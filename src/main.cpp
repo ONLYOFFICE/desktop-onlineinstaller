@@ -5,8 +5,8 @@
 #include "utils.h"
 #include "baseutils.h"
 #include "translator.h"
-#include "../../src/defines.h"
-#include "../../src/prop/defines_p.h"
+#include "../desktop-apps/win-linux/src/defines.h"
+#include "../desktop-apps/win-linux/src/prop/defines_p.h"
 
 #define WINDOW_SIZE Size(768, 480)
 

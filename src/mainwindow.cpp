@@ -19,8 +19,8 @@
 #include <ShlObj.h>
 #include <Shlwapi.h>
 #include <numeric>
-#include "../../src/defines.h"
-#include "../../src/prop/defines_p.h"
+#include "../desktop-apps/win-linux/src/defines.h"
+#include "../desktop-apps/win-linux/src/prop/defines_p.h"
 
 
 template <class T>

@@ -42,8 +42,8 @@
 #include <Msi.h>
 #include <ShlObj.h>
 // #include <sstream>
-#include "../../src/defines.h"
-#include "../../src/prop/defines_p.h"
+#include "../desktop-apps/win-linux/src/defines.h"
+#include "../desktop-apps/win-linux/src/prop/defines_p.h"
 
 #define APP_REG_PATH "\\" REG_GROUP_KEY "\\" REG_APP_NAME
 #define BIT123_LAYOUTRTL 0x08000000

@@ -7,7 +7,7 @@ CONFIG  -= debug_and_release debug_and_release_target
 
 TEMPLATE = app
 
-CORE_ROOT_DIR = $$PWD/../../../../core
+CORE_ROOT_DIR = $$PWD/../core
 UICLASSES = $$PWD/src/uiclasses
 
 CONFIG += core_no_dst
@@ -15,7 +15,7 @@ include($$CORE_ROOT_DIR/Common/base.pri)
 
 INCLUDEPATH += $$PWD/src \
                $$UICLASSES
-INCLUDEPATH += $$PWD/../../src/prop
+INCLUDEPATH += $$PWD/../desktop-apps/win-linux/src/prop
 
 HEADERS += $$PWD/src/version.h \
            $$PWD/src/resource.h \
