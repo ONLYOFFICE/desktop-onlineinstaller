@@ -1,0 +1,8 @@
+
+build
+Makefile
+Makefile.*
+*.stash
+*.user
+*.user.*
+.qtc_clang*
