@@ -6,3 +6,4 @@ Makefile.*
 *.user
 *.user.*
 .qtc_clang*
+*.pyc
