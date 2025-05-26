@@ -368,6 +368,12 @@ void DrawingEngine::DrawProgressBar(int progress, int pulse_pos)
     m_graphics->SetSmoothingMode(Gdiplus::SmoothingModeHighSpeed);
     m_graphics->Clear(ColorFromColorRef(m_ds->palette()->color(Palette::Background)));
 
+    DWORD dwOldLayout = GetLayout(m_memDC);
+    if (dwOldLayout & LAYOUT_RTL) {
+        Gdiplus::Matrix rtlMatrix(-1.0f, 0.0f, 0.0f, 1.0f, float(m_rc->right + m_rc->left - 1), 0.0f);
+        m_graphics->SetTransform(&rtlMatrix);
+    }
+
     Gdiplus::GraphicsPath ph;
     RoundedPath(ph, x, y, width, height, rad);
 
