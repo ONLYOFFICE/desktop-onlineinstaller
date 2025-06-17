@@ -14,8 +14,7 @@ static bool isArrangingAllowed() {
 
 Button::Button(Widget *parent, const std::wstring &text) :
     AbstractButton(parent, text),
-    m_hIcon(nullptr),
-    m_hEmfBmp(nullptr),
+    IconHandler(this),
     m_stockIcon(StockIcon::None),
     supportSnapLayouts(false),
     snapLayoutAllowed(false),
@@ -26,90 +25,7 @@ Button::Button(Widget *parent, const std::wstring &text) :
 
 Button::~Button()
 {
-    if (m_hIcon) {
-        DestroyIcon(m_hIcon);
-        m_hIcon = nullptr;
-    }
-    if (m_hEmfBmp) {
-        delete m_hEmfBmp, m_hEmfBmp = nullptr;
-    }
-}
 
-void Button::setIcon(const std::wstring &path, int w, int h)
-{
-    if (m_hIcon) {
-        DestroyIcon(m_hIcon);
-        m_hIcon = nullptr;
-    }
-    metrics()->setMetrics(Metrics::IconWidth, w);
-    metrics()->setMetrics(Metrics::IconHeight, h);
-    m_hIcon = (HICON)LoadImage(NULL, path.c_str(), IMAGE_ICON, w, h, LR_LOADFROMFILE | LR_DEFAULTCOLOR | LR_SHARED);
-    update();
-}
-
-void Button::setIcon(int id, int w, int h)
-{
-    if (m_hIcon) {
-        DestroyIcon(m_hIcon);
-        m_hIcon = nullptr;
-    }
-    metrics()->setMetrics(Metrics::IconWidth, w);
-    metrics()->setMetrics(Metrics::IconHeight, h);
-    HMODULE hInst = GetModuleHandle(NULL);
-    m_hIcon = (HICON)LoadImage(hInst, MAKEINTRESOURCE(id), IMAGE_ICON, w, h, LR_COPYFROMRESOURCE | LR_DEFAULTCOLOR | LR_SHARED);
-    update();
-}
-
-void Button::setEMFIcon(const std::wstring &path, int w, int h)
-{
-    if (m_hEmfBmp) {
-        delete m_hEmfBmp, m_hEmfBmp = nullptr;
-    }
-    metrics()->setMetrics(Metrics::IconWidth, w);
-    metrics()->setMetrics(Metrics::IconHeight, h);
-    m_hEmfBmp = new Gdiplus::Bitmap(path.c_str());
-    update();
-}
-
-void Button::setEMFIcon(int id, int w, int h)
-{
-    if (m_hEmfBmp) {
-        delete m_hEmfBmp, m_hEmfBmp = nullptr;
-    }
-    metrics()->setMetrics(Metrics::IconWidth, w);
-    metrics()->setMetrics(Metrics::IconHeight, h);
-    HMODULE hInst = GetModuleHandle(NULL);
-    if (HRSRC hRes = FindResource(hInst, MAKEINTRESOURCE(id), RT_RCDATA)) {
-        if (HGLOBAL hResData = LoadResource(hInst, hRes)) {
-            if (LPVOID pData = LockResource(hResData)) {
-                DWORD dataSize = SizeofResource(hInst, hRes);
-                if (dataSize > 0) {
-                    if (HGLOBAL hGlobal = GlobalAlloc(GHND, dataSize)) {
-                        if (LPVOID pBuffer = GlobalLock(hGlobal)) {
-                            memcpy(pBuffer, pData, dataSize);
-                            IStream *pStream = nullptr;
-                            HRESULT hr = CreateStreamOnHGlobal(hGlobal, TRUE, &pStream);
-                            if (SUCCEEDED(hr)) {
-                                m_hEmfBmp = new Gdiplus::Bitmap(pStream);
-                                pStream->Release();
-                            }
-                            GlobalUnlock(hGlobal);
-                        }
-                        GlobalFree(hGlobal);
-                    }
-                }
-            }
-            FreeResource(hResData);
-        }
-    }
-    update();
-}
-
-void Button::setIconSize(int w, int h)
-{
-    metrics()->setMetrics(Metrics::IconWidth, w);
-    metrics()->setMetrics(Metrics::IconHeight, h);
-    update();
 }
 
 void Button::setSupportSnapLayouts()
@@ -140,8 +56,8 @@ bool Button::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
             engine()->DrawBorder();
         if (m_hIcon)
             engine()->DrawIcon(m_hIcon);
-        if (m_hEmfBmp)
-            engine()->DrawEmfIcon(m_hEmfBmp);
+        if (m_hEmf)
+            engine()->DrawEmfIcon(m_hEmf);
         if (!m_text.empty())
             engine()->DrawText(rc, m_text, m_hFont);
 
