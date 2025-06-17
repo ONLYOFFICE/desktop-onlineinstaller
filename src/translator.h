@@ -28,11 +28,7 @@ private:
     Translator();
     ~Translator();
 
-    void parseTranslations();
-
     TranslationsMap translMap;
-    wstring        translations,
-                   error_substr;
     wstring langName;
     bool    is_translations_valid;
 

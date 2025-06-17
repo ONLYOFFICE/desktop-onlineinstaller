@@ -3,7 +3,7 @@ include(common.pri)
 
 DEFINES += COPYRIGHT_YEAR=$${CURRENT_YEAR}
 DEFINES += APP_ICON_PATH=\"./icons/desktopeditors.ico\"
-DEFINES += APP_LANG_PATH=\"./langs/langs.isl\"
+DEFINES += APP_LANG_PATH=\"./langs/langs.bin\"
 
 OTHER_FILES += $$PWD/res/langs/langs.isl
 
