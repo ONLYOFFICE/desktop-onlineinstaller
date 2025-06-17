@@ -66,7 +66,7 @@ static IStream* LoadResourceToStream(int resourceId)
 }
 
 Translator::Translator() :
-    langName(_T("en_EN")),
+    langName(_T("en")),
     is_translations_valid(false)
 {
 
