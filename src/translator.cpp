@@ -105,13 +105,12 @@ Translator::~Translator()
 
 }
 
-wstring Translator::tr(const char *str)
+const wchar_t* Translator::tr(const wchar_t *str) const
 {
-    wstring translatedStr = StrToWStr(str);
     if (is_translations_valid) {
-        auto it = translMap.find(translatedStr);
+        auto it = translMap.find(str);
         if (it != translMap.end()) {
-            LocaleMap &lcmap = it->second;
+            const LocaleMap &lcmap = it->second;
             auto lc_it = lcmap.find(langName);
             if (lc_it == lcmap.end()) {
                 wstring primaryLangAndScript = getPrimaryLang(langName, true);
@@ -123,10 +122,10 @@ wstring Translator::tr(const char *str)
                 }
             }
             if (lc_it != lcmap.end())
-                return lc_it->second;
+                return lc_it->second.c_str();
         }
     }
-    return translatedStr;
+    return str;
 }
 
 void Translator::parseTranslations()

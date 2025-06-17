@@ -5,7 +5,7 @@
 #include <string>
 #include <tchar.h>
 
-#define _TR(str) Translator::instance().tr(#str).c_str()
+#define _TR(str) Translator::instance().tr(_T(#str))
 
 using std::wstring;
 using std::unordered_map;
@@ -22,7 +22,7 @@ public:
     static Translator& instance();
 
     void init(unsigned long langId, int resourceId);
-    wstring tr(const char*);
+    const wchar_t* tr(const wchar_t*) const;
 
 private:
     Translator();
