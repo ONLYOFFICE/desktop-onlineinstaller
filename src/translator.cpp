@@ -50,11 +50,20 @@ wstring StrToWStr(const string &str)
     return converter.from_bytes(str);
 }
 
-TranslationsMap Translator::translMap = TranslationsMap();
-wstring Translator::langName = _T("en_EN");
-bool Translator::is_translations_valid = false;
+Translator::Translator() :
+    langName(_T("en_EN")),
+    is_translations_valid(false)
+{
 
-Translator::Translator(unsigned long langId, int resourceId)
+}
+
+Translator& Translator::instance()
+{
+    static Translator inst;
+    return inst;
+}
+
+void Translator::init(unsigned long langId, int resourceId)
 {
     TCHAR _langName[LOCALE_NAME_MAX_LENGTH] = {0};
     if (GetLocaleInfo(langId, LOCALE_SNAME, _langName, LOCALE_NAME_MAX_LENGTH) > 0) {

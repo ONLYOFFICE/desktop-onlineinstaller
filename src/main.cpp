@@ -24,7 +24,7 @@ int WINAPI _tWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInstance, _In
 
     std::locale::global(std::locale(""));
     LCID lcid = MAKELCID(GetUserDefaultUILanguage(), SORT_DEFAULT);
-    Translator lang(lcid, IDT_TRANSLATIONS);
+    Translator::instance().init(lcid, IDT_TRANSLATIONS);
     HANDLE hMutex = CreateMutex(NULL, FALSE, _T(VER_PRODUCTNAME_STR));
     if (GetLastError() == ERROR_ALREADY_EXISTS) {
         NS_Utils::ShowMessage(_TR(MSG_ERR_ALREADY_RUNNING));
