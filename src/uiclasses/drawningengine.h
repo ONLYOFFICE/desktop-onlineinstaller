@@ -22,7 +22,7 @@ public:
     void DrawBorder() const;
     void DrawTopBorder(int, COLORREF) const;
     void DrawIcon(HICON hIcon) const;
-    void DrawEmfIcon(Gdiplus::Bitmap *hEmfBmp) const;
+    void DrawEmfIcon(Gdiplus::Metafile *hEmf) const;
     void DrawImage(Gdiplus::Bitmap *hBmp) const;
     void DrawStockCloseIcon();
     void DrawStockMinimizeIcon();

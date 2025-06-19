@@ -5,9 +5,7 @@
 
 Label::Label(Widget *parent) :
     Widget(parent, ObjectType::WidgetType),
-    m_hIcon(nullptr),
-    m_hEmfBmp(nullptr),
-    m_hBmp(nullptr),
+    IconHandler(this),
     m_multiline(false)
 {
 
@@ -15,133 +13,13 @@ Label::Label(Widget *parent) :
 
 Label::~Label()
 {
-    if (m_hIcon) {
-        DestroyIcon(m_hIcon);
-        m_hIcon = nullptr;
-    }
-    if (m_hEmfBmp) {
-        delete m_hEmfBmp, m_hEmfBmp = nullptr;
-    }
-    if (m_hBmp) {
-        delete m_hBmp, m_hBmp = nullptr;
-    }
+
 }
 
 void Label::setText(const std::wstring &text, bool multiline)
 {
     m_text = text;
     m_multiline = multiline;
-    update();
-}
-
-void Label::setIcon(const std::wstring &path, int w, int h)
-{
-    if (m_hIcon) {
-        DestroyIcon(m_hIcon);
-        m_hIcon = nullptr;
-    }
-    metrics()->setMetrics(Metrics::IconWidth, w);
-    metrics()->setMetrics(Metrics::IconHeight, h);
-    m_hIcon = (HICON)LoadImage(NULL, path.c_str(), IMAGE_ICON, w, h, LR_LOADFROMFILE | LR_DEFAULTCOLOR | LR_SHARED);
-    update();
-}
-
-void Label::setIcon(int id, int w, int h)
-{
-    if (m_hIcon) {
-        DestroyIcon(m_hIcon);
-        m_hIcon = nullptr;
-    }
-    metrics()->setMetrics(Metrics::IconWidth, w);
-    metrics()->setMetrics(Metrics::IconHeight, h);
-    HMODULE hInst = GetModuleHandle(NULL);
-    m_hIcon = (HICON)LoadImage(hInst, MAKEINTRESOURCE(id), IMAGE_ICON, w, h, LR_COPYFROMRESOURCE | LR_DEFAULTCOLOR | LR_SHARED);
-    update();
-}
-
-void Label::setEMFIcon(const std::wstring &path, int w, int h)
-{
-    if (m_hEmfBmp) {
-        delete m_hEmfBmp, m_hEmfBmp = nullptr;
-    }
-    metrics()->setMetrics(Metrics::IconWidth, w);
-    metrics()->setMetrics(Metrics::IconHeight, h);
-    m_hEmfBmp = new Gdiplus::Bitmap(path.c_str());
-    update();
-}
-
-void Label::setEMFIcon(int id, int w, int h)
-{
-    if (m_hEmfBmp) {
-        delete m_hEmfBmp, m_hEmfBmp = nullptr;
-    }
-    metrics()->setMetrics(Metrics::IconWidth, w);
-    metrics()->setMetrics(Metrics::IconHeight, h);
-    HMODULE hInst = GetModuleHandle(NULL);
-    if (HRSRC hRes = FindResource(hInst, MAKEINTRESOURCE(id), RT_RCDATA)) {
-        if (HGLOBAL hResData = LoadResource(hInst, hRes)) {
-            if (LPVOID pData = LockResource(hResData)) {
-                DWORD dataSize = SizeofResource(hInst, hRes);
-                if (dataSize > 0) {
-                    if (HGLOBAL hGlobal = GlobalAlloc(GHND, dataSize)) {
-                        if (LPVOID pBuffer = GlobalLock(hGlobal)) {
-                            memcpy(pBuffer, pData, dataSize);
-                            IStream *pStream = nullptr;
-                            HRESULT hr = CreateStreamOnHGlobal(hGlobal, TRUE, &pStream);
-                            if (SUCCEEDED(hr)) {
-                                m_hEmfBmp = new Gdiplus::Bitmap(pStream);
-                                pStream->Release();
-                            }
-                            GlobalUnlock(hGlobal);
-                        }
-                        GlobalFree(hGlobal);
-                    }
-                }
-            }
-            FreeResource(hResData);
-        }
-    }
-    update();
-}
-
-void Label::setImage(int id, int w, int h)
-{
-    if (m_hBmp) {
-        delete m_hBmp, m_hBmp = nullptr;
-    }
-    metrics()->setMetrics(Metrics::IconWidth, w);
-    metrics()->setMetrics(Metrics::IconHeight, h);
-    HMODULE hInst = GetModuleHandle(NULL);
-    if (HRSRC hRes = FindResource(hInst, MAKEINTRESOURCE(id), L"PNG")) {
-        if (HGLOBAL hResData = LoadResource(hInst, hRes)) {
-            if (LPVOID pData = LockResource(hResData)) {
-                DWORD dataSize = SizeofResource(hInst, hRes);
-                if (dataSize > 0) {
-                    if (HGLOBAL hGlobal = GlobalAlloc(GHND, dataSize)) {
-                        if (LPVOID pBuffer = GlobalLock(hGlobal)) {
-                            memcpy(pBuffer, pData, dataSize);
-                            IStream *pStream = nullptr;
-                            HRESULT hr = CreateStreamOnHGlobal(hGlobal, TRUE, &pStream);
-                            if (SUCCEEDED(hr)) {
-                                m_hBmp = new Gdiplus::Bitmap(pStream);
-                                pStream->Release();
-                            }
-                            GlobalUnlock(hGlobal);
-                        }
-                        GlobalFree(hGlobal);
-                    }
-                }
-            }
-            FreeResource(hResData);
-        }
-    }
-    update();
-}
-
-void Label::setIconSize(int w, int h)
-{
-    metrics()->setMetrics(Metrics::IconWidth, w);
-    metrics()->setMetrics(Metrics::IconHeight, h);
     update();
 }
 
@@ -161,8 +39,8 @@ bool Label::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
             engine()->DrawImage(m_hBmp);
         if (m_hIcon)
             engine()->DrawIcon(m_hIcon);
-        if (m_hEmfBmp)
-            engine()->DrawEmfIcon(m_hEmfBmp);
+        if (m_hEmf)
+            engine()->DrawEmfIcon(m_hEmf);
         if (!m_text.empty())
             engine()->DrawText(rc, m_text, m_hFont, m_multiline);
 

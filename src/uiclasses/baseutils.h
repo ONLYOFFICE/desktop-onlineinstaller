@@ -2,6 +2,7 @@
 #define BASEUTILS_H
 
 #include <Windows.h>
+#include <gdiplus.h>
 
 
 namespace Utils
@@ -12,6 +13,8 @@ namespace Utils
     WinVer getWinVersion();
     // bool isColorDark(COLORREF color);
     COLORREF getColorizationColor(bool isActive = true, COLORREF topColor = 0x00ffffff);
+    void loadImageResource(Gdiplus::Bitmap* &hBmp, int id, LPCWSTR type);
+    void loadEmfResource(Gdiplus::Metafile* &hBmp, int id, LPCWSTR type);
 };
 
 #endif // BASEUTILS_H

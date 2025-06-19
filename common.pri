@@ -32,6 +32,7 @@ HEADERS += $$PWD/src/version.h \
            $$UICLASSES/palette.h \
            $$UICLASSES/drawningengine.h \
            $$UICLASSES/drawingsurface.h \
+           $$UICLASSES/iconhandler.h \
            $$UICLASSES/object.h \
            $$UICLASSES/application.h \
            $$UICLASSES/window.h \
@@ -59,6 +60,7 @@ SOURCES += $$PWD/src/main.cpp \
            $$UICLASSES/palette.cpp \
            $$UICLASSES/drawningengine.cpp \
            $$UICLASSES/drawingsurface.cpp \
+           $$UICLASSES/iconhandler.cpp \
            $$UICLASSES/object.cpp \
            $$UICLASSES/application.cpp \
            $$UICLASSES/window.cpp \
