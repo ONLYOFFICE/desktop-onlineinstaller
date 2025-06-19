@@ -10,6 +10,7 @@
 
 #define WINDOW_SIZE Size(768, 480)
 
+static const WCHAR pVersion[] = _T("Application version:\n" VER_FILEVERSION_STR);
 
 int WINAPI _tWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInstance, _In_ LPTSTR lpCmdLine, _In_ int nCmdShow)
 {
@@ -19,8 +20,10 @@ int WINAPI _tWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInstance, _In
         NS_Utils::parseCmdArgs(num_args, args);
         LocalFree(args);
     }
-    if (NS_Utils::cmdArgContains(_T("--log")))
+    if (NS_Utils::cmdArgContains(_T("--log"))) {
         NS_Logger::AllowWriteLog();
+        NS_Logger::WriteLog(pVersion);
+    }
 
     std::locale::global(std::locale(""));
     LCID lcid = MAKELCID(GetUserDefaultUILanguage(), SORT_DEFAULT);
