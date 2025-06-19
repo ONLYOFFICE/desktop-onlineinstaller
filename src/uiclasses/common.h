@@ -29,9 +29,4 @@ struct Size {
     int width, height;
 };
 
-enum LayoutDirection : unsigned char {
-    LeftToRight = 0,
-    RightToLeft
-};
-
 #endif // COMMON_H

@@ -2,10 +2,10 @@
 #define BUTTON_H
 
 #include "abstractbutton.h"
-#include <gdiplus.h>
+#include "iconhandler.h"
 
 
-class Button : public AbstractButton
+class Button : public AbstractButton, public IconHandler
 {
 public:
     Button(Widget *parent = nullptr, const std::wstring &text = L"");
@@ -19,11 +19,6 @@ public:
         CloseIcon
     };
 
-    void setIcon(const std::wstring &path, int w, int h);
-    void setIcon(int id, int w, int h);
-    void setEMFIcon(const std::wstring &path, int w, int h);
-    void setEMFIcon(int id, int w, int h);
-    void setIconSize(int w, int h);
     void setSupportSnapLayouts();
     void setStockIcon(StockIcon stockIcon);
 
@@ -33,8 +28,6 @@ protected:
     virtual bool event(UINT, WPARAM, LPARAM, LRESULT*) override;
 
 private:
-    HICON m_hIcon;
-    Gdiplus::Bitmap *m_hEmfBmp;
     int  m_stockIcon;
     bool supportSnapLayouts,
          snapLayoutAllowed;
