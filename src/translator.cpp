@@ -63,7 +63,7 @@ Translator::Translator(unsigned long langId, int resourceId)
     } else
         NS_Logger::WriteLog(ADVANCED_ERROR_MESSAGE);
 
-    NS_Logger::WriteLog(_T("\nCurrent locale:\n") + langName);
+    NS_Logger::WriteLog(_T("Current locale:\n") + langName);
 
     HMODULE hInst = GetModuleHandle(NULL);
     if (HRSRC hRes = FindResource(hInst, MAKEINTRESOURCE(resourceId), RT_RCDATA)) {
