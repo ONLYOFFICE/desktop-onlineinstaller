@@ -25,51 +25,30 @@ jobs:
     steps:
 
     - name: Checkout
-      run: |
-        $repos = "build_tools", "core", "desktop-apps"
-        $repos | % {
-          if (-not (Test-Path $_)) {
-            ni -ItemType Directory -Force -Path $_
-          }
-          pushd $_
-          if (-not (Test-Path .git)) {
-            & git clone -n --depth 1 git@git.onlyoffice.com:ONLYOFFICE/$_.git .
-            if (-not $?) { throw }
-          }
-          else {
-            & git fetch --depth 1
-            if (-not $?) { throw }
-          }
-          & git reset --hard origin/master
-          if (-not $?) { throw }
-          popd
-        }
+      uses: actions/checkout@v4
+      with:
+        path: desktop-onlineinstaller
 
-        $repo = "desktop-onlineinstaller"
-        if (-not (Test-Path $repo)) {
-          ni -ItemType Directory -Force -Path $repo
-        }
-        pushd $repo
-        if (-not (Test-Path .git)) {
-          & git clone -n git@git.onlyoffice.com:ONLYOFFICE/$repo.git .
-          if (-not $?) { throw }
-        }
-        else {
-          & git fetch --depth 1
-          if (-not $?) { throw }
-        }
-        if ("branch" -eq "${{ github.ref_type }}") {
-          & git reset --hard origin/${{ github.ref_name }}
-          if (-not $?) { throw }
-        }
-        elseif ("tag" -eq "${{ github.ref_type }}") {
-          & git reset --hard ${{ github.ref_name }}
-          if (-not $?) { throw }
-        }
-        else {
-          throw
-        }
-        popd
+    - name: Checkout build_tools repo
+      uses: actions/checkout@v4
+      with:
+        repository: ONLYOFFICE/build_tools
+        ref: master
+        path: build_tools
+
+    - name: Checkout core repo
+      uses: actions/checkout@v4
+      with:
+        repository: ONLYOFFICE/core
+        ref: master
+        path: core
+
+    - name: Checkout desktop-apps repo
+      uses: actions/checkout@v4
+      with:
+        repository: ONLYOFFICE/desktop-apps
+        ref: master
+        path: desktop-apps
 
     - name: Build
       working-directory: desktop-onlineinstaller
