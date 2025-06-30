@@ -8,7 +8,6 @@ sys.path.append(__dir__name__ + '/../build_tools/scripts')
 import config
 import base
 import qmake
-import deploy_onlineinst
 import argparse
 
 base.check_python()
