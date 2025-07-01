@@ -71,7 +71,7 @@
 #define VER_LEGALCOPYRIGHT_STR      "© Ascensio System SIA " TO_STR(COPYRIGHT_YEAR) ". All rights reserved.\0"
 #define VER_COMPANYDOMAIN_STR       "www.onlyoffice.com\0"
 
-#define VER_INTERNALNAME_STR        "AppIcons\0"
+#define VER_INTERNALNAME_STR        "OnlineInstaller\0"
 #define VER_LEGALTRADEMARKS1_STR    "All rights reserved\0"
 #define VER_LEGALTRADEMARKS2_STR    VER_LEGALTRADEMARKS1_STR
 #define VER_ORIGINALFILENAME_STR    "online-installer.exe\0"
