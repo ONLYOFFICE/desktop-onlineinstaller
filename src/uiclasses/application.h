@@ -14,6 +14,11 @@ public:
     Application(const Application&) = delete;
     ~Application();
 
+    enum LayoutDirection : unsigned char {
+        LeftToRight = 0,
+        RightToLeft
+    };
+
     Application& operator=(const Application&) = delete;
     static Application *instance();
     HINSTANCE moduleHandle();

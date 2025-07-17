@@ -44,6 +44,35 @@ static std::wstring GetCurrentUserSID()
     return user_sid;
 }
 
+static IStream* LoadResourceToStream(int id, LPCWSTR type) {
+    IStream *pStream = nullptr;
+    HMODULE hInst = GetModuleHandle(NULL);
+    if (HRSRC hRes = FindResource(hInst, MAKEINTRESOURCE(id), type)) {
+        if (HGLOBAL hResData = LoadResource(hInst, hRes)) {
+            if (LPVOID pData = LockResource(hResData)) {
+                DWORD dataSize = SizeofResource(hInst, hRes);
+                if (dataSize > 0) {
+                    if (HGLOBAL hGlobal = GlobalAlloc(GHND, dataSize)) {
+                        if (LPVOID pBuffer = GlobalLock(hGlobal)) {
+                            memcpy(pBuffer, pData, dataSize);
+                            GlobalUnlock(hGlobal);
+                            HRESULT hr = CreateStreamOnHGlobal(hGlobal, TRUE, &pStream);
+                            if (FAILED(hr)) {
+                                GlobalFree(hGlobal);
+                                pStream = nullptr;
+                            }
+                        } else {
+                            GlobalFree(hGlobal);
+                        }
+                    }
+                }
+            }
+            FreeResource(hResData);
+        }
+    }
+    return pStream;
+}
+
 static DWORD RegQueryDwordValue(HKEY rootKey, LPCWSTR subkey, LPCWSTR value)
 {
     HKEY hKey;
@@ -118,6 +147,22 @@ COLORREF Utils::getColorizationColor(bool isActive, COLORREF topColor)
     }
     int res = -0.0007*luma*luma + 0.78*luma + 25;
     return RGB(res, res, res);
+}
+
+void Utils::loadImageResource(Gdiplus::Bitmap *&hBmp, int id, LPCWSTR type)
+{
+    if (IStream *pStream = LoadResourceToStream(id, type)) {
+        hBmp = new Gdiplus::Bitmap(pStream);
+        pStream->Release();
+    }
+}
+
+void Utils::loadEmfResource(Gdiplus::Metafile* &hBmp, int id, LPCWSTR type)
+{
+    if (IStream *pStream = LoadResourceToStream(id, type)) {
+        hBmp = new Gdiplus::Metafile(pStream);
+        pStream->Release();
+    }
 }
 
 // bool Utils::isColorDark(COLORREF color)

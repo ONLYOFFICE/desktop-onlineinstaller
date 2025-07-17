@@ -5,7 +5,7 @@
 #include <string>
 #include <tchar.h>
 
-#define _TR(str) Translator::tr(#str).c_str()
+#define _TR(str) Translator::instance().tr(_T(#str))
 
 using std::wstring;
 using std::unordered_map;
@@ -17,19 +17,20 @@ typedef unordered_map<wstring, LocaleMap> TranslationsMap;
 class Translator
 {
 public:
-    Translator(unsigned long langId, int resourceId);
-    ~Translator();
+    Translator(const Translator&) = delete;
+    Translator& operator=(const Translator&) = delete;
+    static Translator& instance();
 
-    static wstring tr(const char*);
+    void init(unsigned long langId, int resourceId);
+    const wchar_t* tr(const wchar_t*) const;
 
 private:
-    void parseTranslations();
+    Translator();
+    ~Translator();
 
-    static TranslationsMap translMap;
-    wstring        translations,
-                   error_substr;
-    static wstring langName;
-    static bool    is_translations_valid;
+    TranslationsMap translMap;
+    wstring langName;
+    bool    is_translations_valid;
 
     enum TokenType : unsigned char {
         TOKEN_BEGIN_DOCUMENT = 0,

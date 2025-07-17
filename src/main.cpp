@@ -10,6 +10,7 @@
 
 #define WINDOW_SIZE Size(768, 480)
 
+static const WCHAR pVersion[] = _T("Application version:\n" VER_FILEVERSION_STR);
 
 int WINAPI _tWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInstance, _In_ LPTSTR lpCmdLine, _In_ int nCmdShow)
 {
@@ -19,12 +20,14 @@ int WINAPI _tWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInstance, _In
         NS_Utils::parseCmdArgs(num_args, args);
         LocalFree(args);
     }
-    if (NS_Utils::cmdArgContains(_T("--log")))
+    if (NS_Utils::cmdArgContains(_T("--log"))) {
         NS_Logger::AllowWriteLog();
+        NS_Logger::WriteLog(pVersion);
+    }
 
     std::locale::global(std::locale(""));
     LCID lcid = MAKELCID(GetUserDefaultUILanguage(), SORT_DEFAULT);
-    Translator lang(lcid, IDT_TRANSLATIONS);
+    Translator::instance().init(lcid, IDT_TRANSLATIONS);
     HANDLE hMutex = CreateMutex(NULL, FALSE, _T(VER_PRODUCTNAME_STR));
     if (GetLastError() == ERROR_ALREADY_EXISTS) {
         NS_Utils::ShowMessage(_TR(MSG_ERR_ALREADY_RUNNING));
@@ -50,7 +53,7 @@ int WINAPI _tWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInstance, _In
     Application app(hInst, lpCmdLine, nCmdShow);
     app.setFont(L"Segoe UI");
     if (NS_Utils::IsRtlLanguage(lcid))
-        app.setLayoutDirection(LayoutDirection::RightToLeft);
+        app.setLayoutDirection(Application::RightToLeft);
     int scrWidth = GetSystemMetrics(SM_CXSCREEN);
     int scrHeight = GetSystemMetrics(SM_CYSCREEN);
     int x = (scrWidth - WINDOW_SIZE.width) / 2;

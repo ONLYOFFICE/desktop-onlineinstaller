@@ -311,11 +311,12 @@ void MainWindow::startInstall()
             }
             DWORD status = NS_File::runProcess(path, args);
             if (status != 0) {
+                DWORD err = GetLastError();
                 if (!m_is_checked)
                     show();
                 m_bar->pulse(false);
                 m_bar->setProgress(0);
-                m_comntInfoLbl->setText((status & ERROR_LAUNCH) ? _TR(LABEL_ERR_RUNNING) : _TR(LABEL_ERR_COMMON) + wstring(L" ") + std::to_wstring(status), true);
+                m_comntInfoLbl->setText(err == 0 ? _TR(LABEL_ERR_RUNNING) + wstring(L" Exit code: ") + to_wstring(status) : NS_Utils::GetLastErrorAsString(err), true);
             } else {
                 if (m_is_checked) {
                     wstring app_path;
@@ -415,9 +416,10 @@ void MainWindow::startUpdate()
             args += (m_package == L"msi") ? L"\" /qn /norestart" : L"\" /UPDATE /VERYSILENT /NOLAUNCH";
             DWORD status = NS_File::runProcess(L"cmd", args, true);
             if (status != 0) {
+                DWORD err = GetLastError();
                 m_bar->pulse(false);
                 m_bar->setProgress(0);
-                m_comntInfoLbl->setText((status & ERROR_LAUNCH) ? _TR(LABEL_ERR_RUNNING) : _TR(LABEL_ERR_COMMON) + wstring(L" ") + std::to_wstring(status), true);
+                m_comntInfoLbl->setText(err == 0 ? _TR(LABEL_ERR_RUNNING) + wstring(L" Exit code: ") + to_wstring(status) : NS_Utils::GetLastErrorAsString(err), true);
             } else {
                 if (m_checkState & ClrDataCheck) {
                     wstring dataPath = NS_File::appDataPath();
@@ -494,9 +496,10 @@ void MainWindow::startUpdate()
 //                 args += (m_package == L"msi") ? L"\" /qn" : L" /VERYSILENT\"";
 //             DWORD status = NS_File::runProcess(cmd, args, true);
 //             if (status != 0) {
+//                 DWORD err = GetLastError();
 //                 m_bar->pulse(false);
 //                 m_bar->setProgress(0);
-//                 m_comntInfoLbl->setText((status & ERROR_LAUNCH) ? _TR(LABEL_ERR_RUNNING) : _TR(LABEL_ERR_COMMON) + wstring(L" ") + std::to_wstring(status), true);
+//                 m_comntInfoLbl->setText(err == 0 ? _TR(LABEL_ERR_RUNNING) + wstring(L" Exit code: ") + to_wstring(status) : NS_Utils::GetLastErrorAsString(err), true);
 //             } else {
 //                 if (m_checkState & ClrDataCheck) {
 //                     wstring dataPath = NS_File::appDataPath();
@@ -827,7 +830,7 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
 {
     wstring appcast_url = NS_Utils::cmdArgContains(_T("--appcast-dev-channel")) ? _T(URL_INSTALL_DEV) : _T(URL_INSTALL);
     wstring tmp_path = NS_File::toNativeSeparators(NS_File::generateTmpFileName(L".json"));
-    NS_Logger::WriteLog(_T("\nAppcast URL:\n") + appcast_url);
+    NS_Logger::WriteLog(_T("Appcast URL:\n") + appcast_url);
     CDownloader *dnl = new CDownloader();
     dnl->onComplete([=](ulong error) {
         if (error == ERROR_SUCCESS) {
@@ -847,10 +850,10 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
                 JsonObject package_type = win.value(install_type).toObject();
                 tstring url = package_type.value(_T("url")).toTString();
                 tstring url2 = package_type.value(_T("url2")).toTString();
-                NS_Logger::WriteLog(_T("\nPrimary package URL:\n") + url + _T("\nSecondary package URL:\n") + url2);
+                NS_Logger::WriteLog(_T("Primary package URL:\n") + url + _T("\n\nSecondary package URL:\n") + url2);
                 if ((url.empty() || !dnl->isUrlAccessible(url)) && !url2.empty())
                     url = url2;
-                NS_Logger::WriteLog(_T("\nDownload from URL:\n") + url);
+                NS_Logger::WriteLog(_T("Download from URL:\n") + url);
                 // tstring hash = package_type.value(_T("md5")).toTString();
                 // std::transform(hash.begin(), hash.end(), hash.begin(), ::tolower);
                 NS_File::removeFile(tmp_path);
@@ -885,8 +888,8 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
                     dnl->downloadFile(url, path);
                 });
             } else {
+                m_comntInfoLbl->setText(NS_Utils::GetLastErrorAsString(), true);
                 NS_File::removeFile(tmp_path);
-                m_comntInfoLbl->setText(_TR(LABEL_ERR_COMMON), true);
                 if (m_mode == Mode::Control)
                     createCloseAndBackButtons();
             }

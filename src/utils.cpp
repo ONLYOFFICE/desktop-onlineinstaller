@@ -101,9 +101,11 @@ namespace NS_Utils
         if (errID == 0)
             return _T("");
 
+        HMODULE hInst = GetModuleHandle((errID >= 12001 && errID < 12185) ? L"winhttp.dll" : L"user32.dll");
+        DWORD flags = FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS
+                          | FORMAT_MESSAGE_FROM_HMODULE;
         LPTSTR msgBuff = NULL;
-        size_t size = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                                       NULL, errID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&msgBuff, 0, NULL);
+        size_t size = FormatMessage(flags, hInst, errID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&msgBuff, 0, NULL);
         wstring msg = _TR(LABEL_ERR_COMMON) + wstring(L" ") + std::to_wstring(errID);
         if (size > 0) {
             msg.append(L"\n" + wstring(msgBuff, (int)size));
@@ -330,11 +332,11 @@ namespace NS_File
         if (ShellExecuteEx(&shExInfo)) {
             DWORD exitCode = 0;
             if (wait && (WaitForSingleObject(shExInfo.hProcess, INFINITE) == WAIT_FAILED || !GetExitCodeProcess(shExInfo.hProcess, &exitCode)))
-                exitCode = GetLastError();
+                exitCode = 1;
             CloseHandle(shExInfo.hProcess);
             return exitCode;
         }
-        return GetLastError() | ERROR_LAUNCH;
+        return 1;
     }
 
 //    bool isProcessRunning(const wstring &fileName)
@@ -511,7 +513,7 @@ namespace NS_Logger
             if (!file.is_open()) {
                 return;
             }
-            file << log << std::endl;
+            file << log << wstring(_T("\n")) << std::endl;
             file.close();
         }
         if (showMessage)
