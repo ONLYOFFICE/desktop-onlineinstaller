@@ -1,7 +1,0 @@
-{
-  "root" : "./",
-
-  "onlineinstaller" : [
-    "[win_xp]OnlineInstaller.pro"
-  ]
-}

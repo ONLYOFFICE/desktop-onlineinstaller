@@ -1,4 +1,3 @@
-
 TARGET  = online-installer
 CONFIG  += c++11 utf8_source static_runtime
 CONFIG  -= app_bundle
@@ -79,7 +78,7 @@ SOURCES += $$PWD/src/main.cpp \
 OTHER_FILES += $$PWD/res/version.rc \
                $$PWD/res/manifest/online-installer.exe.manifest
 
-ENV_PRODUCT_VERSION = "2.0.0" # $$(PRODUCT_VERSION)
+ENV_PRODUCT_VERSION = $$(PRODUCT_VERSION)
 !isEmpty(ENV_PRODUCT_VERSION) {
     FULL_PRODUCT_VERSION = $${ENV_PRODUCT_VERSION}.$$(BUILD_NUMBER)
     DEFINES += VER_PRODUCT_VERSION=$$FULL_PRODUCT_VERSION \

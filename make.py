@@ -7,8 +7,7 @@ sys.path.append(__dir__name__ + '/scripts')
 sys.path.append(__dir__name__ + '/../build_tools/scripts')
 import config
 import base
-import build_sln
-import deploy_onlineinst
+import qmake
 import argparse
 
 base.check_python()
@@ -34,7 +33,4 @@ if "windows" == base.host_platform():
   base.set_env("DESKTOP_URL_UPDATES_DEV_CHANNEL", "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcastdev.json")
 
   # build
-  build_sln.make(__dir__name__ + '/sln.json')
-
-  # deploy
-  deploy_onlineinst.make()
+  qmake.make(config.option("platform"), "OnlineInstaller.pro")

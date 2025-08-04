@@ -1,0 +1,138 @@
+name: Build online installer
+
+on:
+  workflow_dispatch:
+    inputs:
+      sign:
+        description: Sign
+        type: boolean
+        default: true
+  push:
+    tags:
+    - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  build:
+    name: Build online installer
+    runs-on: [ self-hosted, Windows, onlineinstaller ]
+    steps:
+
+    - name: Set Variables
+      run: |
+        $version = "${{ github.ref_name }}" -replace "^v"
+        write "PRODUCT_VERSION=${{ github.ref_type == 'tag' && '$version' || '0.0.0' }}" >> $env:GITHUB_ENV
+        write "BUILD_NUMBER=${{ github.run_number }}" >> $env:GITHUB_ENV
+
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        path: desktop-onlineinstaller
+
+    - name: Checkout build_tools repo
+      uses: actions/checkout@v4
+      with:
+        repository: ONLYOFFICE/build_tools
+        ref: master
+        path: build_tools
+
+    - name: Checkout core repo
+      uses: actions/checkout@v4
+      with:
+        repository: ONLYOFFICE/core
+        ref: master
+        path: core
+
+    - name: Checkout desktop-apps repo
+      uses: actions/checkout@v4
+      with:
+        repository: ONLYOFFICE/desktop-apps
+        ref: master
+        path: desktop-apps
+
+    - name: Build
+      working-directory: desktop-onlineinstaller
+      run: |
+        write "::group::Clean"
+        if (Test-Path build) {
+          ri -Force -Recurse -Verbose -Path build
+        }
+        write "::endgroup::"
+
+        write "::group::Config"
+        if (-not $env:QT_PATH) {
+          $env:QT_PATH = "C:\Qt\5.6.3"
+        }
+        write @"
+        module=`"onlineinstaller`"
+        platform=`"win_32_xp`"
+        config=`"release`"
+        branch=`"master`"
+        update=`"false`"
+        clean=`"false`"
+        qt-dir=`"$env:QT_PATH`"
+        qt-dir-xp=`"$env:QT_PATH`"
+        "@ | Out-File -Encoding UTF8 config
+        gc config
+        write @"
+        PRODUCT_VERSION = $env:PRODUCT_VERSION
+        BUILD_NUMBER    = $env:BUILD_NUMBER
+        QT_PATH         = $env:QT_PATH
+        "@
+        write "::endgroup::"
+
+        write "::group::Build"
+        & python make.py
+        if (-not $?) { throw }
+        gci "build\win_32\xp\online-installer.exe" | % { $_.VersionInfo } | select *
+        write "::endgroup::"
+
+    - name: Sign
+      if: github.ref_type == 'tag' || inputs.sign
+      working-directory: desktop-onlineinstaller/build/win_32/xp
+      run: |
+        $File = "online-installer.exe"
+        $CertName = "Ascensio System SIA"
+        & signtool sign /v /a /n $CertName /t http://timestamp.digicert.com $File
+        if (-not $?) { throw }
+        & signtool verify /q /pa /all $File
+        if (-not $?) { throw }
+
+    - name: Archive artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: OnlineInstaller-${{ env.PRODUCT_VERSION }}-${{ env.BUILD_NUMBER }}
+        path: desktop-onlineinstaller/build/win_32/xp/online-installer.exe
+        if-no-files-found: error
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      if: github.ref_type == 'tag'
+      with:
+        files: desktop-onlineinstaller/build/win_32/xp/online-installer.exe
+
+    - name: Publish to S3
+      if: github.ref_type == 'tag'
+      working-directory: desktop-onlineinstaller/build/win_32/xp
+      run: |
+        $ReleasePath = "install/desktop/editors/windows/distrib/onlyoffice"
+        aws s3 cp --no-progress --acl public-read `
+          online-installer.exe `
+          s3://${{ secrets.RELEASE_BUCKET }}/$ReleasePath/OnlineInstaller.exe
+        aws s3 cp --no-progress --acl public-read `
+          s3://${{ secrets.RELEASE_BUCKET }}/$ReleasePath/OnlineInstaller.exe `
+          s3://${{ secrets.RELEASE_BUCKET }}/$ReleasePath/OnlineInstaller-${{ env.PRODUCT_VERSION }}.exe
+        aws cloudfront create-invalidation `
+          --distribution-id ${{ secrets.DISTRIBUTION_ID }} `
+          --paths "/$ReleasePath/*"
+        aws apigateway test-invoke-method `
+          --rest-api-id ${{ secrets.CDN_REST_API_ID }} `
+          --resource-id ${{ secrets.CDN_RESOURCE_ID }} `
+          --http-method PUT `
+          --path-with-query-string /prod/selectel `
+          --body "{`"paths`":[`"/$ReleasePath/*`"]}" `
+          --region us-east-1 `
+          --no-paginate
+        write @"
+        https://download.onlyoffice.com/$ReleasePath/OnlineInstaller.exe
+        https://download.onlyoffice.com/$ReleasePath/OnlineInstaller-${{ env.PRODUCT_VERSION }}.exe
+        "@
