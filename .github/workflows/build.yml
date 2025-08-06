@@ -19,8 +19,14 @@ jobs:
 
     - name: Set Variables
       run: |
-        $version = "${{ github.ref_name }}" -replace "^v"
-        write "PRODUCT_VERSION=${{ github.ref_type == 'tag' && '$version' || '0.0.0' }}" >> $env:GITHUB_ENV
+        $ref = "${{ github.ref_name }}"
+        $version = switch -Regex ($ref) {
+          "^release/v\d+\.\d+\.\d+" { $ref -replace "^release/v" }
+          "^hotfix/v\d+\.\d+\.\d+"  { $ref -replace "^hotfix/v" }
+          "^v\d+\.\d+\.\d+"         { $ref -replace "^v" }
+          default                   { "0.0.0" }
+        }
+        write "PRODUCT_VERSION=$version" >> $env:GITHUB_ENV
         write "BUILD_NUMBER=${{ github.run_number }}" >> $env:GITHUB_ENV
 
     - name: Checkout
