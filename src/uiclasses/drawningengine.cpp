@@ -284,9 +284,9 @@ void DrawingEngine::DrawCheckBox(const std::wstring &text, HFONT hFont, bool che
         pen.SetWidth(m_ds->metrics()->value(Metrics::AlternatePrimitiveWidth));
         pen.SetColor(ColorFromColorRef(m_ds->palette()->color(Palette::AlternatePrimitive)));
         Gdiplus::PointF pts[3] = {
-            Gdiplus::PointF(float(x + 2), float(y + iconHeight/2 - 1)),
-            Gdiplus::PointF(float(x + iconWidth/2 - 2), float(y + iconHeight - 5)),
-            Gdiplus::PointF(float(x + iconWidth - 3), float(y + 4))
+            Gdiplus::PointF(x + (isRTL ? iconWidth - 3 : 2), y + iconHeight/2.0 - 1),
+            Gdiplus::PointF(x + iconWidth/2.0 + (isRTL ? 1 : - 2), y + iconHeight - 5),
+            Gdiplus::PointF(x + (isRTL ? 2 : iconWidth - 3), y + 4)
         };
         m_graphics->DrawLines(&pen, pts, 3);
     }
