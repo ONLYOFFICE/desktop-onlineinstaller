@@ -253,8 +253,10 @@ void DrawingEngine::DrawStockRestoreIcon()
 
 void DrawingEngine::DrawCheckBox(const std::wstring &text, HFONT hFont, bool checked)
 {
+    int iconWidth = m_ds->metrics()->value(Metrics::IconWidth);
+    int iconHeight = m_ds->metrics()->value(Metrics::IconHeight);
     int x = m_rc->left + 1;
-    int y = m_rc->top + (m_rc->bottom - m_rc->top - m_ds->metrics()->value(Metrics::IconHeight)) / 2;
+    int y = m_rc->top + (m_rc->bottom - m_rc->top - iconHeight) / 2;
 
     m_memDC = CreateCompatibleDC(m_hdc);
     m_memBmp = CreateCompatibleBitmap(m_hdc, m_rc->right - m_rc->left, m_rc->bottom - m_rc->top);
@@ -264,16 +266,16 @@ void DrawingEngine::DrawCheckBox(const std::wstring &text, HFONT hFont, bool che
     m_graphics->SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
     m_graphics->Clear(ColorFromColorRef(m_ds->palette()->color(Palette::Background)));
 
-    DWORD dwOldLayout = GetLayout(m_memDC);
+    bool isRTL = GetLayout(m_memDC) & LAYOUT_RTL;
     Gdiplus::Matrix origMatrix;
     m_graphics->GetTransform(&origMatrix);
-    if (dwOldLayout & LAYOUT_RTL) {
+    if (isRTL) {
         Gdiplus::Matrix rtlMatrix(-1.0f, 0.0f, 0.0f, 1.0f, float(m_rc->right + m_rc->left - 1), 0.0f);
         m_graphics->SetTransform(&rtlMatrix);
     }
 
     Gdiplus::Pen pen(ColorFromColorRef(m_ds->palette()->color(Palette::Primitive)), m_ds->metrics()->value(Metrics::PrimitiveWidth));
-    Gdiplus::Rect rc(x, y, m_ds->metrics()->value(Metrics::IconWidth) - 1, m_ds->metrics()->value(Metrics::IconHeight) - 1);
+    Gdiplus::Rect rc(x, y, iconWidth - 1, iconHeight - 1);
     // m_graphics->DrawRectangle(&pen, rc);
     Gdiplus::GraphicsPath ph;
     RoundedPath(ph, rc.X, rc.Y, rc.Width, rc.Height, m_ds->metrics()->value(Metrics::PrimitiveRadius));
@@ -282,19 +284,19 @@ void DrawingEngine::DrawCheckBox(const std::wstring &text, HFONT hFont, bool che
         pen.SetWidth(m_ds->metrics()->value(Metrics::AlternatePrimitiveWidth));
         pen.SetColor(ColorFromColorRef(m_ds->palette()->color(Palette::AlternatePrimitive)));
         Gdiplus::PointF pts[3] = {
-            Gdiplus::PointF(float(x + 2), float(y + m_ds->metrics()->value(Metrics::IconHeight)/2 - 1)),
-            Gdiplus::PointF(float(x + m_ds->metrics()->value(Metrics::IconWidth)/2 - 2), float(y + m_ds->metrics()->value(Metrics::IconHeight) - 5)),
-            Gdiplus::PointF(float(x + m_ds->metrics()->value(Metrics::IconWidth) - 3), float(y + 4))
+            Gdiplus::PointF(x + (isRTL ? iconWidth - 3 : 2), y + iconHeight/2.0 - 1),
+            Gdiplus::PointF(x + iconWidth/2.0 + (isRTL ? 1 : - 2), y + iconHeight - 5),
+            Gdiplus::PointF(x + (isRTL ? 2 : iconWidth - 3), y + 4)
         };
         m_graphics->DrawLines(&pen, pts, 3);
     }
     if (!text.empty()) {
         RECT rc;
-        int offset = (dwOldLayout & LAYOUT_RTL) ? m_ds->metrics()->value(Metrics::IconWidth) : 0;
-        SetRect(&rc, m_rc->left + m_ds->metrics()->value(Metrics::IconWidth) - offset, m_rc->top, m_rc->right - offset, m_rc->bottom);
+        int offset = isRTL ? iconWidth : 0;
+        SetRect(&rc, m_rc->left + iconWidth - offset, m_rc->top, m_rc->right - offset, m_rc->bottom);
         m_graphics->SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
         m_graphics->SetTransform(&origMatrix);
-        LayeredDrawText(rc, text, hFont, dwOldLayout & LAYOUT_RTL);
+        LayeredDrawText(rc, text, hFont, isRTL);
     }
     StretchBlt(m_hdc, m_rc->left, m_rc->top, m_rc->right - m_rc->left, m_rc->bottom - m_rc->top, m_memDC, 0, 0, m_rc->right - m_rc->left, m_rc->bottom - m_rc->top, SRCCOPY);
 

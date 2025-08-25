@@ -19,8 +19,14 @@ jobs:
 
     - name: Set Variables
       run: |
-        $version = "${{ github.ref_name }}" -replace "^v"
-        write "PRODUCT_VERSION=${{ github.ref_type == 'tag' && '$version' || '0.0.0' }}" >> $env:GITHUB_ENV
+        $ref = "${{ github.ref_name }}"
+        $version = switch -Regex ($ref) {
+          "^release/v\d+\.\d+\.\d+" { $ref -replace "^release/v" }
+          "^hotfix/v\d+\.\d+\.\d+"  { $ref -replace "^hotfix/v" }
+          "^v\d+\.\d+\.\d+"         { $ref -replace "^v" }
+          default                   { "0.0.0" }
+        }
+        write "PRODUCT_VERSION=$version" >> $env:GITHUB_ENV
         write "BUILD_NUMBER=${{ github.run_number }}" >> $env:GITHUB_ENV
 
     - name: Checkout
@@ -117,10 +123,10 @@ jobs:
         $ReleasePath = "install/desktop/editors/windows/distrib/onlyoffice"
         aws s3 cp --no-progress --acl public-read `
           online-installer.exe `
-          s3://${{ secrets.RELEASE_BUCKET }}/$ReleasePath/OnlineInstaller.exe
+          s3://${{ secrets.RELEASE_BUCKET }}/$ReleasePath/ONLYOFFICEDesktopInstaller.exe
         aws s3 cp --no-progress --acl public-read `
-          s3://${{ secrets.RELEASE_BUCKET }}/$ReleasePath/OnlineInstaller.exe `
-          s3://${{ secrets.RELEASE_BUCKET }}/$ReleasePath/OnlineInstaller-${{ env.PRODUCT_VERSION }}.exe
+          s3://${{ secrets.RELEASE_BUCKET }}/$ReleasePath/ONLYOFFICEDesktopInstaller.exe `
+          s3://${{ secrets.RELEASE_BUCKET }}/$ReleasePath/ONLYOFFICEDesktopInstaller-${{ env.PRODUCT_VERSION }}.exe
         aws cloudfront create-invalidation `
           --distribution-id ${{ secrets.DISTRIBUTION_ID }} `
           --paths "/$ReleasePath/*"
@@ -133,6 +139,6 @@ jobs:
           --region us-east-1 `
           --no-paginate
         write @"
-        https://download.onlyoffice.com/$ReleasePath/OnlineInstaller.exe
-        https://download.onlyoffice.com/$ReleasePath/OnlineInstaller-${{ env.PRODUCT_VERSION }}.exe
+        https://download.onlyoffice.com/$ReleasePath/ONLYOFFICEDesktopInstaller.exe
+        https://download.onlyoffice.com/$ReleasePath/ONLYOFFICEDesktopInstaller-${{ env.PRODUCT_VERSION }}.exe
         "@
