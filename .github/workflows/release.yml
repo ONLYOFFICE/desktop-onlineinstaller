@@ -1,0 +1,94 @@
+name: Release online installer
+
+on:
+  push:
+    tags:
+    - 'v\d+\.\d+\.\d+\.\d+'
+
+jobs:
+  release:
+    name: Release online installer
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set Variables
+      run: |
+        set -x
+        REF="${{ github.ref_name }}"
+        echo "\
+        PACKAGE=ONLYOFFICEDesktopInstaller
+        VERSION=${REF#v}
+        RUN_NUMBER=${REF##*.}\
+        " >> $GITHUB_ENV
+
+    - name: Download artifact
+      uses: dawidd6/action-download-artifact@v11
+      with:
+        workflow: build.yml
+        name: ${{ env.PACKAGE }}
+        run_number: ${{ env.RUN_NUMBER }}
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: ${{ env.PACKAGE }}.exe
+
+    - name: Publish to S3
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+        set -x
+
+        RELEASE_BUCKET=${{ secrets.RELEASE_BUCKET }}
+        RELEASE_PATH=install/desktop/editors/windows/distrib/onlyoffice
+        JSON=desktop-production.json
+        JSON_PATH=install/desktop/editors/$JSON
+
+        aws s3 cp --no-progress --acl public-read \
+          $PACKAGE.exe \
+          s3://$RELEASE_BUCKET/$RELEASE_PATH/$PACKAGE.exe
+        aws s3 cp --no-progress --acl public-read \
+          s3://$RELEASE_BUCKET/$RELEASE_PATH/$PACKAGE.exe \
+          s3://$RELEASE_BUCKET/$RELEASE_PATH/$PACKAGE-$VERSION.exe
+
+        aws s3 cp --no-progress \
+          s3://$RELEASE_BUCKET/$JSON_PATH \
+          $JSON.bak
+        jq \
+          --indent 4 \
+          --arg version "${VERSION%.*}" \
+          --arg date "$(date --utc +%FT%RZ)" \
+          --arg size "$(stat -L -c%s $PACKAGE.exe)" \
+          'map( (
+            select(.["os"] == "Windows_online")
+            | .version = $version
+            | .releaseDate = $date
+            | .size = $size
+          ) // .)' \
+          $JSON.bak > $JSON
+        diff --suppress-common-lines --color=always $JSON.bak $JSON
+        aws s3 cp --no-progress \
+          $JSON \
+          s3://$RELEASE_BUCKET/$JSON_PATH
+        aws s3 cp --no-progress \
+          $JSON.bak \
+          s3://$RELEASE_BUCKET/$JSON_PATH.bak
+
+        aws cloudfront create-invalidation \
+          --distribution-id ${{ secrets.DISTRIBUTION_ID }} \
+          --paths "/$RELEASE_PATH/$PACKAGE.exe" "/$JSON_PATH"
+        aws apigateway test-invoke-method \
+          --rest-api-id ${{ secrets.CDN_REST_API_ID }} \
+          --resource-id ${{ secrets.CDN_RESOURCE_ID }} \
+          --http-method PUT \
+          --path-with-query-string /prod/selectel \
+          --body "{\"paths\":[\"/$RELEASE_PATH/$PACKAGE.exe\",\"/$JSON_PATH\"]}" \
+          --region us-east-1 \
+          --no-paginate
+
+        echo "
+        https://download.onlyoffice.com/$RELEASE_PATH/$PACKAGE.exe
+        https://download.onlyoffice.com/$RELEASE_PATH/$PACKAGE-$VERSION.exe
+        https://download.onlyoffice.com/$JSON_PATH
+        "
