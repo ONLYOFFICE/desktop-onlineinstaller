@@ -41,9 +41,11 @@
 #include <TlHelp32.h>
 #include <Msi.h>
 #include <ShlObj.h>
-// #include <sstream>
+#include <sstream>
 #include "../desktop-apps/win-linux/src/defines.h"
 #include "../desktop-apps/win-linux/src/prop/defines_p.h"
+
+#define BUFSIZE 1024
 
 #define APP_REG_PATH "\\" REG_GROUP_KEY "\\" REG_APP_NAME
 #define BIT123_LAYOUTRTL 0x08000000
@@ -455,6 +457,77 @@ namespace NS_File
         } else
             uuid_tstr = L"00000000-0000-0000-0000-000000000000";
         return NS_File::tempPath() + _T("/") + _T(FILE_PREFIX) + uuid_tstr + ext;
+    }
+
+    wstring getFileHash(const wstring &fileName)
+    {
+        HANDLE hFile = CreateFile(fileName.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+        if (hFile == INVALID_HANDLE_VALUE)
+            return L"";
+
+        // Get handle to the crypto provider
+        HCRYPTPROV hProv = 0;
+        if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+            CloseHandle(hFile);
+            return L"";
+        }
+
+        HCRYPTHASH hHash = 0;
+        if (!CryptCreateHash(hProv, CALG_MD5, 0, 0, &hHash)) {
+            CloseHandle(hFile);
+            CryptReleaseContext(hProv, 0);
+            return L"";
+        }
+
+        DWORD cbRead = 0;
+        BYTE rgbFile[BUFSIZE];
+        BOOL bResult = FALSE;
+        while ((bResult = ReadFile(hFile, rgbFile, BUFSIZE, &cbRead, NULL))) {
+            if (cbRead == 0)
+                break;
+
+            if (!CryptHashData(hHash, rgbFile, cbRead, 0)) {
+                CryptReleaseContext(hProv, 0);
+                CryptDestroyHash(hHash);
+                CloseHandle(hFile);
+                return L"";
+            }
+        }
+
+        if (!bResult) {
+            CryptReleaseContext(hProv, 0);
+            CryptDestroyHash(hHash);
+            CloseHandle(hFile);
+            return L"";
+        }
+
+        DWORD cbHashSize = 0, dwCount = sizeof(DWORD);
+        if (!CryptGetHashParam( hHash, HP_HASHSIZE, (BYTE*)&cbHashSize, &dwCount, 0)) {
+            CryptReleaseContext(hProv, 0);
+            CryptDestroyHash(hHash);
+            CloseHandle(hFile);
+            return L"";
+        }
+
+        std::vector<BYTE> buffer(cbHashSize);
+        if (!CryptGetHashParam(hHash, HP_HASHVAL, reinterpret_cast<BYTE*>(&buffer[0]), &cbHashSize, 0)) {
+            CryptReleaseContext(hProv, 0);
+            CryptDestroyHash(hHash);
+            CloseHandle(hFile);
+            return L"";
+        }
+
+        std::wostringstream oss;
+        for (std::vector<BYTE>::const_iterator it = buffer.begin(); it != buffer.end(); ++it) {
+            oss.fill('0');
+            oss.width(2);
+            oss << std::hex << static_cast<const int>(*it);
+        }
+
+        CryptReleaseContext(hProv, 0);
+        CryptDestroyHash(hHash);
+        CloseHandle(hFile);
+        return oss.str();
     }
 
     bool verifyEmbeddedSignature(const wstring &fileName)

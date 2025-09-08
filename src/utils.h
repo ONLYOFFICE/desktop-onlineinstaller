@@ -81,6 +81,7 @@ wstring tempPath();
 wstring appPath();
 wstring appDataPath();
 wstring generateTmpFileName(const wstring &ext);
+wstring getFileHash(const wstring &fileName);
 bool verifyEmbeddedSignature(const wstring &fileName);
 }
 

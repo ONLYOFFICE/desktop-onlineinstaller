@@ -854,8 +854,8 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
                 if ((url.empty() || !dnl->isUrlAccessible(url)) && !url2.empty())
                     url = url2;
                 NS_Logger::WriteLog(_T("Download from URL:\n") + url);
-                // tstring hash = package_type.value(_T("md5")).toTString();
-                // std::transform(hash.begin(), hash.end(), hash.begin(), ::tolower);
+                tstring hash = package_type.value(_T("md5")).toTString();
+                std::transform(hash.begin(), hash.end(), hash.begin(), ::tolower);
                 NS_File::removeFile(tmp_path);
 
                 invokeMethod([=]() {
@@ -867,7 +867,8 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
                         if (m_mode == Mode::Control)
                             m_cancelBtn->setDisabled(true);
                         if (error == ERROR_SUCCESS) {
-                            if (NS_File::verifyEmbeddedSignature(path)) {
+                            tstring fhash = NS_File::getFileHash(path);
+                            if (!fhash.empty() && fhash == hash && NS_File::verifyEmbeddedSignature(path)) {
                                 onComplete();
                             } else {
                                 m_bar->setProgress(0);
