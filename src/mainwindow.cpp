@@ -82,6 +82,20 @@ static void setControlLabelStyle(Label *lb)
     lb->metrics()->setMetrics(Metrics::TextAlignment, Metrics::AlignHLeft | Metrics::AlignVTop);
 }
 
+static wstring displayNameAddInfo(const wstring &disp_name, const wstring &info)
+{
+    size_t lbr = disp_name.find_last_of(L'(');
+    size_t rbr = disp_name.find_last_of(L')');
+    if (lbr != wstring::npos && rbr != wstring::npos && lbr < rbr) {
+        wstring inside_brackets = disp_name.substr(lbr + 1, rbr - lbr - 1);
+        if (inside_brackets.find(info) == wstring::npos) {
+            inside_brackets += L" " + info;
+        }
+        return disp_name.substr(0, lbr + 1) + inside_brackets + disp_name.substr(rbr);
+    }
+    return disp_name + L" (" + info + L")";
+}
+
 MainWindow::MainWindow(Widget *parent, const Rect &rc) :
     Window(parent, rc),
     m_comntLbl(nullptr),
@@ -811,7 +825,8 @@ void MainWindow::createCloseAndBackButtons()
 
 wstring MainWindow::fillInstalledVerInfo()
 {
-    wstring text = _TR(LABEL_VERSION);
+    wstring text = _TR(LABEL_VERSION), dispName;
+    NS_Utils::InstalledVerInfo(L"DisplayName", dispName, m_arch);
     NS_Utils::InstalledVerInfo(L"DisplayVersion", m_ver, m_arch);
     if (m_ver.empty())
         m_ver = _TR(LABEL_UNKN_VER);
@@ -819,10 +834,14 @@ wstring MainWindow::fillInstalledVerInfo()
     NS_Utils::InstalledVerInfo(L"UninstallString", m_uninst_cmd, m_arch);
     m_package = (m_uninst_cmd.find(L"msiexec") != std::wstring::npos) ? L"msi" : (m_uninst_cmd.find(L".exe") != std::wstring::npos) ? L"exe" : _TR(LABEL_UNKN_PACK);
 
-    NS_Utils::Replace(text, L"%1", _T(WINDOW_NAME));
-    NS_Utils::Replace(text, L"%2", m_ver);
-    NS_Utils::Replace(text, L"%3", m_arch);
-    NS_Utils::Replace(text, L"%4", m_package);
+    if (!dispName.empty()) {
+        NS_Utils::Replace(text, L"%1 %2 (%3 %4)", displayNameAddInfo(dispName, m_package));
+    } else {
+        NS_Utils::Replace(text, L"%1", _T(WINDOW_NAME));
+        NS_Utils::Replace(text, L"%2", m_ver);
+        NS_Utils::Replace(text, L"%3", m_arch);
+        NS_Utils::Replace(text, L"%4", m_package);
+    }
     return text;
 }
 
