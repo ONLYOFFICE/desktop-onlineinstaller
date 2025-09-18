@@ -7,9 +7,6 @@ on:
         description: Sign
         type: boolean
         default: true
-  push:
-    tags:
-    - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   build:
@@ -26,6 +23,7 @@ jobs:
           "^v\d+\.\d+\.\d+"         { $ref -replace "^v" }
           default                   { "0.0.0" }
         }
+        write "PACKAGE=ONLYOFFICEDesktopInstaller" >> $env:GITHUB_ENV
         write "PRODUCT_VERSION=$version" >> $env:GITHUB_ENV
         write "BUILD_NUMBER=${{ github.run_number }}" >> $env:GITHUB_ENV
 
@@ -89,56 +87,25 @@ jobs:
         write "::group::Build"
         & python make.py
         if (-not $?) { throw }
-        gci "build\win_32\xp\online-installer.exe" | % { $_.VersionInfo } | select *
+        cp build\win_32\xp\online-installer.exe build\$env:PACKAGE.exe
+        gci "build\$env:PACKAGE.exe" | % { $_.VersionInfo } | select *
         write "::endgroup::"
 
     - name: Sign
-      if: github.ref_type == 'tag' || inputs.sign
-      working-directory: desktop-onlineinstaller/build/win_32/xp
+      if: inputs.sign
+      working-directory: desktop-onlineinstaller/build
       run: |
-        $File = "online-installer.exe"
-        $CertName = "Ascensio System SIA"
-        & signtool sign /v /a /n $CertName /t http://timestamp.digicert.com $File
+        & signtool sign /v /a `
+          /n "Ascensio System SIA" `
+          /t http://timestamp.digicert.com `
+          "$env:PACKAGE.exe"
         if (-not $?) { throw }
-        & signtool verify /q /pa /all $File
+        & signtool verify /q /pa /all "$env:PACKAGE.exe"
         if (-not $?) { throw }
 
     - name: Archive artifact
       uses: actions/upload-artifact@v4
       with:
-        name: OnlineInstaller-${{ env.PRODUCT_VERSION }}-${{ env.BUILD_NUMBER }}
-        path: desktop-onlineinstaller/build/win_32/xp/online-installer.exe
+        name: ${{ env.PACKAGE }}
+        path: desktop-onlineinstaller/build/${{ env.PACKAGE }}.exe
         if-no-files-found: error
-
-    - name: Create Release
-      uses: softprops/action-gh-release@v2
-      if: github.ref_type == 'tag'
-      with:
-        files: desktop-onlineinstaller/build/win_32/xp/online-installer.exe
-
-    - name: Publish to S3
-      if: github.ref_type == 'tag'
-      working-directory: desktop-onlineinstaller/build/win_32/xp
-      run: |
-        $ReleasePath = "install/desktop/editors/windows/distrib/onlyoffice"
-        aws s3 cp --no-progress --acl public-read `
-          online-installer.exe `
-          s3://${{ secrets.RELEASE_BUCKET }}/$ReleasePath/OnlineInstaller.exe
-        aws s3 cp --no-progress --acl public-read `
-          s3://${{ secrets.RELEASE_BUCKET }}/$ReleasePath/OnlineInstaller.exe `
-          s3://${{ secrets.RELEASE_BUCKET }}/$ReleasePath/OnlineInstaller-${{ env.PRODUCT_VERSION }}.exe
-        aws cloudfront create-invalidation `
-          --distribution-id ${{ secrets.DISTRIBUTION_ID }} `
-          --paths "/$ReleasePath/*"
-        aws apigateway test-invoke-method `
-          --rest-api-id ${{ secrets.CDN_REST_API_ID }} `
-          --resource-id ${{ secrets.CDN_RESOURCE_ID }} `
-          --http-method PUT `
-          --path-with-query-string /prod/selectel `
-          --body "{`"paths`":[`"/$ReleasePath/*`"]}" `
-          --region us-east-1 `
-          --no-paginate
-        write @"
-        https://download.onlyoffice.com/$ReleasePath/OnlineInstaller.exe
-        https://download.onlyoffice.com/$ReleasePath/OnlineInstaller-${{ env.PRODUCT_VERSION }}.exe
-        "@
