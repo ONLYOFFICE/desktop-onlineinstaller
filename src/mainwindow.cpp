@@ -9,7 +9,6 @@
 #include "uiradiobutton.h"
 #include "uiprogressbar.h"
 #include "uimetrics.h"
-#include "uipalette.h"
 #include "uicaption.h"
 #include "resource.h"
 #include "translator.h"
@@ -23,65 +22,6 @@
 #include "../desktop-apps/win-linux/src/defines.h"
 #include "../desktop-apps/win-linux/src/prop/defines_p.h"
 
-
-template <class T>
-static void setSelectorStyle(T *sel) // style for UICheckBox and UIRadioButton
-{
-    sel->metrics()->setMetrics(Metrics::TextMarginLeft, 6);
-    sel->metrics()->setMetrics(Metrics::TextMarginRight, 6);
-    sel->metrics()->setMetrics(Metrics::PrimitiveRadius, 1);
-    sel->metrics()->setMetrics(Metrics::AlternatePrimitiveWidth, 2);
-    sel->palette()->setColor(Palette::Text, Palette::Disabled, 0x888888);
-    sel->palette()->setColor(Palette::Text, Palette::Normal, 0x333333);
-    sel->palette()->setColor(Palette::Text, Palette::Hover, 0x333333);
-    sel->palette()->setColor(Palette::Text, Palette::Pressed, 0x333333);
-    sel->palette()->setColor(Palette::Background, Palette::Disabled, 0xfefefe);
-    sel->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
-    sel->palette()->setColor(Palette::Background, Palette::Hover, 0xfefefe);
-    sel->palette()->setColor(Palette::Background, Palette::Pressed, 0xfefefe);
-    sel->palette()->setColor(Palette::Primitive, Palette::Disabled, 0x888888);
-    sel->palette()->setColor(Palette::Primitive, Palette::Normal, 0x888888);
-    sel->palette()->setColor(Palette::Primitive, Palette::Hover, 0x0055ff);
-    sel->palette()->setColor(Palette::Primitive, Palette::Pressed, 0x0055ff);
-}
-
-static void setButtonStyle(UIButton *btn)
-{
-    btn->palette()->setColor(Palette::Text, Palette::Disabled, 0x888888);
-    btn->palette()->setColor(Palette::Text, Palette::Normal, 0x333333);
-    btn->palette()->setColor(Palette::Text, Palette::Hover, 0x333333);
-    btn->palette()->setColor(Palette::Text, Palette::Pressed, 0x333333);
-    btn->palette()->setColor(Palette::Background, Palette::Disabled, 0xeeeeee);
-    btn->palette()->setColor(Palette::Background, Palette::Normal, 0xeeeeee);
-    btn->palette()->setColor(Palette::Background, Palette::Hover, 0xe0e0e0);
-    btn->palette()->setColor(Palette::Background, Palette::Pressed, 0xd0d0d0);
-    btn->palette()->setColor(Palette::Border, Palette::Disabled, 0xbebebe);
-    btn->palette()->setColor(Palette::Border, Palette::Normal, 0xbebebe);
-    btn->palette()->setColor(Palette::Border, Palette::Hover, 0xbebebe);
-    btn->palette()->setColor(Palette::Border, Palette::Pressed, 0xbebebe);
-    btn->metrics()->setMetrics(Metrics::BorderWidth, 1);
-}
-
-static void setProgressStyle(UIProgressBar *bar)
-{
-    bar->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
-    bar->palette()->setColor(Palette::Base, Palette::Normal, 0xcccccc);
-    bar->palette()->setColor(Palette::AlternateBase, Palette::Normal, 0x1e7aaa);
-}
-
-static void setLabelStyle(UILabel *lb)
-{
-    lb->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
-    lb->palette()->setColor(Palette::Text, Palette::Normal, 0x888888);
-}
-
-static void setControlLabelStyle(UILabel *lb)
-{
-    lb->setBaseSize(50, 36);
-    lb->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
-    lb->palette()->setColor(Palette::Text, Palette::Normal, 0x333333);
-    lb->metrics()->setMetrics(Metrics::TextAlignment, Metrics::AlignHLeft | Metrics::AlignVTop);
-}
 
 static wstring displayNameAddInfo(const wstring &disp_name, const wstring &info)
 {
@@ -114,15 +54,14 @@ MainWindow::MainWindow(UIWidget *parent, const Rect &rc) :
     m_is_checked(false),
     m_is_completed(false)
 {
+    setObjectGroupId(_T("MainWindow"));
     setWindowTitle(_TR(CAPTION));
     setIcon(IDI_MAINICON);
-    palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
-    palette()->setColor(Palette::Border, Palette::Normal, 0x888888);
     if (UIUtils::winVersion() > UIUtils::WinXP && UIUtils::winVersion() < UIUtils::Win10)
         metrics()->setMetrics(Metrics::BorderWidth, 1);
 
     UIWidget *cw = new UIWidget(this);
-    cw->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
+    cw->setObjectGroupId(_T("MainWindow"));
     setCentralWidget(cw);
     setContentsMargins(0,0,0,0);
 
@@ -131,51 +70,29 @@ MainWindow::MainWindow(UIWidget *parent, const Rect &rc) :
     cenVlut->setSpacing(0);
     cw->setLayout(cenVlut);
 
-    /* Caption section*/
-    UIWidget *topPanel = new UIWidget(cw);
-    topPanel->setBaseSize(50,28);
-    topPanel->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
-    topPanel->setSizePolicy(SizePolicy::HSizeBehavior, SizePolicy::Expanding);
-    topPanel->setSizePolicy(SizePolicy::VSizeBehavior, SizePolicy::Fixed);
-    cenVlut->addWidget(topPanel);
+    /* Caption section*/   
+    UICaption *cap = new UICaption(cw);
+    cap->setObjectGroupId(_T("HeaderBar"));
+    cap->setResizingAvailable(false);
+    cenVlut->addWidget(cap);
 
-    UIBoxLayout *topHlut = new UIBoxLayout(UIBoxLayout::Horizontal);
+    UIBoxLayout *topHlut = new UIBoxLayout(UIBoxLayout::Horizontal, UILayout::AlignHRight | UILayout::AlignVCenter);
     topHlut->setContentMargins(0, 0, 0, 0);
     topHlut->setSpacing(0);
-    topPanel->setLayout(topHlut);
+    cap->setLayout(topHlut);
 
-    UICaption *cap = new UICaption(topPanel);
-    cap->setResizingAvailable(false);
-    cap->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
-    cap->metrics()->setMetrics(Metrics::TextMarginLeft, 12);
-    cap->metrics()->setMetrics(Metrics::TextAlignment, Metrics::AlignHLeft| Metrics::AlignVCenter);
-    cap->setBaseSize(50,28);
-    cap->setSizePolicy(SizePolicy::HSizeBehavior, SizePolicy::Expanding);
-    cap->setSizePolicy(SizePolicy::VSizeBehavior, SizePolicy::Fixed);
-
-    UIButton *closeBtn = new UIButton(topPanel);
-    closeBtn->setBaseSize(40,28);
-    closeBtn->setSizePolicy(SizePolicy::HSizeBehavior, SizePolicy::Fixed);
-    closeBtn->setSizePolicy(SizePolicy::VSizeBehavior, SizePolicy::Fixed);
-    closeBtn->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
-    closeBtn->palette()->setColor(Palette::Background, Palette::Hover, 0xe81123);
-    closeBtn->palette()->setColor(Palette::Background, Palette::Pressed, 0x8b0a14);
-    closeBtn->palette()->setColor(Palette::Background, Palette::Disabled, 0x2b2b2b);
-    closeBtn->palette()->setColor(Palette::Primitive, Palette::Normal, 0x000000);
-    closeBtn->metrics()->setMetrics(Metrics::PrimitiveWidth, 1);
+    UIButton *closeBtn = new UIButton(cap);
+    closeBtn->setObjectGroupId(_T("HeaderCloseButton"));
     closeBtn->setStockIcon(UIButton::CloseIcon);
     closeBtn->setIconSize(10, 10);
     closeBtn->onClick([this]() {
         close();
     });
-    topHlut->addWidget(cap);
     topHlut->addWidget(closeBtn);
 
     /* Central section */
     m_cenPanel = new UIWidget(cw);
-    m_cenPanel->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
-    m_cenPanel->setSizePolicy(SizePolicy::HSizeBehavior, SizePolicy::Expanding);
-    m_cenPanel->setSizePolicy(SizePolicy::VSizeBehavior, SizePolicy::Expanding);
+    m_cenPanel->setObjectGroupId(_T("MainWindow"));
     cenVlut->addWidget(m_cenPanel);
 
     m_cenPanelVlut = new UIBoxLayout(UIBoxLayout::Vertical);
@@ -196,17 +113,17 @@ void MainWindow::initInstallationMode()
     m_mode = Mode::Install;
     /* Image section*/
     UILabel *wlcLbl = new UILabel(m_cenPanel);
+    wlcLbl->setObjectGroupId(_T("MainWindow"));
     wlcLbl->setBaseSize(282, 200);
     wlcLbl->setEMFIcon(IDI_WELCOME, 282, 200);
-    wlcLbl->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
     wlcLbl->setSizePolicy(SizePolicy::HSizeBehavior, SizePolicy::Expanding);
     wlcLbl->setSizePolicy(SizePolicy::VSizeBehavior, SizePolicy::Fixed);
     m_cenPanelVlut->addWidget(wlcLbl);
 
     /* Check box section*/
     UICheckBox *chkBox = new UICheckBox(m_cenPanel, _TR(CHECK_SILENT));
+    chkBox->setObjectGroupId(_T("Selector"));
     chkBox->setChecked(m_is_checked);
-    setSelectorStyle(chkBox);
     chkBox->adjustSizeBasedOnContent();
     int chkMargin = 2 + (chkBox->metrics()->value(Metrics::IconWidth) + chkBox->metrics()->value(Metrics::TextMarginLeft))/2;
     chkBox->move(chkMargin * m_dpi_ratio + m_cenPanel->size().width/2 - chkBox->size().width/2, 254 * m_dpi_ratio);
@@ -218,16 +135,15 @@ void MainWindow::initInstallationMode()
     wstring warn_text = _TR(LABEL_WARN_CLOSE);
     NS_Utils::Replace(warn_text, L"%1", _T(WINDOW_NAME));
     UILabel *comntLbl = new UILabel(m_cenPanel);
+    comntLbl->setObjectGroupId(_T("Label"));
     comntLbl->setText(warn_text, true);
     comntLbl->setGeometry(0, m_cenPanel->size().height - 136 * m_dpi_ratio, m_cenPanel->size().width, 48 * m_dpi_ratio);
-    setLabelStyle(comntLbl);
 
     /* Install button section */
     UIButton *instlBtn = new UIButton(m_cenPanel);
+    instlBtn->setObjectGroupId(_T("PushButton"));
     instlBtn->setText(_TR(BUTTON_INSTALL));
-    instlBtn->setBaseSize(100, 28);
     instlBtn->move(m_cenPanel->size().width/2 - 50 * m_dpi_ratio, m_cenPanel->size().height - 76 * m_dpi_ratio);
-    setButtonStyle(instlBtn);
     instlBtn->onClick([=]() {
         m_cenPanel->disconnect(m_resize_conn);
         chkBox->close();
@@ -248,7 +164,7 @@ void MainWindow::initControlMode(const std::wstring &_arch)
     m_mode = Mode::Control;
     /* Comment section */
     m_versionLbl = new UILabel(m_cenPanel);
-    setControlLabelStyle(m_versionLbl);
+    m_versionLbl->setObjectGroupId(_T("ControlLabel"));
     m_versionLbl->setText(fillInstalledVerInfo());
     m_versionLbl->setSizePolicy(SizePolicy::HSizeBehavior, SizePolicy::Expanding);
     m_versionLbl->setSizePolicy(SizePolicy::VSizeBehavior, SizePolicy::Fixed);
@@ -258,7 +174,7 @@ void MainWindow::initControlMode(const std::wstring &_arch)
 
     if (m_package == _TR(LABEL_UNKN_PACK) || m_ver == _TR(LABEL_UNKN_VER) || _arch.empty() || m_arch != _arch) {
         UILabel *errLbl = new UILabel(m_cenPanel);
-        setControlLabelStyle(errLbl);
+        errLbl->setObjectGroupId(_T("ControlLabel"));
         errLbl->setText(_TR(LABEL_NO_OPTIONS));
         errLbl->setSizePolicy(SizePolicy::HSizeBehavior, SizePolicy::Expanding);
         errLbl->setSizePolicy(SizePolicy::VSizeBehavior, SizePolicy::Expanding);
@@ -290,20 +206,20 @@ void MainWindow::startInstall()
 {
     /* Comment section */
     m_comntLbl = new UILabel(m_cenPanel);
+    m_comntLbl->setObjectGroupId(_T("Label"));
     m_comntLbl->setText(_TR(LABEL_DOWNLOAD), true);
     m_comntLbl->setGeometry(0, m_cenPanel->size().height - 161 * m_dpi_ratio, m_cenPanel->size().width, 28 * m_dpi_ratio);
     m_comntLbl->setFont(L"Segoe UI", 12);
-    setLabelStyle(m_comntLbl);
 
     m_comntInfoLbl = new UILabel(m_cenPanel);
+    m_comntInfoLbl->setObjectGroupId(_T("Label"));
     m_comntInfoLbl->setText(_TR(LABEL_ALMOST_DONE), true);
     m_comntInfoLbl->setGeometry(0, m_cenPanel->size().height - 122 * m_dpi_ratio, m_cenPanel->size().width, 40 * m_dpi_ratio);
-    setLabelStyle(m_comntInfoLbl);
 
     /* Progress section */
     m_bar = new UIProgressBar(m_cenPanel);
+    m_bar->setObjectGroupId(_T("ProgressBar"));
     m_bar->setGeometry(0, m_cenPanel->size().height - 126 * m_dpi_ratio, m_cenPanel->size().width, 5 * m_dpi_ratio);
-    setProgressStyle(m_bar);
     m_bar->metrics()->setMetrics(Metrics::IconMarginLeft, 108);
     m_bar->metrics()->setMetrics(Metrics::IconMarginRight, 108);
 
@@ -368,8 +284,8 @@ void MainWindow::finishInstall(const std::wstring &app_path)
     /* Check box section*/
     m_is_checked = true;
     UICheckBox *chkBox = new UICheckBox(m_cenPanel, _TR(CHECK_LAUNCH));
+    chkBox->setObjectGroupId(_T("Selector"));
     chkBox->setChecked(m_is_checked);
-    setSelectorStyle(chkBox);
     chkBox->adjustSizeBasedOnContent();
     int chkMargin = 2 + (chkBox->metrics()->value(Metrics::IconWidth) + chkBox->metrics()->value(Metrics::TextMarginLeft))/2;
     chkBox->move(chkMargin * m_dpi_ratio + m_cenPanel->size().width/2 - chkBox->size().width/2, 254 * m_dpi_ratio);
@@ -381,16 +297,15 @@ void MainWindow::finishInstall(const std::wstring &app_path)
     wstring compl_text = _TR(LABEL_INSTALL_COMPL);
     NS_Utils::Replace(compl_text, L"%1", _T(WINDOW_NAME));
     UILabel *comntLbl = new UILabel(m_cenPanel);
+    comntLbl->setObjectGroupId(_T("Label"));
     comntLbl->setText(compl_text, true);
     comntLbl->setGeometry(0, m_cenPanel->size().height - 136 * m_dpi_ratio, m_cenPanel->size().width, 48 * m_dpi_ratio);
-    setLabelStyle(comntLbl);
 
     /* Install button section */
     UIButton *closeBtn = new UIButton(m_cenPanel);
+    closeBtn->setObjectGroupId(_T("PushButton"));
     closeBtn->setText(_TR(BUTTON_CLOSE));
-    closeBtn->setBaseSize(100, 28);
     closeBtn->move(m_cenPanel->size().width/2 - 50 * m_dpi_ratio, m_cenPanel->size().height - 76 * m_dpi_ratio);
-    setButtonStyle(closeBtn);
     closeBtn->onClick([=]() {
         if (m_is_checked)
             NS_File::runProcess(L"explorer.exe", app_path + _T(APP_LAUNCH_NAME), false);
@@ -610,9 +525,9 @@ void MainWindow::createSelectionPage()
     m_is_completed = false;
     /* Check box section*/
     UICheckBox *clrChkBox = new UICheckBox(m_cenPanel, _TR(CHECK_CLR_DATA));
+    clrChkBox->setObjectGroupId(_T("Selector"));
     clrChkBox->setDisabled(!(m_checkState & UpdateRadio));
     clrChkBox->setChecked(m_checkState & ClrDataCheck);
-    setSelectorStyle(clrChkBox);
     clrChkBox->adjustSizeBasedOnContent();
     clrChkBox->move(79 * m_dpi_ratio, 80 * m_dpi_ratio);
     clrChkBox->onClick([=]() {
@@ -620,9 +535,9 @@ void MainWindow::createSelectionPage()
     });
 
     UICheckBox *stnChkBox = new UICheckBox(m_cenPanel, _TR(CHECK_CLR_STNGS));
+    stnChkBox->setObjectGroupId(_T("Selector"));
     stnChkBox->setDisabled(!(m_checkState & UpdateRadio));
     stnChkBox->setChecked(m_checkState & ClrStnCheck);
-    setSelectorStyle(stnChkBox);
     stnChkBox->adjustSizeBasedOnContent();
     stnChkBox->move(79 * m_dpi_ratio, 112 * m_dpi_ratio);
     stnChkBox->onClick([stnChkBox, this]() {
@@ -630,9 +545,9 @@ void MainWindow::createSelectionPage()
     });
 
     UICheckBox *clrAllChkBox = new UICheckBox(m_cenPanel, _TR(CHECK_CLR_ALL));
+    clrAllChkBox->setObjectGroupId(_T("Selector"));
     clrAllChkBox->setDisabled(!(m_checkState & UninstRadio));
     clrAllChkBox->setChecked(m_checkState & ClrAllCheck);
-    setSelectorStyle(clrAllChkBox);
     clrAllChkBox->adjustSizeBasedOnContent();
     clrAllChkBox->move(79 * m_dpi_ratio, 182 * m_dpi_ratio);
     clrAllChkBox->onClick([clrAllChkBox, this]() {
@@ -641,8 +556,8 @@ void MainWindow::createSelectionPage()
 
     /* Update radio button section*/
     m_updRadio = new UIRadioButton(m_cenPanel, _TR(RADIO_UPDATE));
+    m_updRadio->setObjectGroupId(_T("Selector"));
     m_updRadio->setChecked(m_checkState & UpdateRadio);
-    setSelectorStyle(m_updRadio);
     m_updRadio->adjustSizeBasedOnContent();
     m_updRadio->move(50 * m_dpi_ratio, 48 * m_dpi_ratio);
     m_updRadio->onClick([=]() {
@@ -658,8 +573,8 @@ void MainWindow::createSelectionPage()
 
     /* Repair radio button section*/
     // m_repRadio = new UIRadioButton(m_cenPanel, _TR(RADIO_REPAIR));
+    // m_repRadio->setObjectGroupId(_T("Selector"));
     // m_repRadio->setChecked(m_checkState & RepairRadio);
-    // setSelectorStyle(m_repRadio);
     // m_repRadio->adjustSizeBasedOnContent();
     // m_repRadio->move(50 * m_dpi_ratio, 82 * m_dpi_ratio);
     // m_repRadio->onClick([=]() {
@@ -675,8 +590,8 @@ void MainWindow::createSelectionPage()
 
     /* Uninstall radio button section*/
     m_uninsRadio = new UIRadioButton(m_cenPanel, _TR(RADIO_UNINST));
+    m_uninsRadio->setObjectGroupId(_T("Selector"));
     m_uninsRadio->setChecked(m_checkState & UninstRadio);
-    setSelectorStyle(m_uninsRadio);
     m_uninsRadio->adjustSizeBasedOnContent();
     m_uninsRadio->move(50 * m_dpi_ratio, 150 * m_dpi_ratio);
     m_uninsRadio->onClick([=]() {
@@ -692,10 +607,9 @@ void MainWindow::createSelectionPage()
 
     /* Apply button section */
     UIButton *applyBtn = new UIButton(m_cenPanel);
+    applyBtn->setObjectGroupId(_T("PushButton"));
     applyBtn->setText(_TR(BUTTON_APPLY));
-    applyBtn->setBaseSize(100, 28);
     applyBtn->move(m_cenPanel->size().width - 112 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
-    setButtonStyle(applyBtn);
     applyBtn->onClick([=]() {
         wstring msg = m_uninsRadio->isChecked() ? _TR(MSG_REMOVE) : /*m_repRadio->isChecked() ? _TR(MSG_REPAIR) :*/ _TR(MSG_UPDATE);
         NS_Utils::Replace(msg, L"%1", _T(WINDOW_NAME));
@@ -715,8 +629,8 @@ void MainWindow::createSelectionPage()
             if (m_updRadio->isChecked() /*|| m_repRadio->isChecked()*/) {
                 /* Check box section*/
                 m_launchCheck = new UICheckBox(m_cenPanel, _TR(CHECK_LAUNCH));
+                m_launchCheck->setObjectGroupId(_T("Selector"));
                 m_launchCheck->setChecked(m_checkState & LaunchCheck);
-                setSelectorStyle(m_launchCheck);
                 m_launchCheck->adjustSizeBasedOnContent();
                 m_launchCheck->onClick([this]() {
                     m_checkState = (m_checkState & ~LaunchCheck) | (m_launchCheck->isChecked() * LaunchCheck);
@@ -752,27 +666,26 @@ void MainWindow::createSelectionPage()
 void MainWindow::createProgressPage(const std::wstring &text)
 {
     m_comntLbl = new UILabel(m_cenPanel);
-    setControlLabelStyle(m_comntLbl);
+    m_comntLbl->setObjectGroupId(_T("ControlLabel"));
     m_comntLbl->setText(text);
     m_comntLbl->metrics()->setMetrics(Metrics::TextMarginLeft, 12);
     m_comntLbl->setGeometry(30 * m_dpi_ratio, 50 * m_dpi_ratio, size().width - 30 * m_dpi_ratio, 24 * m_dpi_ratio);
 
     m_comntInfoLbl = new UILabel(m_cenPanel);
-    setControlLabelStyle(m_comntInfoLbl);
+    m_comntInfoLbl->setObjectGroupId(_T("ControlLabel"));
     m_comntInfoLbl->metrics()->setMetrics(Metrics::TextMarginLeft, 12);
     m_comntInfoLbl->setGeometry(30 * m_dpi_ratio, 92 * m_dpi_ratio, m_cenPanel->size().width - 30 * m_dpi_ratio, 40 * m_dpi_ratio);
 
     /* Progress section */
     m_bar = new UIProgressBar(m_cenPanel);
+    m_bar->setObjectGroupId(_T("ProgressBar"));
     m_bar->setBaseSize(250, 5);
     m_bar->move(42 * m_dpi_ratio, 80 * m_dpi_ratio);
-    setProgressStyle(m_bar);
 
     m_cancelBtn = new UIButton(m_cenPanel);
+    m_cancelBtn->setObjectGroupId(_T("PushButton"));
     m_cancelBtn->setText(_TR(BUTTON_CANCEL));
-    m_cancelBtn->setBaseSize(100, 28);
     m_cancelBtn->move(m_cenPanel->size().width - 112 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
-    setButtonStyle(m_cancelBtn);
     m_resize_conn = m_cenPanel->onResize([this](int w, int h) {
         m_comntLbl->setGeometry(30 * m_dpi_ratio, 50 * m_dpi_ratio, size().width - 30 * m_dpi_ratio, 24 * m_dpi_ratio);
         m_comntInfoLbl->setGeometry(30 * m_dpi_ratio, 92 * m_dpi_ratio, m_cenPanel->size().width - 30 * m_dpi_ratio, 40 * m_dpi_ratio);
@@ -792,10 +705,9 @@ void MainWindow::createCloseButton()
         m_cenPanel->disconnect(m_resize_conn);
         m_cancelBtn->close();
         UIButton *closeBtn = new UIButton(m_cenPanel);
+        closeBtn->setObjectGroupId(_T("PushButton"));
         closeBtn->setText(_TR(BUTTON_CLOSE));
-        closeBtn->setBaseSize(100, 28);
         closeBtn->move(m_cenPanel->size().width - 112 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
-        setButtonStyle(closeBtn);
         closeBtn->onClick([=]() {
             m_cenPanel->disconnect(m_resize_conn);
             close();
@@ -831,10 +743,9 @@ void MainWindow::createCloseAndBackButtons()
         }
 
         UIButton *closeBtn = new UIButton(m_cenPanel);
+        closeBtn->setObjectGroupId(_T("PushButton"));
         closeBtn->setText(_TR(BUTTON_CLOSE));
-        closeBtn->setBaseSize(100, 28);
         closeBtn->move(m_cenPanel->size().width - 112 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
-        setButtonStyle(closeBtn);
         closeBtn->onClick([=]() {
             m_cenPanel->disconnect(m_resize_conn);
             if (m_launchCheck && m_is_completed && (m_checkState & LaunchCheck)) {
@@ -846,10 +757,9 @@ void MainWindow::createCloseAndBackButtons()
         });
 
         UIButton *backBtn = new UIButton(m_cenPanel);
+        backBtn->setObjectGroupId(_T("PushButton"));
         backBtn->setText(_TR(BUTTON_BACK));
-        backBtn->setBaseSize(100, 28);
         backBtn->move(m_cenPanel->size().width - 218 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
-        setButtonStyle(backBtn);
         backBtn->onClick([=]() {
             m_cenPanel->disconnect(m_resize_conn);
             if (m_launchCheck) {

@@ -128,6 +128,8 @@ SOURCES += $$PWD/src/main.cpp \
            $$UICLASSES/layout/uiboxlayout.cpp
 
 OTHER_FILES += $$PWD/res/version.rc \
+               $$PWD/res/styles/styles.xml \
+               $$PWD/res/styles/themes.xml \
                $$PWD/res/manifest/online-installer.exe.manifest
 
 ENV_PRODUCT_VERSION = $$(PRODUCT_VERSION)

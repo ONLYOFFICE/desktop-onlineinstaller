@@ -1,5 +1,6 @@
 #include "uiapplication.h"
 #include "mainwindow.h"
+#include "uistyle.h"
 #include <locale>
 #include "resource.h"
 #include "utils.h"
@@ -50,6 +51,9 @@ int WINAPI _tWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInstance, _In
     bool app_installed = NS_Utils::IsAppInstalled(path, &arch);
 
     UIApplication app(hInst, lpCmdLine, nCmdShow);
+    app.style()->loadThemesFromResource(IDT_THEMES);
+    app.style()->loadStylesFromResource(IDT_STYLES);
+    app.style()->setDefaultTheme(_T("Light"));
     app.setFont(L"Segoe UI", 9.5);
     if (NS_Utils::IsRtlLanguage(lcid))
         app.setLayoutDirection(UIApplication::RightToLeft);
