@@ -15,7 +15,8 @@ UIAbstractButton::UIAbstractButton(UIWidget *parent, const tstring &text) :
     UIWidget(parent, ObjectType::WidgetType),
     m_text(text),
     m_tooltipHandler(nullptr),
-    m_checked(false)
+    m_checked(false),
+    m_restrictedClickArea(false)
 {
 #ifdef _WIN32
     DWORD dwStyle = ::GetClassLong(m_hWindow, GCL_STYLE);
@@ -47,6 +48,11 @@ void UIAbstractButton::setToolTip(const tstring &text) noexcept
 tstring UIAbstractButton::text() noexcept
 {
     return m_text;
+}
+
+void UIAbstractButton::restrictClickArea(bool restrict) noexcept
+{
+    m_restrictedClickArea = restrict;
 }
 
 void UIAbstractButton::adjustSizeBasedOnContent()
@@ -84,6 +90,8 @@ bool UIAbstractButton::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *re
 {
     switch (msg) {
     case WM_NCHITTEST: {
+        if (!m_restrictedClickArea)
+            break;
         *result = checkInputRegion(lParam, m_check_rc);
         return true;
     }

@@ -88,7 +88,8 @@ void UIRadioButton::onPaint(const RECT&)
 {
     engine()->DrawRadioButton(m_text, m_hFont, m_check_rc, m_checked);
 #ifdef __linux__
-    updateInputRegion(m_check_rc);
+    if (m_restrictedClickArea)
+        updateInputRegion(m_check_rc);
 #endif
 }
 
