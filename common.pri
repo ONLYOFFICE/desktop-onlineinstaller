@@ -13,7 +13,14 @@ CONFIG += core_no_dst
 include($$CORE_ROOT_DIR/Common/base.pri)
 
 INCLUDEPATH += $$PWD/src \
-               $$UICLASSES
+               $$UICLASSES \
+               $$UICLASSES/core \
+               $$UICLASSES/common \
+               $$UICLASSES/graphics \
+               $$UICLASSES/layout \
+               $$UICLASSES/widgets \
+               $$UICLASSES/dialogs
+
 INCLUDEPATH += $$PWD/../desktop-apps/win-linux/src/prop
 
 HEADERS += $$PWD/src/version.h \
@@ -24,28 +31,28 @@ HEADERS += $$PWD/src/version.h \
            $$PWD/src/cjson_p.h \
            $$PWD/src/cjson.h \
            $$PWD/src/utils.h \
-           $$UICLASSES/commondefines.h \
-           $$UICLASSES/baseutils.h \
-           $$UICLASSES/common.h \
-           $$UICLASSES/metrics.h \
-           $$UICLASSES/palette.h \
-           $$UICLASSES/drawningengine.h \
-           $$UICLASSES/drawingsurface.h \
-           $$UICLASSES/iconhandler.h \
-           $$UICLASSES/object.h \
-           $$UICLASSES/application.h \
-           $$UICLASSES/window.h \
-           $$UICLASSES/widget.h \
-           $$UICLASSES/label.h \
-           $$UICLASSES/caption.h \
-           $$UICLASSES/abstractbutton.h \
-           $$UICLASSES/button.h \
-           $$UICLASSES/checkbox.h \
-           $$UICLASSES/radiobutton.h \
-           $$UICLASSES/progressbar.h \
-           $$UICLASSES/layoutitem.h \
-           $$UICLASSES/layout.h \
-           $$UICLASSES/boxlayout.h
+           $$UICLASSES/common/commondefines.h \
+           $$UICLASSES/common/baseutils.h \
+           $$UICLASSES/common/common.h \
+           $$UICLASSES/graphics/metrics.h \
+           $$UICLASSES/graphics/palette.h \
+           $$UICLASSES/graphics/drawningengine.h \
+           $$UICLASSES/graphics/drawingsurface.h \
+           $$UICLASSES/graphics/iconhandler.h \
+           $$UICLASSES/core/object.h \
+           $$UICLASSES/core/application.h \
+           $$UICLASSES/widgets/window.h \
+           $$UICLASSES/widgets/widget.h \
+           $$UICLASSES/widgets/label.h \
+           $$UICLASSES/widgets/caption.h \
+           $$UICLASSES/widgets/abstractbutton.h \
+           $$UICLASSES/widgets/button.h \
+           $$UICLASSES/widgets/checkbox.h \
+           $$UICLASSES/widgets/radiobutton.h \
+           $$UICLASSES/widgets/progressbar.h \
+           $$UICLASSES/layout/layoutitem.h \
+           $$UICLASSES/layout/layout.h \
+           $$UICLASSES/layout/boxlayout.h
 
 SOURCES += $$PWD/src/main.cpp \
            $$PWD/src/mainwindow.cpp \
@@ -53,27 +60,27 @@ SOURCES += $$PWD/src/main.cpp \
            $$PWD/src/translator.cpp \
            $$PWD/src/cjson.cpp \
            $$PWD/src/utils.cpp \
-           $$UICLASSES/baseutils.cpp \
-           $$UICLASSES/common.cpp \
-           $$UICLASSES/metrics.cpp \
-           $$UICLASSES/palette.cpp \
-           $$UICLASSES/drawningengine.cpp \
-           $$UICLASSES/drawingsurface.cpp \
-           $$UICLASSES/iconhandler.cpp \
-           $$UICLASSES/object.cpp \
-           $$UICLASSES/application.cpp \
-           $$UICLASSES/window.cpp \
-           $$UICLASSES/widget.cpp \
-           $$UICLASSES/label.cpp \
-           $$UICLASSES/caption.cpp \
-           $$UICLASSES/abstractbutton.cpp \
-           $$UICLASSES/button.cpp \
-           $$UICLASSES/checkbox.cpp \
-           $$UICLASSES/radiobutton.cpp \
-           $$UICLASSES/progressbar.cpp \
-           $$UICLASSES/layoutitem.cpp \
-           $$UICLASSES/layout.cpp \
-           $$UICLASSES/boxlayout.cpp
+           $$UICLASSES/common/baseutils.cpp \
+           $$UICLASSES/common/common.cpp \
+           $$UICLASSES/graphics/metrics.cpp \
+           $$UICLASSES/graphics/palette.cpp \
+           $$UICLASSES/graphics/drawningengine.cpp \
+           $$UICLASSES/graphics/drawingsurface.cpp \
+           $$UICLASSES/graphics/iconhandler.cpp \
+           $$UICLASSES/core/object.cpp \
+           $$UICLASSES/core/application.cpp \
+           $$UICLASSES/widgets/window.cpp \
+           $$UICLASSES/widgets/widget.cpp \
+           $$UICLASSES/widgets/label.cpp \
+           $$UICLASSES/widgets/caption.cpp \
+           $$UICLASSES/widgets/abstractbutton.cpp \
+           $$UICLASSES/widgets/button.cpp \
+           $$UICLASSES/widgets/checkbox.cpp \
+           $$UICLASSES/widgets/radiobutton.cpp \
+           $$UICLASSES/widgets/progressbar.cpp \
+           $$UICLASSES/layout/layoutitem.cpp \
+           $$UICLASSES/layout/layout.cpp \
+           $$UICLASSES/layout/boxlayout.cpp
 
 OTHER_FILES += $$PWD/res/version.rc \
                $$PWD/res/manifest/online-installer.exe.manifest
