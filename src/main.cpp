@@ -8,7 +8,6 @@
 #include "../desktop-apps/win-linux/src/defines.h"
 #include "../desktop-apps/win-linux/src/prop/defines_p.h"
 
-#define WINDOW_SIZE Size(768, 480)
 
 static const WCHAR pVersion[] = _T("Application version:\n" VER_FILEVERSION_STR);
 
@@ -54,11 +53,16 @@ int WINAPI _tWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInstance, _In
     app.setFont(L"Segoe UI", 9.5);
     if (NS_Utils::IsRtlLanguage(lcid))
         app.setLayoutDirection(UIApplication::RightToLeft);
+
+    RECT rc{0, 0, WINDOW_SIZE.width, WINDOW_SIZE.height};
+    double screenDpi = UIUtils::screenDpiAtRect(rc);
     int scrWidth = GetSystemMetrics(SM_CXSCREEN);
     int scrHeight = GetSystemMetrics(SM_CYSCREEN);
-    int x = (scrWidth - WINDOW_SIZE.width) / 2;
-    int y = (scrHeight - WINDOW_SIZE.height) / 2;
-    MainWindow w(nullptr, Rect(x, y, WINDOW_SIZE.width, WINDOW_SIZE.height));
+    int x = (scrWidth - WINDOW_SIZE.width * screenDpi) / 2;
+    int y = (scrHeight - WINDOW_SIZE.height * screenDpi) / 2;
+    MainWindow w(nullptr, Rect(x, y, WINDOW_SIZE.width * screenDpi, WINDOW_SIZE.height * screenDpi));
+    w.setMinimumSize(WINDOW_SIZE.width * screenDpi, WINDOW_SIZE.height * screenDpi);
+    w.setResizable(false);
     w.onAboutToDestroy([&app]() {
         app.exit(0);
     });

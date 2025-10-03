@@ -4,6 +4,7 @@
 #include "uiwindow.h"
 #include <future>
 
+#define WINDOW_SIZE Size(768, 480)
 
 class UILabel;
 class UIProgressBar;

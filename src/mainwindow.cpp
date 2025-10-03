@@ -77,7 +77,7 @@ static void setLabelStyle(UILabel *lb)
 
 static void setControlLabelStyle(UILabel *lb)
 {
-    lb->resize(50, 36);
+    lb->setBaseSize(50, 36);
     lb->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
     lb->palette()->setColor(Palette::Text, Palette::Normal, 0x333333);
     lb->metrics()->setMetrics(Metrics::TextAlignment, Metrics::AlignHLeft | Metrics::AlignVTop);
@@ -115,7 +115,6 @@ MainWindow::MainWindow(UIWidget *parent, const Rect &rc) :
     m_is_completed(false)
 {
     setWindowTitle(_TR(CAPTION));
-    setResizable(false);
     setIcon(IDI_MAINICON);
     palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
     palette()->setColor(Palette::Border, Palette::Normal, 0x888888);
@@ -134,7 +133,7 @@ MainWindow::MainWindow(UIWidget *parent, const Rect &rc) :
 
     /* Caption section*/
     UIWidget *topPanel = new UIWidget(cw);
-    topPanel->resize(50,28);
+    topPanel->setBaseSize(50,28);
     topPanel->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
     topPanel->setSizePolicy(SizePolicy::HSizeBehavior, SizePolicy::Expanding);
     topPanel->setSizePolicy(SizePolicy::VSizeBehavior, SizePolicy::Fixed);
@@ -150,12 +149,12 @@ MainWindow::MainWindow(UIWidget *parent, const Rect &rc) :
     cap->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
     cap->metrics()->setMetrics(Metrics::TextMarginLeft, 12);
     cap->metrics()->setMetrics(Metrics::TextAlignment, Metrics::AlignHLeft| Metrics::AlignVCenter);
-    cap->resize(50,28);
+    cap->setBaseSize(50,28);
     cap->setSizePolicy(SizePolicy::HSizeBehavior, SizePolicy::Expanding);
     cap->setSizePolicy(SizePolicy::VSizeBehavior, SizePolicy::Fixed);
 
     UIButton *closeBtn = new UIButton(topPanel);
-    closeBtn->resize(40,28);
+    closeBtn->setBaseSize(40,28);
     closeBtn->setSizePolicy(SizePolicy::HSizeBehavior, SizePolicy::Fixed);
     closeBtn->setSizePolicy(SizePolicy::VSizeBehavior, SizePolicy::Fixed);
     closeBtn->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
@@ -197,7 +196,7 @@ void MainWindow::initInstallationMode()
     m_mode = Mode::Install;
     /* Image section*/
     UILabel *wlcLbl = new UILabel(m_cenPanel);
-    wlcLbl->resize(282, 200);
+    wlcLbl->setBaseSize(282, 200);
     wlcLbl->setEMFIcon(IDI_WELCOME, 282, 200);
     wlcLbl->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
     wlcLbl->setSizePolicy(SizePolicy::HSizeBehavior, SizePolicy::Expanding);
@@ -210,7 +209,7 @@ void MainWindow::initInstallationMode()
     setSelectorStyle(chkBox);
     chkBox->adjustSizeBasedOnContent();
     int chkMargin = 2 + (chkBox->metrics()->value(Metrics::IconWidth) + chkBox->metrics()->value(Metrics::TextMarginLeft))/2;
-    chkBox->move(chkMargin + m_cenPanel->size().width/2 - chkBox->size().width/2, 254);
+    chkBox->move(chkMargin * m_dpi_ratio + m_cenPanel->size().width/2 - chkBox->size().width/2, 254 * m_dpi_ratio);
     chkBox->onClick([chkBox, this]() {
         m_is_checked = chkBox->isChecked();
     });
@@ -220,13 +219,14 @@ void MainWindow::initInstallationMode()
     NS_Utils::Replace(warn_text, L"%1", _T(WINDOW_NAME));
     UILabel *comntLbl = new UILabel(m_cenPanel);
     comntLbl->setText(warn_text, true);
-    comntLbl->setGeometry(0, m_cenPanel->size().height - 130, m_cenPanel->size().width, 48);
+    comntLbl->setGeometry(0, m_cenPanel->size().height - 136 * m_dpi_ratio, m_cenPanel->size().width, 48 * m_dpi_ratio);
     setLabelStyle(comntLbl);
 
     /* Install button section */
     UIButton *instlBtn = new UIButton(m_cenPanel);
     instlBtn->setText(_TR(BUTTON_INSTALL));
-    instlBtn->setGeometry(m_cenPanel->size().width/2 - 50, m_cenPanel->size().height - 76, 100, 28);
+    instlBtn->setBaseSize(100, 28);
+    instlBtn->move(m_cenPanel->size().width/2 - 50 * m_dpi_ratio, m_cenPanel->size().height - 76 * m_dpi_ratio);
     setButtonStyle(instlBtn);
     instlBtn->onClick([=]() {
         m_cenPanel->disconnect(m_resize_conn);
@@ -236,10 +236,10 @@ void MainWindow::initInstallationMode()
         startInstall();
     });
 
-    m_resize_conn = m_cenPanel->onResize([chkBox, comntLbl, instlBtn, chkMargin](int w, int h) {
-        chkBox->move(chkMargin + w/2 - chkBox->size().width/2, 254);
-        comntLbl->setGeometry(0, h - 130, w, 48);
-        instlBtn->setGeometry(w/2 - 50, h - 76, 100, 28);
+    m_resize_conn = m_cenPanel->onResize([this, chkBox, comntLbl, instlBtn, chkMargin](int w, int h) {
+        chkBox->move(chkMargin * m_dpi_ratio + w/2 - chkBox->size().width/2, 254 * m_dpi_ratio);
+        comntLbl->setGeometry(0, h - 136 * m_dpi_ratio, w, 48 * m_dpi_ratio);
+        instlBtn->move(w/2 - 50 * m_dpi_ratio, h - 76 * m_dpi_ratio);
     });
 }
 
@@ -272,6 +272,16 @@ void MainWindow::initControlMode(const std::wstring &_arch)
 bool MainWindow::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
 {
     switch (msg) {
+    case WM_DPICHANGED: {
+        setResizable(true);
+        setMinimumSize(0, 0);
+        UIWindow::event(msg, wParam, lParam, result);
+        setMinimumSize(WINDOW_SIZE.width * m_dpi_ratio, WINDOW_SIZE.height * m_dpi_ratio);
+        setResizable(false);
+        return true;
+    }
+    default:
+        break;
     }
     return UIWindow::event(msg, wParam, lParam, result);
 }
@@ -281,26 +291,26 @@ void MainWindow::startInstall()
     /* Comment section */
     m_comntLbl = new UILabel(m_cenPanel);
     m_comntLbl->setText(_TR(LABEL_DOWNLOAD), true);
-    m_comntLbl->setGeometry(0, m_cenPanel->size().height - 156, m_cenPanel->size().width, 24);
+    m_comntLbl->setGeometry(0, m_cenPanel->size().height - 161 * m_dpi_ratio, m_cenPanel->size().width, 28 * m_dpi_ratio);
     m_comntLbl->setFont(L"Segoe UI", 12);
     setLabelStyle(m_comntLbl);
 
     m_comntInfoLbl = new UILabel(m_cenPanel);
     m_comntInfoLbl->setText(_TR(LABEL_ALMOST_DONE), true);
-    m_comntInfoLbl->setGeometry(0, m_cenPanel->size().height - 112, m_cenPanel->size().width, 40);
+    m_comntInfoLbl->setGeometry(0, m_cenPanel->size().height - 122 * m_dpi_ratio, m_cenPanel->size().width, 40 * m_dpi_ratio);
     setLabelStyle(m_comntInfoLbl);
 
     /* Progress section */
     m_bar = new UIProgressBar(m_cenPanel);
-    m_bar->setGeometry(0, m_cenPanel->size().height - 126, m_cenPanel->size().width, 5);
+    m_bar->setGeometry(0, m_cenPanel->size().height - 126 * m_dpi_ratio, m_cenPanel->size().width, 5 * m_dpi_ratio);
     setProgressStyle(m_bar);
     m_bar->metrics()->setMetrics(Metrics::IconMarginLeft, 108);
     m_bar->metrics()->setMetrics(Metrics::IconMarginRight, 108);
 
     m_resize_conn = m_cenPanel->onResize([this](int w, int h) {
-        m_comntLbl->setGeometry(0, h - 156, w, 24);
-        m_comntInfoLbl->setGeometry(0, h - 112, w, 40);
-        m_bar->setGeometry(0, m_cenPanel->size().height - 126, m_cenPanel->size().width, 5);
+        m_comntLbl->setGeometry(0, h - 161 * m_dpi_ratio, w, 24 * m_dpi_ratio);
+        m_comntInfoLbl->setGeometry(0, h - 122 * m_dpi_ratio, w, 40 * m_dpi_ratio);
+        m_bar->setGeometry(0, m_cenPanel->size().height - 126 * m_dpi_ratio, m_cenPanel->size().width, 5 * m_dpi_ratio);
     });
     m_comntLbl->show();
     m_comntInfoLbl->show();
@@ -316,7 +326,9 @@ void MainWindow::startInstall()
             } else {
                 hide();
             }
+            m_future = std::async(std::launch::async, [=]() {
             DWORD status = NS_File::runProcess(path, args);
+            UIThread::invoke(this, [=]() {
             if (status != 0) {
                 DWORD err = GetLastError();
                 if (!m_is_checked)
@@ -342,6 +354,12 @@ void MainWindow::startInstall()
                     close();
                 }
             }
+            if (NS_File::fileExists(path))
+                NS_File::removeFile(path);
+            if (m_mode == Mode::Control)
+                createCloseAndBackButtons();
+            });
+            });
         });
 }
 
@@ -354,7 +372,7 @@ void MainWindow::finishInstall(const std::wstring &app_path)
     setSelectorStyle(chkBox);
     chkBox->adjustSizeBasedOnContent();
     int chkMargin = 2 + (chkBox->metrics()->value(Metrics::IconWidth) + chkBox->metrics()->value(Metrics::TextMarginLeft))/2;
-    chkBox->move(chkMargin + m_cenPanel->size().width/2 - chkBox->size().width/2, 254);
+    chkBox->move(chkMargin * m_dpi_ratio + m_cenPanel->size().width/2 - chkBox->size().width/2, 254 * m_dpi_ratio);
     chkBox->onClick([chkBox, this]() {
         m_is_checked = chkBox->isChecked();
     });
@@ -364,13 +382,14 @@ void MainWindow::finishInstall(const std::wstring &app_path)
     NS_Utils::Replace(compl_text, L"%1", _T(WINDOW_NAME));
     UILabel *comntLbl = new UILabel(m_cenPanel);
     comntLbl->setText(compl_text, true);
-    comntLbl->setGeometry(0, m_cenPanel->size().height - 130, m_cenPanel->size().width, 48);
+    comntLbl->setGeometry(0, m_cenPanel->size().height - 136 * m_dpi_ratio, m_cenPanel->size().width, 48 * m_dpi_ratio);
     setLabelStyle(comntLbl);
 
     /* Install button section */
     UIButton *closeBtn = new UIButton(m_cenPanel);
     closeBtn->setText(_TR(BUTTON_CLOSE));
-    closeBtn->setGeometry(m_cenPanel->size().width/2 - 50, m_cenPanel->size().height - 76, 100, 28);
+    closeBtn->setBaseSize(100, 28);
+    closeBtn->move(m_cenPanel->size().width/2 - 50 * m_dpi_ratio, m_cenPanel->size().height - 76 * m_dpi_ratio);
     setButtonStyle(closeBtn);
     closeBtn->onClick([=]() {
         if (m_is_checked)
@@ -378,10 +397,10 @@ void MainWindow::finishInstall(const std::wstring &app_path)
         close();
     });
 
-    m_resize_conn = m_cenPanel->onResize([chkBox, comntLbl, closeBtn, chkMargin](int w, int h) {
-        chkBox->move(chkMargin + w/2 - chkBox->size().width/2, 254);
-        comntLbl->setGeometry(0, h - 130, w, 48);
-        closeBtn->setGeometry(w/2 - 50, h - 76, 100, 28);
+    m_resize_conn = m_cenPanel->onResize([this, chkBox, comntLbl, closeBtn, chkMargin](int w, int h) {
+        chkBox->move(chkMargin * m_dpi_ratio + w/2 - chkBox->size().width/2, 254 * m_dpi_ratio);
+        comntLbl->setGeometry(0, h - 136 * m_dpi_ratio, w, 48 * m_dpi_ratio);
+        closeBtn->move(w/2 - 50 * m_dpi_ratio, h - 76 * m_dpi_ratio);
     });
     chkBox->show();
     comntLbl->show();
@@ -421,7 +440,9 @@ void MainWindow::startUpdate()
             m_comntLbl->setText(_TR(LABEL_UPDATING));
             wstring args = L"/c call \"" + tmp_path;
             args += (m_package == L"msi") ? L"\" /qn /norestart" : L"\" /UPDATE /VERYSILENT /NOLAUNCH";
+            m_future = std::async(std::launch::async, [=]() {
             DWORD status = NS_File::runProcess(L"cmd", args, true);
+            UIThread::invoke(this, [=]() {
             if (status != 0) {
                 DWORD err = GetLastError();
                 m_bar->pulse(false);
@@ -444,6 +465,12 @@ void MainWindow::startUpdate()
                 m_versionLbl->setText(fillInstalledVerInfo());
                 m_is_completed = true;
             }
+            if (NS_File::fileExists(tmp_path))
+                NS_File::removeFile(tmp_path);
+            if (m_mode == Mode::Control)
+                createCloseAndBackButtons();
+            });
+            });
         });
 
     m_cancelBtn->onClick([=]() {
@@ -501,7 +528,9 @@ void MainWindow::startUpdate()
 //                 args = (m_package == L"msi") ? L"/fvamus \"" : L"/c \"";
 //                 args += tmp_path;
 //                 args += (m_package == L"msi") ? L"\" /qn" : L" /VERYSILENT\"";
+//             m_future = std::async(std::launch::async, [=]() {
 //             DWORD status = NS_File::runProcess(cmd, args, true);
+//             UIThread::invoke(this, [=]() {
 //             if (status != 0) {
 //                 DWORD err = GetLastError();
 //                 m_bar->pulse(false);
@@ -523,6 +552,12 @@ void MainWindow::startUpdate()
 //                 m_comntLbl->setText(_TR(LABEL_REPAIR_COMPL));
 //                 m_is_completed = true;
 //             }
+//             if (NS_File::fileExists(tmp_path))
+//                 NS_File::removeFile(tmp_path);
+//             if (m_mode == Mode::Control)
+//                 createCloseAndBackButtons();
+//             });
+//             });
 //         });
 
 //     m_cancelBtn->onClick([=]() {
@@ -544,6 +579,7 @@ void MainWindow::startUninstall()
     args += (m_package == L"msi") ? L" /qn\"" : L" /VERYSILENT\"";
     m_future = std::async(std::launch::async, [=]() {
         DWORD status = NS_File::runProcess(L"cmd", args, true);
+        UIThread::invoke(this, [=]() {
         if (status != 0) {
             m_bar->pulse(false);
             m_bar->setProgress(0);
@@ -565,6 +601,7 @@ void MainWindow::startUninstall()
             // m_is_completed = true;
             createCloseButton();
         }
+        });
     });
 }
 
@@ -577,7 +614,7 @@ void MainWindow::createSelectionPage()
     clrChkBox->setChecked(m_checkState & ClrDataCheck);
     setSelectorStyle(clrChkBox);
     clrChkBox->adjustSizeBasedOnContent();
-    clrChkBox->move(79, 80);
+    clrChkBox->move(79 * m_dpi_ratio, 80 * m_dpi_ratio);
     clrChkBox->onClick([=]() {
         m_checkState = (m_checkState & ~ClrDataCheck) | (clrChkBox->isChecked() * ClrDataCheck);
     });
@@ -587,7 +624,7 @@ void MainWindow::createSelectionPage()
     stnChkBox->setChecked(m_checkState & ClrStnCheck);
     setSelectorStyle(stnChkBox);
     stnChkBox->adjustSizeBasedOnContent();
-    stnChkBox->move(79, 112);
+    stnChkBox->move(79 * m_dpi_ratio, 112 * m_dpi_ratio);
     stnChkBox->onClick([stnChkBox, this]() {
         m_checkState = (m_checkState & ~ClrStnCheck) | (stnChkBox->isChecked() * ClrStnCheck);
     });
@@ -597,7 +634,7 @@ void MainWindow::createSelectionPage()
     clrAllChkBox->setChecked(m_checkState & ClrAllCheck);
     setSelectorStyle(clrAllChkBox);
     clrAllChkBox->adjustSizeBasedOnContent();
-    clrAllChkBox->move(79, 182);
+    clrAllChkBox->move(79 * m_dpi_ratio, 182 * m_dpi_ratio);
     clrAllChkBox->onClick([clrAllChkBox, this]() {
         m_checkState = (m_checkState & ~ClrAllCheck) | (clrAllChkBox->isChecked() * ClrAllCheck);
     });
@@ -607,7 +644,7 @@ void MainWindow::createSelectionPage()
     m_updRadio->setChecked(m_checkState & UpdateRadio);
     setSelectorStyle(m_updRadio);
     m_updRadio->adjustSizeBasedOnContent();
-    m_updRadio->move(50, 48);
+    m_updRadio->move(50 * m_dpi_ratio, 48 * m_dpi_ratio);
     m_updRadio->onClick([=]() {
         clrChkBox->setDisabled(false);
         stnChkBox->setDisabled(false);
@@ -624,7 +661,7 @@ void MainWindow::createSelectionPage()
     // m_repRadio->setChecked(m_checkState & RepairRadio);
     // setSelectorStyle(m_repRadio);
     // m_repRadio->adjustSizeBasedOnContent();
-    // m_repRadio->move(50, 82);
+    // m_repRadio->move(50 * m_dpi_ratio, 82 * m_dpi_ratio);
     // m_repRadio->onClick([=]() {
     //     clrChkBox->setDisabled(false);
     //     stnChkBox->setDisabled(false);
@@ -641,7 +678,7 @@ void MainWindow::createSelectionPage()
     m_uninsRadio->setChecked(m_checkState & UninstRadio);
     setSelectorStyle(m_uninsRadio);
     m_uninsRadio->adjustSizeBasedOnContent();
-    m_uninsRadio->move(50, 150);
+    m_uninsRadio->move(50 * m_dpi_ratio, 150 * m_dpi_ratio);
     m_uninsRadio->onClick([=]() {
         clrChkBox->setDisabled(true);
         stnChkBox->setDisabled(true);
@@ -656,7 +693,8 @@ void MainWindow::createSelectionPage()
     /* Apply button section */
     UIButton *applyBtn = new UIButton(m_cenPanel);
     applyBtn->setText(_TR(BUTTON_APPLY));
-    applyBtn->setGeometry(m_cenPanel->size().width - 100 - 12, m_cenPanel->size().height - 28 - 12, 100, 28);
+    applyBtn->setBaseSize(100, 28);
+    applyBtn->move(m_cenPanel->size().width - 112 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
     setButtonStyle(applyBtn);
     applyBtn->onClick([=]() {
         wstring msg = m_uninsRadio->isChecked() ? _TR(MSG_REMOVE) : /*m_repRadio->isChecked() ? _TR(MSG_REPAIR) :*/ _TR(MSG_UPDATE);
@@ -680,7 +718,6 @@ void MainWindow::createSelectionPage()
                 m_launchCheck->setChecked(m_checkState & LaunchCheck);
                 setSelectorStyle(m_launchCheck);
                 m_launchCheck->adjustSizeBasedOnContent();
-                m_launchCheck->move(42, 100);
                 m_launchCheck->onClick([this]() {
                     m_checkState = (m_checkState & ~LaunchCheck) | (m_launchCheck->isChecked() * LaunchCheck);
                 });
@@ -694,8 +731,14 @@ void MainWindow::createSelectionPage()
                 startUpdate();
         }
     });
-    m_resize_conn = m_cenPanel->onResize([applyBtn](int w, int h) {
-        applyBtn->setGeometry(w - 100 - 12, h - 28 - 12, 100, 28);
+    m_resize_conn = m_cenPanel->onResize([this, clrAllChkBox, stnChkBox, clrChkBox, applyBtn](int w, int h) {
+        m_updRadio->move(50 * m_dpi_ratio, 48 * m_dpi_ratio);
+        // m_repRadio->move(50 * m_dpi_ratio, 82 * m_dpi_ratio);
+        m_uninsRadio->move(50 * m_dpi_ratio, 150 * m_dpi_ratio);
+        clrAllChkBox->move(79 * m_dpi_ratio, 182 * m_dpi_ratio);
+        stnChkBox->move(79 * m_dpi_ratio, 112 * m_dpi_ratio);
+        clrChkBox->move(79 * m_dpi_ratio, 80 * m_dpi_ratio);
+        applyBtn->move(w - 112 * m_dpi_ratio, h - 40 * m_dpi_ratio);
     });
     m_updRadio->show();
     // m_repRadio->show();
@@ -712,24 +755,29 @@ void MainWindow::createProgressPage(const std::wstring &text)
     setControlLabelStyle(m_comntLbl);
     m_comntLbl->setText(text);
     m_comntLbl->metrics()->setMetrics(Metrics::TextMarginLeft, 12);
-    m_comntLbl->setGeometry(30, 50, size().width - 30, 24);
+    m_comntLbl->setGeometry(30 * m_dpi_ratio, 50 * m_dpi_ratio, size().width - 30 * m_dpi_ratio, 24 * m_dpi_ratio);
 
     m_comntInfoLbl = new UILabel(m_cenPanel);
     setControlLabelStyle(m_comntInfoLbl);
     m_comntInfoLbl->metrics()->setMetrics(Metrics::TextMarginLeft, 12);
-    m_comntInfoLbl->setGeometry(30, 92, m_cenPanel->size().width - 30, 40);
+    m_comntInfoLbl->setGeometry(30 * m_dpi_ratio, 92 * m_dpi_ratio, m_cenPanel->size().width - 30 * m_dpi_ratio, 40 * m_dpi_ratio);
 
     /* Progress section */
     m_bar = new UIProgressBar(m_cenPanel);
-    m_bar->setGeometry(42, 80, 250, 5);
+    m_bar->setBaseSize(250, 5);
+    m_bar->move(42 * m_dpi_ratio, 80 * m_dpi_ratio);
     setProgressStyle(m_bar);
 
     m_cancelBtn = new UIButton(m_cenPanel);
     m_cancelBtn->setText(_TR(BUTTON_CANCEL));
-    m_cancelBtn->setGeometry(m_cenPanel->size().width - 100 - 12, m_cenPanel->size().height - 28 - 12, 100, 28);
+    m_cancelBtn->setBaseSize(100, 28);
+    m_cancelBtn->move(m_cenPanel->size().width - 112 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
     setButtonStyle(m_cancelBtn);
     m_resize_conn = m_cenPanel->onResize([this](int w, int h) {
-        m_cancelBtn->setGeometry(w - 100 - 12, h - 28 - 12, 100, 28);
+        m_comntLbl->setGeometry(30 * m_dpi_ratio, 50 * m_dpi_ratio, size().width - 30 * m_dpi_ratio, 24 * m_dpi_ratio);
+        m_comntInfoLbl->setGeometry(30 * m_dpi_ratio, 92 * m_dpi_ratio, m_cenPanel->size().width - 30 * m_dpi_ratio, 40 * m_dpi_ratio);
+        m_bar->move(42 * m_dpi_ratio, 80 * m_dpi_ratio);
+        m_cancelBtn->move(w - 112 * m_dpi_ratio, h - 40 * m_dpi_ratio);
     });
 
     m_comntLbl->show();
@@ -745,14 +793,21 @@ void MainWindow::createCloseButton()
         m_cancelBtn->close();
         UIButton *closeBtn = new UIButton(m_cenPanel);
         closeBtn->setText(_TR(BUTTON_CLOSE));
-        closeBtn->setGeometry(m_cenPanel->size().width - 100 - 12, m_cenPanel->size().height - 28 - 12, 100, 28);
+        closeBtn->setBaseSize(100, 28);
+        closeBtn->move(m_cenPanel->size().width - 112 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
         setButtonStyle(closeBtn);
         closeBtn->onClick([=]() {
             m_cenPanel->disconnect(m_resize_conn);
             close();
         });
-        m_resize_conn = m_cenPanel->onResize([closeBtn](int w, int h) {
-            closeBtn->setGeometry(w - 100 - 12, h - 28 - 12, 100, 28);
+        m_resize_conn = m_cenPanel->onResize([this, closeBtn](int w, int h) {
+            closeBtn->move(w - 112 * m_dpi_ratio, h - 40 * m_dpi_ratio);
+            if (m_comntLbl)
+                m_comntLbl->setGeometry(30 * m_dpi_ratio, 50 * m_dpi_ratio, size().width - 30 * m_dpi_ratio, 24 * m_dpi_ratio);
+            if (m_comntInfoLbl)
+                m_comntInfoLbl->setGeometry(30 * m_dpi_ratio, 92 * m_dpi_ratio, m_cenPanel->size().width - 30 * m_dpi_ratio, 40 * m_dpi_ratio);
+            if (m_bar)
+                m_bar->move(42 * m_dpi_ratio, 80 * m_dpi_ratio);
         });
         closeBtn->show();
     });
@@ -767,6 +822,7 @@ void MainWindow::createCloseAndBackButtons()
         if (m_launchCheck) {
             if (m_is_completed) {
                 m_comntInfoLbl->hide();
+                m_launchCheck->move(42 * m_dpi_ratio, 100 * m_dpi_ratio);
                 m_launchCheck->show();
             } else {
                 m_launchCheck->close();
@@ -776,7 +832,8 @@ void MainWindow::createCloseAndBackButtons()
 
         UIButton *closeBtn = new UIButton(m_cenPanel);
         closeBtn->setText(_TR(BUTTON_CLOSE));
-        closeBtn->setGeometry(m_cenPanel->size().width - 100 - 12, m_cenPanel->size().height - 28 - 12, 100, 28);
+        closeBtn->setBaseSize(100, 28);
+        closeBtn->move(m_cenPanel->size().width - 112 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
         setButtonStyle(closeBtn);
         closeBtn->onClick([=]() {
             m_cenPanel->disconnect(m_resize_conn);
@@ -790,7 +847,8 @@ void MainWindow::createCloseAndBackButtons()
 
         UIButton *backBtn = new UIButton(m_cenPanel);
         backBtn->setText(_TR(BUTTON_BACK));
-        backBtn->setGeometry(m_cenPanel->size().width - 100 - 12 - 106, m_cenPanel->size().height - 28 - 12, 100, 28);
+        backBtn->setBaseSize(100, 28);
+        backBtn->move(m_cenPanel->size().width - 218 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
         setButtonStyle(backBtn);
         backBtn->onClick([=]() {
             m_cenPanel->disconnect(m_resize_conn);
@@ -806,9 +864,17 @@ void MainWindow::createCloseAndBackButtons()
             createSelectionPage();
         });
 
-        m_resize_conn = m_cenPanel->onResize([closeBtn, backBtn](int w, int h) {
-            closeBtn->setGeometry(w - 100 - 12, h - 28 - 12, 100, 28);
-            backBtn->setGeometry(w - 100 - 12 - 106, h - 28 - 12, 100, 28);
+        m_resize_conn = m_cenPanel->onResize([this, closeBtn, backBtn](int w, int h) {
+            closeBtn->move(w - 112 * m_dpi_ratio, h - 40 * m_dpi_ratio);
+            backBtn->move(w - 218 * m_dpi_ratio, h - 40 * m_dpi_ratio);
+            if (m_comntLbl)
+                m_comntLbl->setGeometry(30 * m_dpi_ratio, 50 * m_dpi_ratio, size().width - 30 * m_dpi_ratio, 24 * m_dpi_ratio);
+            if (m_comntInfoLbl)
+                m_comntInfoLbl->setGeometry(30 * m_dpi_ratio, 92 * m_dpi_ratio, m_cenPanel->size().width - 30 * m_dpi_ratio, 40 * m_dpi_ratio);
+            if (m_bar)
+                m_bar->move(42 * m_dpi_ratio, 80 * m_dpi_ratio);
+            if (m_launchCheck)
+                m_launchCheck->move(42 * m_dpi_ratio, 100 * m_dpi_ratio);
         });
 
         closeBtn->show();
@@ -876,6 +942,7 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
                         m_bar->setProgress(percent);
                     });
                     dnl->onComplete([=](ulong error) {
+                        UIThread::invoke(this, [=]() {
                         if (m_mode == Mode::Control)
                             m_cancelBtn->setDisabled(true);
                         if (error == ERROR_SUCCESS) {
@@ -885,36 +952,44 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
                             } else {
                                 m_bar->setProgress(0);
                                 m_comntInfoLbl->setText(_TR(LABEL_NO_VER_AVAIL), true);
+                                if (m_mode == Mode::Control)
+                                    createCloseAndBackButtons();
                             }
-                            if (NS_File::fileExists(path))
-                                NS_File::removeFile(path);
                         } else
                         if (error == ERROR_CANCELLED) {
                             m_comntInfoLbl->setText(_TR(LABEL_ERR_CANCELLED), true);
+                            if (m_mode == Mode::Control)
+                                createCloseAndBackButtons();
                         } else {
                             m_comntInfoLbl->setText(NS_Utils::GetLastErrorAsString(error), true);
+                            if (m_mode == Mode::Control)
+                                createCloseAndBackButtons();
                         }
-
-                        if (m_mode == Mode::Control)
-                            createCloseAndBackButtons();
+                        });
                     });
                     dnl->downloadFile(url, path);
                 });
             } else {
+                UIThread::invoke(this, [=]() {
                 m_comntInfoLbl->setText(NS_Utils::GetLastErrorAsString(), true);
                 NS_File::removeFile(tmp_path);
                 if (m_mode == Mode::Control)
                     createCloseAndBackButtons();
+                });
             }
         } else
         if (error == ERROR_CANCELLED) {
+            UIThread::invoke(this, [=]() {
             m_comntInfoLbl->setText(_TR(LABEL_ERR_CANCELLED), true);
             if (m_mode == Mode::Control)
                 createCloseAndBackButtons();
+            });
         } else {
+            UIThread::invoke(this, [=]() {
             m_comntInfoLbl->setText(NS_Utils::GetLastErrorAsString(error), true);
             if (m_mode == Mode::Control)
                 createCloseAndBackButtons();
+            });
         }
     });
     dnl->downloadFile(appcast_url, tmp_path);
