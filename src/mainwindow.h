@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "window.h"
+#include "uiwindow.h"
 #include <future>
 
 

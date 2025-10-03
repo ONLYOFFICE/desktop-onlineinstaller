@@ -31,28 +31,28 @@ HEADERS += $$PWD/src/version.h \
            $$PWD/src/cjson_p.h \
            $$PWD/src/cjson.h \
            $$PWD/src/utils.h \
-           $$UICLASSES/common/commondefines.h \
-           $$UICLASSES/common/baseutils.h \
-           $$UICLASSES/common/common.h \
-           $$UICLASSES/graphics/metrics.h \
-           $$UICLASSES/graphics/palette.h \
-           $$UICLASSES/graphics/drawningengine.h \
-           $$UICLASSES/graphics/drawingsurface.h \
-           $$UICLASSES/graphics/iconhandler.h \
-           $$UICLASSES/core/object.h \
-           $$UICLASSES/core/application.h \
-           $$UICLASSES/widgets/window.h \
-           $$UICLASSES/widgets/widget.h \
-           $$UICLASSES/widgets/label.h \
-           $$UICLASSES/widgets/caption.h \
-           $$UICLASSES/widgets/abstractbutton.h \
-           $$UICLASSES/widgets/button.h \
-           $$UICLASSES/widgets/checkbox.h \
-           $$UICLASSES/widgets/radiobutton.h \
-           $$UICLASSES/widgets/progressbar.h \
-           $$UICLASSES/layout/layoutitem.h \
-           $$UICLASSES/layout/layout.h \
-           $$UICLASSES/layout/boxlayout.h
+           $$UICLASSES/common/uidefines.h \
+           $$UICLASSES/common/uiutils.h \
+           $$UICLASSES/common/uicommon.h \
+           $$UICLASSES/graphics/uimetrics.h \
+           $$UICLASSES/graphics/uipalette.h \
+           $$UICLASSES/graphics/uidrawningengine.h \
+           $$UICLASSES/graphics/uidrawingsurface.h \
+           $$UICLASSES/graphics/uiconhandler.h \
+           $$UICLASSES/core/uiobject.h \
+           $$UICLASSES/core/uiapplication.h \
+           $$UICLASSES/widgets/uiwindow.h \
+           $$UICLASSES/widgets/uiwidget.h \
+           $$UICLASSES/widgets/uilabel.h \
+           $$UICLASSES/widgets/uicaption.h \
+           $$UICLASSES/widgets/uiabstractbutton.h \
+           $$UICLASSES/widgets/uibutton.h \
+           $$UICLASSES/widgets/uicheckbox.h \
+           $$UICLASSES/widgets/uiradiobutton.h \
+           $$UICLASSES/widgets/uiprogressbar.h \
+           $$UICLASSES/layout/uilayoutitem.h \
+           $$UICLASSES/layout/uilayout.h \
+           $$UICLASSES/layout/uiboxlayout.h
 
 SOURCES += $$PWD/src/main.cpp \
            $$PWD/src/mainwindow.cpp \
@@ -60,27 +60,27 @@ SOURCES += $$PWD/src/main.cpp \
            $$PWD/src/translator.cpp \
            $$PWD/src/cjson.cpp \
            $$PWD/src/utils.cpp \
-           $$UICLASSES/common/baseutils.cpp \
-           $$UICLASSES/common/common.cpp \
-           $$UICLASSES/graphics/metrics.cpp \
-           $$UICLASSES/graphics/palette.cpp \
-           $$UICLASSES/graphics/drawningengine.cpp \
-           $$UICLASSES/graphics/drawingsurface.cpp \
-           $$UICLASSES/graphics/iconhandler.cpp \
-           $$UICLASSES/core/object.cpp \
-           $$UICLASSES/core/application.cpp \
-           $$UICLASSES/widgets/window.cpp \
-           $$UICLASSES/widgets/widget.cpp \
-           $$UICLASSES/widgets/label.cpp \
-           $$UICLASSES/widgets/caption.cpp \
-           $$UICLASSES/widgets/abstractbutton.cpp \
-           $$UICLASSES/widgets/button.cpp \
-           $$UICLASSES/widgets/checkbox.cpp \
-           $$UICLASSES/widgets/radiobutton.cpp \
-           $$UICLASSES/widgets/progressbar.cpp \
-           $$UICLASSES/layout/layoutitem.cpp \
-           $$UICLASSES/layout/layout.cpp \
-           $$UICLASSES/layout/boxlayout.cpp
+           $$UICLASSES/common/uiutils.cpp \
+           $$UICLASSES/common/uicommon.cpp \
+           $$UICLASSES/graphics/uimetrics.cpp \
+           $$UICLASSES/graphics/uipalette.cpp \
+           $$UICLASSES/graphics/uidrawningengine.cpp \
+           $$UICLASSES/graphics/uidrawingsurface.cpp \
+           $$UICLASSES/graphics/uiconhandler.cpp \
+           $$UICLASSES/core/uiobject.cpp \
+           $$UICLASSES/core/uiapplication.cpp \
+           $$UICLASSES/widgets/uiwindow.cpp \
+           $$UICLASSES/widgets/uiwidget.cpp \
+           $$UICLASSES/widgets/uilabel.cpp \
+           $$UICLASSES/widgets/uicaption.cpp \
+           $$UICLASSES/widgets/uiabstractbutton.cpp \
+           $$UICLASSES/widgets/uibutton.cpp \
+           $$UICLASSES/widgets/uicheckbox.cpp \
+           $$UICLASSES/widgets/uiradiobutton.cpp \
+           $$UICLASSES/widgets/uiprogressbar.cpp \
+           $$UICLASSES/layout/uilayoutitem.cpp \
+           $$UICLASSES/layout/uilayout.cpp \
+           $$UICLASSES/layout/uiboxlayout.cpp
 
 OTHER_FILES += $$PWD/res/version.rc \
                $$PWD/res/manifest/online-installer.exe.manifest

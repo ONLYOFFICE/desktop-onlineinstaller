@@ -1,9 +1,9 @@
-#include "application.h"
+#include "uiapplication.h"
 #include "mainwindow.h"
 #include <locale>
 #include "resource.h"
 #include "utils.h"
-#include "baseutils.h"
+#include "uiutils.h"
 #include "translator.h"
 #include "../desktop-apps/win-linux/src/defines.h"
 #include "../desktop-apps/win-linux/src/prop/defines_p.h"

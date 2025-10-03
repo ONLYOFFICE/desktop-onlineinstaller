@@ -1,0 +1,41 @@
+#ifndef APPLICATION_H
+#define APPLICATION_H
+
+#include "uiobject.h"
+#include "uicommon.h"
+#include <Windows.h>
+
+
+class Widget;
+class Application : public Object
+{
+public:
+    Application(HINSTANCE hInstance, PWSTR cmdline, int cmdshow);
+    Application(const Application&) = delete;
+    ~Application();
+
+    enum LayoutDirection : unsigned char {
+        LeftToRight = 0,
+        RightToLeft
+    };
+
+    Application& operator=(const Application&) = delete;
+    static Application *instance();
+    HINSTANCE moduleHandle();
+    void setLayoutDirection(LayoutDirection);
+    void setFont(const std::wstring &font) const;
+    std::wstring font() const;
+
+    int exec();
+    void exit(int);
+
+private:
+    Application();
+    friend class Widget;
+    void registerWidget(Widget*, ObjectType, const Rect &rc);
+    class ApplicationPrivate;
+    ApplicationPrivate *d_ptr;
+    static Application *inst;
+};
+
+#endif // APPLICATION_H
