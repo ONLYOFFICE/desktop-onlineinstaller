@@ -18,9 +18,10 @@ namespace UIUtils
     };
     WinVer DECL_VISUALUI winVersion() noexcept;
     std::wstring DECL_VISUALUI currentUserSID();
-    DWORD DECL_VISUALUI regQueryDwordValue(HKEY rootKey, LPCWSTR subkey, LPCWSTR value);
+    DWORD DECL_VISUALUI regQueryDwordValue(HKEY rootKey, LPCWSTR subkey, LPCWSTR value, bool *success = nullptr);
     double DECL_VISUALUI screenDpiAtPoint(const POINT &pt);
     double DECL_VISUALUI screenDpiAtRect(const RECT &rc);
+    bool DECL_VISUALUI shouldAppsUseDarkMode();
     void DECL_VISUALUI loadImageResource(Gdiplus::Bitmap* &hBmp, int id, LPCWSTR type);
     void DECL_VISUALUI loadEmfResource(Gdiplus::Metafile* &hBmp, int id, LPCWSTR type);
     void DECL_VISUALUI loadStringResource(tstring &str, int id);

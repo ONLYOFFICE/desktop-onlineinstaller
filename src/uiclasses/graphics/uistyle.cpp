@@ -483,6 +483,11 @@ void UIStyle::loadStylesFromResource(GResource *res, const tstring &id)
 }
 #endif
 
+tstring UIStyle::themeId()
+{
+    return pimpl->themeId;
+}
+
 void UIStyle::loadThemesFromFile(const tstring &filePath)
 {
     if (filePath.empty())

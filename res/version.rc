@@ -5,6 +5,7 @@
 
 IDI_MAINICON   ICON    DISCARDABLE APP_ICON_PATH
 IDI_WELCOME    RCDATA  "./icons/welcome.emf"
+IDI_WELCOME_DARK    RCDATA  "./icons/welcome_dark.emf"
 IDT_THEMES     TEXT    "./styles/themes.xml"
 IDT_STYLES     TEXT    "./styles/styles.xml"
 IDT_TRANSLATIONS   RCDATA APP_LANG_PATH

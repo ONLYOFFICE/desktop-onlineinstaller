@@ -28,6 +28,7 @@ public:
     void loadThemesFromResource(GResource *res, const tstring &id);
     void loadStylesFromResource(GResource *res, const tstring &id);
 #endif
+    tstring themeId();
     void loadThemesFromFile(const tstring &filePath);
     void loadStylesFromFile(const tstring &filePath);
     void setDefaultTheme(const tstring &theme);

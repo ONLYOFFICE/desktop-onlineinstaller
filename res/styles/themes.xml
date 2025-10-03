@@ -33,4 +33,37 @@
       PROGRESSBAR_CHUNK="#1e7aaa"
     />
   </Theme>
+  <Theme id="Dark">
+    <Colors
+      WINDOW_BKG="#383838"
+      WINDOW_BRD="#616161"
+
+      TEXT_NORMAL="#d9d9d9"
+      TEXT_PRETTY="#888888"
+      TEXT_DISABLED="#888888"
+
+      CLOSEBTN_HOVER_BKG="#e81123"
+      CLOSEBTN_PRESSED_BKG="#8b0a14"
+      CLOSEBTN_DISABLED_BKG="#2b2b2b"
+      CLOSEBTN_PRIM="#d9d9d9"
+      CLOSEBTN_HOVER_PRIM="#d9d9d9"
+
+      PUSHBTN_BKG="#dddddd"
+      PUSHBTN_HOVER_BKG="#e5e5e5"
+      PUSHBTN_PRESSED_BKG="#e5e5e5"
+      PUSHBTN_DISABLED_BKG="#eeeeee"
+      PUSHBTN_BRD="#dddddd"
+      PUSHBTN_TEXT="#333333"
+      PUSHBTN_TEXT_DISABLED="#888888"
+
+      SELECTOR_CHECK="#96c8fd"
+      SELECTOR_NORMAL="#888888"
+      SELECTOR_HOVER="#96c8fd"
+      SELECTOR_PRESSED="#96c8fd"
+      SELECTOR_DISABLED="#888888"
+
+      PROGRESSBAR_BKG="#858585"
+      PROGRESSBAR_CHUNK="#96c8fd"
+    />
+  </Theme>
 </Themes>

@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "uiapplication.h"
 #include "utils.h"
+#include "uistyle.h"
 #include "uithread.h"
 #include "uicheckbox.h"
 #include "uibutton.h"
@@ -111,11 +112,12 @@ void MainWindow::initInstallationMode()
 {
     m_is_checked = true;
     m_mode = Mode::Install;
+    UIStyle *style = UIApplication::instance()->style();
     /* Image section*/
     UILabel *wlcLbl = new UILabel(m_cenPanel);
     wlcLbl->setObjectGroupId(_T("MainWindow"));
     wlcLbl->setBaseSize(282, 200);
-    wlcLbl->setEMFIcon(IDI_WELCOME, 282, 200);
+    wlcLbl->setEMFIcon(style->themeId() == _T("Dark") ? IDI_WELCOME_DARK : IDI_WELCOME, 282, 200);
     wlcLbl->setSizePolicy(SizePolicy::HSizeBehavior, SizePolicy::Expanding);
     wlcLbl->setSizePolicy(SizePolicy::VSizeBehavior, SizePolicy::Fixed);
     m_cenPanelVlut->addWidget(wlcLbl);
