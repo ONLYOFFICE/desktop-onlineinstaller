@@ -12,12 +12,10 @@ Metrics::Metrics()
     metrics[IconMarginTop]    = 0;
     metrics[IconMarginBottom] = 0;
     metrics[IconAlignment]    = Alignment::AlignCenter;
-    metrics[FontWidth]      = 0;
-    metrics[FontHeight]     = 18;
     metrics[PrimitiveWidth] = 1;
     metrics[PrimitiveRadius] = 0;
     metrics[AlternatePrimitiveWidth] = 1;
-    metrics[ShadowWidth]    = 10;
+    metrics[ShadowWidth]    = 16;
     metrics[ShadowRadius]   = 10;
     metrics[TextMarginLeft] = 0;
     metrics[TextMarginTop]  = 0;
@@ -31,12 +29,12 @@ Metrics::~Metrics()
 
 }
 
-int Metrics::value(Role role)
+int Metrics::value(Role role) const noexcept
 {
     return metrics[role];
 }
 
-void Metrics::setMetrics(Role role, int value)
+void Metrics::setMetrics(Role role, int value) noexcept
 {
     metrics[role] = value;
 }

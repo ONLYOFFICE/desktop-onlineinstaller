@@ -1,32 +1,64 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef UICOMMON_H
+#define UICOMMON_H
 
+#include "uidefines.h"
+#ifdef __linux__
+# include "gtk/gtk.h"
+#endif
 
-struct Margins {
+struct DECL_VISUALUI Margins {
     Margins();
     Margins(int, int, int, int);
-    Margins(const Margins&);
-    Margins& operator=(const Margins&);
 
     int left, top, right, bottom;
 };
 
-struct Rect {
+struct DECL_VISUALUI Rect {
     Rect();
     Rect(int, int, int, int);
-    Rect(const Rect &rc);
-    Rect& operator=(const Rect &rc);
 
     int x, y, width, height;
 };
 
-struct Size {
+struct DECL_VISUALUI Point {
+    Point();
+    Point(int, int);
+
+    int x, y;
+};
+
+struct DECL_VISUALUI Size {
     Size();
     Size(int, int);
-    Size(const Size&);
-    Size& operator=(const Size&);
 
     int width, height;
 };
+
+#ifdef __linux__
+typedef Point POINT;
+typedef Rect RECT;
+
+struct DECL_VISUALUI DropFilesInfo {
+    GdkDragContext *context;
+    gint x, y;
+    GtkSelectionData *sel_data;
+    guint info, time;
+};
+#endif
+
+namespace SizePolicy
+{
+    enum Properties : unsigned char {
+        HSizeBehavior,
+        VSizeBehavior,
+        PROPERTIES_LAST
+    };
+
+    enum SizeBehavior : unsigned char {
+        Fixed,
+        Expanding,
+        SIZE_BEHAVIOR_LAST
+    };
+}
 
 #endif // COMMON_H

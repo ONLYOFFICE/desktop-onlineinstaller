@@ -1,17 +1,20 @@
-#ifndef ABSTRACTBUTTON_H
-#define ABSTRACTBUTTON_H
+#ifndef UIABSTRACTBUTTON_H
+#define UIABSTRACTBUTTON_H
 
 #include "uiwidget.h"
 #include <unordered_map>
 
 
-class UIAbstractButton : public UIWidget
+class UIToolTipHandler;
+class DECL_VISUALUI UIAbstractButton : public UIWidget
 {
 public:
-    UIAbstractButton(UIWidget *parent = nullptr, const std::wstring &text = L"");
+    explicit UIAbstractButton(UIWidget *parent = nullptr, const tstring &text = {});
     virtual ~UIAbstractButton();
 
-    void setText(const std::wstring &text);
+    virtual void setText(const tstring &text) noexcept;
+    void setToolTip(const tstring &text) noexcept;
+    tstring text() noexcept;
     void adjustSizeBasedOnContent();
 
     /* callback */
@@ -19,13 +22,20 @@ public:
     virtual void disconnect(int) override;
 
 protected:
+#ifdef _WIN32
     virtual bool event(UINT, WPARAM, LPARAM, LRESULT*) override;
+#else
+    virtual bool event(uint ev_type, void *param) override;
+#endif
     virtual void click();
 
-    std::wstring m_text;
+    tstring  m_text;
+    RECT m_check_rc;
+    UIToolTipHandler *m_tooltipHandler;
+    bool m_checked;
 
 private:
     std::unordered_map<int, FnVoidVoid> m_click_callbacks;
 };
 
-#endif // ABSTRACTBUTTON_H
+#endif // UIABSTRACTBUTTON_H

@@ -1,14 +1,14 @@
-#ifndef RADIOBUTTON_H
-#define RADIOBUTTON_H
+#ifndef UIRADIOBUTTON_H
+#define UIRADIOBUTTON_H
 
 #include "uiabstractbutton.h"
 
 
-class UIRadioButton : public UIAbstractButton
+class DECL_VISUALUI UIRadioButton : public UIAbstractButton
 {
 public:
-    UIRadioButton(UIWidget *parent = nullptr, const std::wstring &text = L"");
-    virtual ~UIRadioButton();
+    explicit UIRadioButton(UIWidget *parent = nullptr, const tstring &text = {});
+    ~UIRadioButton();
 
     void setChecked(bool checked);
     bool isChecked();
@@ -16,11 +16,13 @@ public:
     /* callback */
 
 protected:
+#ifdef _WIN32
     virtual bool event(UINT, WPARAM, LPARAM, LRESULT*) override;
+#else
+    virtual bool event(uint ev_type, void *param) override;
+#endif
+    virtual void onPaint(const RECT &rc) override;
     virtual void click() override;
-
-private:
-    bool m_checked;
 };
 
-#endif // RADIOBUTTON_H
+#endif // UIRADIOBUTTON_H

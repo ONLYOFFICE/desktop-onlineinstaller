@@ -1,15 +1,14 @@
-#ifndef PROGRESSBAR_H
-#define PROGRESSBAR_H
+#ifndef UIPROGRESSBAR_H
+#define UIPROGRESSBAR_H
 
 #include "uiwidget.h"
-//#include <gdiplus.h>
 
-
-class UIProgressBar : public UIWidget
+class UITimer;
+class DECL_VISUALUI UIProgressBar : public UIWidget
 {
 public:
-    UIProgressBar(UIWidget *parent = nullptr);
-    virtual ~UIProgressBar();
+    explicit UIProgressBar(UIWidget *parent = nullptr);
+    ~UIProgressBar();
 
     void setProgress(int progress);
     void pulse(bool);
@@ -18,13 +17,19 @@ public:
     /* callback */
 
 protected:
+#ifdef _WIN32
     virtual bool event(UINT, WPARAM, LPARAM, LRESULT*) override;
+#else
+    virtual bool event(uint ev_type, void *param) override;
+#endif
+    virtual void onPaint(const RECT &rc) override;
 
 private:
+    UITimer *m_timer;
     int  m_progress,
          m_pulse_pos,
          m_pulse_direction,
          m_pulse_step;
 };
 
-#endif // PROGRESSBAR_H
+#endif // UIPROGRESSBAR_H

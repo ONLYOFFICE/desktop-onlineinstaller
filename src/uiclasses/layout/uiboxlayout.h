@@ -1,33 +1,31 @@
-#ifndef BOXLAYOUT_H
-#define BOXLAYOUT_H
+#ifndef UIBOXLAYOUT_H
+#define UIBOXLAYOUT_H
 
 #include "uilayout.h"
 #include <unordered_map>
 
 
-class UIBoxLayout : public UILayout
+class DECL_VISUALUI UIBoxLayout : public UILayout
 {
 public:
     enum Direction : unsigned char {
         Horizontal,
         Vertical
     };
-    UIBoxLayout(Direction);
+
+    explicit UIBoxLayout(Direction, int alignment = AlignHLeft | AlignVTop);
     ~UIBoxLayout();
 
     virtual void addWidget(UIWidget *wgt) override;
-    virtual void setContentMargins(int, int, int, int);
-    virtual void setSpacing(int);
-
-protected:
+    virtual void addSpacer(UISpacer *spr) override;
+    virtual void setContentMargins(int, int, int, int) noexcept;
+    virtual void setSpacing(int) noexcept;
 
 private:
-    virtual void onResize(int w, int h) override;
+    virtual void onResize(int w, int h, double dpi = 1.0) noexcept override;
     std::unordered_map<UIWidget*, int> m_destroy_conn;
-    std::vector<UIWidget*> m_widgets;
     Direction m_direction;
-    int m_spacing;
     int m_total_fixed_size;
 };
 
-#endif // BOXLAYOUT_H
+#endif // UIBOXLAYOUT_H

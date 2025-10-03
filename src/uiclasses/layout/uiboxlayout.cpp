@@ -1,9 +1,11 @@
 #include "uiboxlayout.h"
 #include "uiwidget.h"
+#include "uispacer.h"
 #include <cmath>
 
 
-UIBoxLayout::UIBoxLayout(Direction direction) :
+UIBoxLayout::UIBoxLayout(Direction direction, int alignment) :
+    UILayout(alignment),
     m_direction(direction)
 {
     m_margins = Margins(6,6,6,6);
@@ -14,11 +16,20 @@ UIBoxLayout::~UIBoxLayout()
 {
     for (auto it = m_destroy_conn.begin(); it != m_destroy_conn.end(); it++)
         it->first->disconnect(it->second);
+
+    for (const UILayoutItem &item : m_items) {
+        if (item.spr)
+            delete item.spr;
+    }
 }
 
 void UIBoxLayout::addWidget(UIWidget *wgt)
 {
-    m_widgets.push_back(wgt);
+    UILayoutItem item;
+    item.wgt = wgt;
+    item.hsb = wgt->sizePolicy(SizePolicy::HSizeBehavior);
+    item.vsb = wgt->sizePolicy(SizePolicy::VSizeBehavior);
+    m_items.push_back(item);
     // int destroy_conn = wgt->onAboutToDestroy([=]() {
     //     auto it = std::find(m_widgets.begin(), m_widgets.end(), wgt);
     //     if (it != m_widgets.end())
@@ -31,69 +42,88 @@ void UIBoxLayout::addWidget(UIWidget *wgt)
     // m_destroy_conn[wgt] = destroy_conn;
 }
 
-void UIBoxLayout::setContentMargins(int left, int top, int right, int bottom)
+void UIBoxLayout::addSpacer(UISpacer *spr)
+{
+    UILayoutItem item;
+    item.spr = spr;
+    item.hsb = spr->sizePolicy(SizePolicy::HSizeBehavior);
+    item.vsb = spr->sizePolicy(SizePolicy::VSizeBehavior);
+    m_items.push_back(item);
+}
+
+void UIBoxLayout::setContentMargins(int left, int top, int right, int bottom) noexcept
 {
     m_margins = Margins(left, top, right, bottom);
 }
 
-void UIBoxLayout::setSpacing(int spacing)
+void UIBoxLayout::setSpacing(int spacing) noexcept
 {
     m_spacing = spacing;
 }
 
-void UIBoxLayout::onResize(int w, int h)
+void UIBoxLayout::onResize(int w, int h, double dpi) noexcept
 {
-    int amount = m_widgets.size();
+    m_width = w; m_height = h;
+    int amount = m_items.size();
     if (amount > 0) {
-        int x = m_margins.left;
-        int y = m_margins.top;
-        int sum_width = w - (m_margins.right + m_margins.left);
-        int sum_height = h - (m_margins.bottom + m_margins.top);
+        int x = m_margins.left * dpi;
+        int y = m_margins.top * dpi;
+        int sum_width = w - (m_margins.right + m_margins.left) * dpi;
+        int sum_height = h - (m_margins.bottom + m_margins.top) * dpi;
+        int spacing = m_spacing * dpi;
         int num_fixed = 0;
         int sum_fixed_width_or_height = 0;
         int last_expanding = -1;
-        if (m_direction == Horizontal) {
-            sum_width -= (amount - 1) * m_spacing;
-            for (int i = 0; i < amount; i++) {
-                UIWidget::SizeBehavior sb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::HSizeBehavior);
-                if (sb == UIWidget::SizeBehavior::Fixed) {
-                    int _w = 0, _h = 0;
-                    m_widgets[i]->size(&_w, &_h);
-                    sum_fixed_width_or_height += _w;
-                    ++num_fixed;
-                } else
-                if (sb == UIWidget::SizeBehavior::Expanding) {
-                    last_expanding = i;
-                }
+        for (int i = 0; i < amount; ++i) {
+            UILayoutItem &item = m_items[i];
+            // item.hsb = item.wgt->sizePolicy(Widget::HSizeBehavior);
+            // item.vsb = item.wgt->sizePolicy(Widget::VSizeBehavior);
+            item.calcSize(dpi);
+            if (item.hsb == SizePolicy::Fixed && m_direction == Horizontal) {
+                sum_fixed_width_or_height += item.width;
+                ++num_fixed;
+            } else
+            if (item.vsb == SizePolicy::Fixed && m_direction == Vertical) {
+                sum_fixed_width_or_height += item.height;
+                ++num_fixed;
+            } else
+            if ((m_direction == Horizontal && item.hsb == SizePolicy::Expanding) ||
+                    (m_direction == Vertical && item.vsb == SizePolicy::Expanding)) {
+                last_expanding = i;
             }
+        }
+
+        if (m_direction == Horizontal) {
+            sum_width -= (amount - 1) * spacing;
 
             if (num_fixed != 0 && last_expanding != -1) {
                 int sep_width = (int)std::round((float)(sum_width - sum_fixed_width_or_height)/(amount - num_fixed));
                 for (int i = 0; i < amount; i++) {
                     if (i == last_expanding)
                         sep_width = (sum_width - sum_fixed_width_or_height) - (amount - num_fixed - 1)*sep_width;
-                    int _w = 0, _h = 0;
-                    m_widgets[i]->size(&_w, &_h);
-                    UIWidget::SizeBehavior hsb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::HSizeBehavior);
-                    UIWidget::SizeBehavior vsb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::VSizeBehavior);
-                    if (hsb == UIWidget::SizeBehavior::Fixed) {
-                        if (vsb == UIWidget::SizeBehavior::Fixed) {
-                            m_widgets[i]->move(x, y);
+                    UILayoutItem &item = m_items[i];
+                    if (item.hsb == SizePolicy::Fixed) {
+                        if (item.vsb == SizePolicy::Fixed) {
+                            int _y = y;
+                            _y += (m_alignment & AlignVCenter) ? (int)std::round((float)(sum_height - item.height) / 2) : (m_alignment & AlignVBottom) ? sum_height - item.height : 0;
+                            item.move(x, _y);
                         } else
-                        if (vsb == UIWidget::SizeBehavior::Expanding) {
-                            m_widgets[i]->setGeometry(x, y, _w, sum_height);
+                        if (item.vsb == SizePolicy::Expanding) {
+                            item.setGeometry(x, y, item.width, sum_height);
                         }
-                        x += _w + m_spacing;
+                        x += item.width + spacing;
 
                     } else
-                    if (hsb == UIWidget::SizeBehavior::Expanding) {
-                        if (vsb == UIWidget::SizeBehavior::Fixed) {
-                            m_widgets[i]->setGeometry(x, y, sep_width, _h);
+                    if (item.hsb == SizePolicy::Expanding) {
+                        if (item.vsb == SizePolicy::Fixed) {
+                            int _y = y;
+                            _y += (m_alignment & AlignVCenter) ? (int)std::round((float)(sum_height - item.height) / 2) : (m_alignment & AlignVBottom) ? sum_height - item.height : 0;
+                            item.setGeometry(x, _y, sep_width, item.height);
                         } else
-                        if (vsb == UIWidget::SizeBehavior::Expanding) {
-                            m_widgets[i]->setGeometry(x, y, sep_width, sum_height);
+                        if (item.vsb == SizePolicy::Expanding) {
+                            item.setGeometry(x, y, sep_width, sum_height);
                         }
-                        x += sep_width + m_spacing;
+                        x += sep_width + spacing;
                     }
                 }
 
@@ -102,75 +132,65 @@ void UIBoxLayout::onResize(int w, int h)
                 for (int i = 0; i < amount; i++) {
                     if (i == amount - 1)
                         sep_width = sum_width - i*sep_width;
-                    UIWidget::SizeBehavior hsb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::HSizeBehavior);
-                    UIWidget::SizeBehavior vsb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::VSizeBehavior);
-                    if (hsb == UIWidget::SizeBehavior::Fixed) {
-                        if (vsb == UIWidget::SizeBehavior::Fixed) {
-                            m_widgets[i]->move(x, y);
+                    UILayoutItem &item = m_items[i];
+                    if (item.hsb == SizePolicy::Fixed) {
+                        int _x = x;
+                        _x += (m_alignment & AlignHCenter) ? (int)std::round((float)(sep_width - item.width) / 2) : (m_alignment & AlignHRight) ? sep_width - item.width : 0;
+                        if (item.vsb == SizePolicy::Fixed) {
+                            int _y = y;
+                            _y += (m_alignment & AlignVCenter) ? (int)std::round((float)(sum_height - item.height) / 2) : (m_alignment & AlignVBottom) ? sum_height - item.height : 0;
+                            item.move(_x, _y);
                         } else
-                        if (vsb == UIWidget::SizeBehavior::Expanding) {
-                            int _w = 0, _h = 0;
-                            m_widgets[i]->size(&_w, &_h);
-                            m_widgets[i]->setGeometry(x, y, _w, sum_height);
+                        if (item.vsb == SizePolicy::Expanding) {
+                            item.setGeometry(_x, y, item.width, sum_height);
                         }
 
                     } else
-                    if (hsb == UIWidget::SizeBehavior::Expanding) {
-                        if (vsb == UIWidget::SizeBehavior::Fixed) {
-                            int _w = 0, _h = 0;
-                            m_widgets[i]->size(&_w, &_h);
-                            m_widgets[i]->setGeometry(x, y, sep_width, _h);
+                    if (item.hsb == SizePolicy::Expanding) {
+                        if (item.vsb == SizePolicy::Fixed) {
+                            int _y = y;
+                            _y += (m_alignment & AlignVCenter) ? (int)std::round((float)(sum_height - item.height) / 2) : (m_alignment & AlignVBottom) ? sum_height - item.height : 0;
+                            item.setGeometry(x, _y, sep_width, item.height);
                         } else
-                        if (vsb == UIWidget::SizeBehavior::Expanding) {
-                            m_widgets[i]->setGeometry(x, y, sep_width, sum_height);
+                        if (item.vsb == SizePolicy::Expanding) {
+                            item.setGeometry(x, y, sep_width, sum_height);
                         }
                     }
-                    x += sep_width + m_spacing;
+                    x += sep_width + spacing;
                 }
             }
 
         } else {
-            sum_height -= (amount - 1) * m_spacing;
-            for (int i = 0; i < amount; i++) {
-                UIWidget::SizeBehavior sb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::VSizeBehavior);
-                if (sb == UIWidget::SizeBehavior::Fixed) {
-                    int _w = 0, _h = 0;
-                    m_widgets[i]->size(&_w, &_h);
-                    sum_fixed_width_or_height += _h;
-                    ++num_fixed;
-                } else
-                if (sb == UIWidget::SizeBehavior::Expanding) {
-                    last_expanding = i;
-                }
-            }
+            sum_height -= (amount - 1) * spacing;
 
             if (num_fixed != 0 && last_expanding != -1) {
                 int sep_height = (int)std::round((float)(sum_height - sum_fixed_width_or_height)/(amount - num_fixed));
                 for (int i = 0; i < amount; i++) {
                     if (i == last_expanding)
                         sep_height = (sum_height - sum_fixed_width_or_height) - (amount - num_fixed - 1)*sep_height;
-                    int _w = 0, _h = 0;
-                    m_widgets[i]->size(&_w, &_h);
-                    UIWidget::SizeBehavior hsb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::HSizeBehavior);
-                    UIWidget::SizeBehavior vsb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::VSizeBehavior);
-                    if (vsb == UIWidget::SizeBehavior::Fixed) {
-                        if (hsb == UIWidget::SizeBehavior::Fixed) {
-                            m_widgets[i]->move(x, y);
+                    UILayoutItem &item = m_items[i];
+                    if (item.vsb == SizePolicy::Fixed) {
+                        if (item.hsb == SizePolicy::Fixed) {
+                            int _x = x;
+                            _x += (m_alignment & AlignHCenter) ? (int)std::round((float)(sum_width - item.width) / 2) : (m_alignment & AlignHRight) ? sum_width - item.width : 0;
+                            item.move(_x, y);
                         } else
-                        if (hsb == UIWidget::SizeBehavior::Expanding) {
-                            m_widgets[i]->setGeometry(x, y, sum_width, _h);
+                        if (item.hsb == SizePolicy::Expanding) {
+                            item.setGeometry(x, y, sum_width, item.height);
                         }
-                        y += _h + m_spacing;
+                        y += item.height + spacing;
 
                     } else
-                    if (vsb == UIWidget::SizeBehavior::Expanding) {
-                        if (hsb == UIWidget::SizeBehavior::Fixed) {
-                            m_widgets[i]->setGeometry(x, y, _w, sep_height);
+                    if (item.vsb == SizePolicy::Expanding) {
+                        if (item.hsb == SizePolicy::Fixed) {
+                            int _x = x;
+                            _x += (m_alignment & AlignHCenter) ? (int)std::round((float)(sum_width - item.width) / 2) : (m_alignment & AlignHRight) ? sum_width - item.width : 0;
+                            item.setGeometry(_x, y, item.width, sep_height);
                         } else
-                        if (hsb == UIWidget::SizeBehavior::Expanding) {
-                            m_widgets[i]->setGeometry(x, y, sum_width, sep_height);
+                        if (item.hsb == SizePolicy::Expanding) {
+                            item.setGeometry(x, y, sum_width, sep_height);
                         }
-                        y += sep_height + m_spacing;
+                        y += sep_height + spacing;
                     }
                 }
 
@@ -179,33 +199,33 @@ void UIBoxLayout::onResize(int w, int h)
                 for (int i = 0; i < amount; i++) {
                     if (i == amount - 1)
                         sep_height = sum_height - i*sep_height;
-                    UIWidget::SizeBehavior hsb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::HSizeBehavior);
-                    UIWidget::SizeBehavior vsb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::VSizeBehavior);
-                    if (vsb == UIWidget::SizeBehavior::Fixed) {
-                        if (hsb == UIWidget::SizeBehavior::Fixed) {
-                            m_widgets[i]->move(x, y);
+                    UILayoutItem &item = m_items[i];
+                    if (item.vsb == SizePolicy::Fixed) {
+                        int _y = y;
+                        _y += (m_alignment & AlignVCenter) ? (int)std::round((float)(sep_height - item.height) / 2) : (m_alignment & AlignVBottom) ? sep_height - item.height : 0;
+                        if (item.hsb == SizePolicy::Fixed) {
+                            int _x = x;
+                            _x += (m_alignment & AlignHCenter) ? (int)std::round((float)(sum_width - item.width) / 2) : (m_alignment & AlignHRight) ? sum_width - item.width : 0;
+                            item.move(_x, _y);
                         } else
-                        if (hsb == UIWidget::SizeBehavior::Expanding) {
-                            int _w = 0, _h = 0;
-                            m_widgets[i]->size(&_w, &_h);
-                            m_widgets[i]->setGeometry(x, y, sum_width, _h);
+                        if (item.hsb == SizePolicy::Expanding) {
+                            item.setGeometry(x, _y, sum_width, item.height);
                         }
 
                     } else
-                    if (vsb == UIWidget::SizeBehavior::Expanding) {
-                        if (hsb == UIWidget::SizeBehavior::Fixed) {
-                            int _w = 0, _h = 0;
-                            m_widgets[i]->size(&_w, &_h);
-                            m_widgets[i]->setGeometry(x, y, _w, sep_height);
+                    if (item.vsb == SizePolicy::Expanding) {
+                        if (item.hsb == SizePolicy::Fixed) {
+                            int _x = x;
+                            _x += (m_alignment & AlignHCenter) ? (int)std::round((float)(sum_width - item.width) / 2) : (m_alignment & AlignHRight) ? sum_width - item.width : 0;
+                            item.setGeometry(_x, y, item.width, sep_height);
                         } else
-                        if (hsb == UIWidget::SizeBehavior::Expanding) {
-                            m_widgets[i]->setGeometry(x, y, sum_width, sep_height);
+                        if (item.hsb == SizePolicy::Expanding) {
+                            item.setGeometry(x, y, sum_width, sep_height);
                         }
                     }
-                    y += sep_height + m_spacing;
+                    y += sep_height + spacing;
                 }
             }
         }
     }
 }
-

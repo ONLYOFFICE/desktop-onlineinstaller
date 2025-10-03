@@ -37,8 +37,6 @@ private:
     void createCloseAndBackButtons();
     std::wstring fillInstalledVerInfo();
     CDownloader* startDownload(const std::wstring &install_type, const std::wstring &arch, const std::wstring &path, const std::function<void()> &onComplete);
-    template<typename Fn, typename... Args>
-    void invokeMethod(Fn&& fn, Args&&... args);
 
     enum class Mode : BYTE {Install, Control};
     enum Selectors : BYTE {UpdateRadio = 1, RepairRadio = 2, UninstRadio = 4, ClrDataCheck = 8, ClrStnCheck = 16, ClrAllCheck = 32, LaunchCheck = 64};

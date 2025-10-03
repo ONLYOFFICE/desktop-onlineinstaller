@@ -1,12 +1,13 @@
 #include "uicheckbox.h"
 #include "uidrawningengine.h"
 #include "uimetrics.h"
-#include <windowsx.h>
+#ifdef _WIN32
+# include "uipalette.h"
+#endif
 
 
-UICheckBox::UICheckBox(UIWidget *parent, const std::wstring &text) :
-    UIAbstractButton(parent, text),
-    m_checked(false)
+UICheckBox::UICheckBox(UIWidget *parent, const tstring &text) :
+    UIAbstractButton(parent, text)
 {
     metrics()->setMetrics(Metrics::TextAlignment, Metrics::AlignHLeft | Metrics::AlignVCenter);
 }
@@ -27,28 +28,68 @@ bool UICheckBox::isChecked()
     return m_checked;
 }
 
+#ifdef _WIN32
 bool UICheckBox::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
 {
     switch (msg) {
-    case WM_PAINT: {
-        RECT rc;
-        GetClientRect(m_hWnd, &rc);
+    case WM_LBUTTONDOWN: {
+        if (!m_disabled) {
+            palette()->setCurrentState(Palette::Pressed);
+            repaint();
+        }
+        return false;
+    }
 
-        engine()->Begin(this, m_hWnd, &rc);
-        engine()->DrawCheckBox(m_text, m_hFont, m_checked);
-        if (metrics()->value(Metrics::BorderWidth) != 0)
-            engine()->DrawBorder();
+    case WM_LBUTTONUP: {
+        if (!m_disabled) {
+            palette()->setCurrentState(Palette::Hover);
+            repaint();
+            click();
+        }
+        return false;
+    }
 
-        engine()->End();
+    case WM_MOUSEENTER: {
+        if (!m_disabled) {
+            palette()->setCurrentState(Palette::Hover);
+            repaint();
+        }
+        return false;
+    }
 
-        *result = FALSE;
-        return true;
+    case WM_MOUSELEAVE: {
+        if (m_mouse_entered) {
+            m_mouse_entered = false;
+        }
+        if (!m_disabled) {
+            palette()->setCurrentState(Palette::Normal);
+            repaint();
+        }
+        return false;
     }
 
     default:
         break;
     }
     return UIAbstractButton::event(msg, wParam, lParam, result);
+}
+#else
+bool UICheckBox::event(uint ev_type, void *param)
+{
+    switch (ev_type) {
+    default:
+        break;
+    }
+    return UIAbstractButton::event(ev_type, param);
+}
+#endif
+
+void UICheckBox::onPaint(const RECT&)
+{
+    engine()->DrawCheckBox(m_text, m_hFont, m_check_rc, m_checked);
+#ifdef __linux__
+    updateInputRegion(m_check_rc);
+#endif
 }
 
 void UICheckBox::click()

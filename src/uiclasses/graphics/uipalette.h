@@ -1,10 +1,19 @@
-#ifndef PALETTE_H
-#define PALETTE_H
+#ifndef UIPALETTE_H
+#define UIPALETTE_H
 
-#include <Windows.h>
+#ifdef _WIN32
+# include <Windows.h>
+#else
+# include <cstdint>
+  typedef unsigned char BYTE;
+  typedef uint16_t WORD;
+  typedef uint32_t DWORD;
+  typedef DWORD COLORREF;
+#endif
+#include "uidefines.h"
 
 
-class Palette
+class DECL_VISUALUI Palette
 {
 public:
     Palette();
@@ -18,7 +27,7 @@ public:
         Text,
         Primitive,
         AlternatePrimitive,
-        PALETTE_ROLE_COUNT
+        PALETTE_ROLE_LAST
     };
 
     enum State : BYTE {
@@ -26,17 +35,17 @@ public:
         Normal,
         Hover,
         Pressed,
-        PALETTE_STATE_COUNT
+        PALETTE_STATE_LAST
     };
 
-    COLORREF color(Role);
-    void setColor(Role, State, DWORD);
-    void setCurrentState(State);
+    COLORREF color(Role) const noexcept;
+    void setColor(Role, State, DWORD) noexcept;
+    void setCurrentState(State) noexcept;
 
 private:
-    DWORD palette[PALETTE_ROLE_COUNT][PALETTE_STATE_COUNT];
-    DWORD currentColors[PALETTE_ROLE_COUNT];
+    DWORD palette[PALETTE_ROLE_LAST][PALETTE_STATE_LAST];
+    DWORD currentColors[PALETTE_ROLE_LAST];
     State currentState;
 };
 
-#endif // PALETTE_H
+#endif // UIPALETTE_H

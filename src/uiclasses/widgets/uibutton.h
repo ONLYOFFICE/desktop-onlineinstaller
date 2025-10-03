@@ -1,15 +1,15 @@
-#ifndef BUTTON_H
-#define BUTTON_H
+#ifndef UIBUTTON_H
+#define UIBUTTON_H
 
 #include "uiabstractbutton.h"
 #include "uiconhandler.h"
 
 
-class UIButton : public UIAbstractButton, public UIconHandler
+class DECL_VISUALUI UIButton : public UIAbstractButton, public UIconHandler
 {
 public:
-    UIButton(UIWidget *parent = nullptr, const std::wstring &text = L"");
-    virtual ~UIButton();
+    explicit UIButton(UIWidget *parent = nullptr, const tstring &text = {});
+    ~UIButton();
 
     enum StockIcon : BYTE {
         None,
@@ -22,16 +22,24 @@ public:
     void setSupportSnapLayouts();
     void setStockIcon(StockIcon stockIcon);
 
-    /* callback */
-
 protected:
+#ifdef _WIN32
     virtual bool event(UINT, WPARAM, LPARAM, LRESULT*) override;
+    LRESULT checkInputRegion(LPARAM lParam, const RECT &rc) = delete;
+#else
+    virtual bool event(uint ev_type, void *param) override;
+    void updateInputRegion(const Rect &rc) = delete;
+#endif
+    virtual void onPaint(const RECT &rc) override;
 
 private:
     int  m_stockIcon;
+#ifdef _WIN32
     bool supportSnapLayouts,
          snapLayoutAllowed;
     bool snapLayoutTimerIsSet;
+#else
+#endif
 };
 
-#endif // BUTTON_H
+#endif // UIBUTTON_H

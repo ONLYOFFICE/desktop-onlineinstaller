@@ -1,21 +1,22 @@
-#ifndef DRAWNINGSURFACE_H
-#define DRAWNINGSURFACE_H
+#ifndef UIDRAWNINGSURFACE_H
+#define UIDRAWNINGSURFACE_H
 
+#include "uidefines.h"
 
 class Metrics;
 class Palette;
 class UIDrawingEngine;
-class UIDrawningSurface
+class DECL_VISUALUI UIDrawningSurface
 {
 public:
     UIDrawningSurface();
     virtual ~UIDrawningSurface();
 
-    Metrics *metrics();
-    Palette *palette();
+    Metrics *metrics() const noexcept;
+    Palette *palette() const noexcept;
 
 protected:
-    UIDrawingEngine *engine();
+    UIDrawingEngine *engine() const noexcept;
 
 private:
     Metrics *m_metrics;
@@ -23,4 +24,4 @@ private:
     UIDrawingEngine *m_engine;
 };
 
-#endif // DRAWNINGSURFACE_H
+#endif // UIDRAWNINGSURFACE_H

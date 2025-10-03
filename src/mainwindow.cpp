@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "uiapplication.h"
 #include "utils.h"
+#include "uithread.h"
 #include "uicheckbox.h"
 #include "uibutton.h"
 #include "uilabel.h"
@@ -97,7 +98,7 @@ static wstring displayNameAddInfo(const wstring &disp_name, const wstring &info)
 }
 
 MainWindow::MainWindow(UIWidget *parent, const Rect &rc) :
-    UIWindow(parent, rc),
+    UIWindow(parent, rc, RemoveSystemDecoration),
     m_comntLbl(nullptr),
     m_versionLbl(nullptr),
     m_comntInfoLbl(nullptr),
@@ -118,7 +119,7 @@ MainWindow::MainWindow(UIWidget *parent, const Rect &rc) :
     setIcon(IDI_MAINICON);
     palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
     palette()->setColor(Palette::Border, Palette::Normal, 0x888888);
-    if (UIUtils::getWinVersion() > UIUtils::WinXP && UIUtils::getWinVersion() < UIUtils::Win10)
+    if (UIUtils::winVersion() > UIUtils::WinXP && UIUtils::winVersion() < UIUtils::Win10)
         metrics()->setMetrics(Metrics::BorderWidth, 1);
 
     UIWidget *cw = new UIWidget(this);
@@ -135,8 +136,8 @@ MainWindow::MainWindow(UIWidget *parent, const Rect &rc) :
     UIWidget *topPanel = new UIWidget(cw);
     topPanel->resize(50,28);
     topPanel->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
-    topPanel->setProperty(UIWidget::HSizeBehavior, UIWidget::Expanding);
-    topPanel->setProperty(UIWidget::VSizeBehavior, UIWidget::Fixed);
+    topPanel->setSizePolicy(SizePolicy::HSizeBehavior, SizePolicy::Expanding);
+    topPanel->setSizePolicy(SizePolicy::VSizeBehavior, SizePolicy::Fixed);
     cenVlut->addWidget(topPanel);
 
     UIBoxLayout *topHlut = new UIBoxLayout(UIBoxLayout::Horizontal);
@@ -150,13 +151,13 @@ MainWindow::MainWindow(UIWidget *parent, const Rect &rc) :
     cap->metrics()->setMetrics(Metrics::TextMarginLeft, 12);
     cap->metrics()->setMetrics(Metrics::TextAlignment, Metrics::AlignHLeft| Metrics::AlignVCenter);
     cap->resize(50,28);
-    cap->setProperty(UIWidget::HSizeBehavior, UIWidget::Expanding);
-    cap->setProperty(UIWidget::VSizeBehavior, UIWidget::Fixed);
+    cap->setSizePolicy(SizePolicy::HSizeBehavior, SizePolicy::Expanding);
+    cap->setSizePolicy(SizePolicy::VSizeBehavior, SizePolicy::Fixed);
 
     UIButton *closeBtn = new UIButton(topPanel);
     closeBtn->resize(40,28);
-    closeBtn->setProperty(UIWidget::HSizeBehavior, UIWidget::Fixed);
-    closeBtn->setProperty(UIWidget::VSizeBehavior, UIWidget::Fixed);
+    closeBtn->setSizePolicy(SizePolicy::HSizeBehavior, SizePolicy::Fixed);
+    closeBtn->setSizePolicy(SizePolicy::VSizeBehavior, SizePolicy::Fixed);
     closeBtn->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
     closeBtn->palette()->setColor(Palette::Background, Palette::Hover, 0xe81123);
     closeBtn->palette()->setColor(Palette::Background, Palette::Pressed, 0x8b0a14);
@@ -174,8 +175,8 @@ MainWindow::MainWindow(UIWidget *parent, const Rect &rc) :
     /* Central section */
     m_cenPanel = new UIWidget(cw);
     m_cenPanel->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
-    m_cenPanel->setProperty(UIWidget::HSizeBehavior, UIWidget::Expanding);
-    m_cenPanel->setProperty(UIWidget::VSizeBehavior, UIWidget::Expanding);
+    m_cenPanel->setSizePolicy(SizePolicy::HSizeBehavior, SizePolicy::Expanding);
+    m_cenPanel->setSizePolicy(SizePolicy::VSizeBehavior, SizePolicy::Expanding);
     cenVlut->addWidget(m_cenPanel);
 
     m_cenPanelVlut = new UIBoxLayout(UIBoxLayout::Vertical);
@@ -199,8 +200,8 @@ void MainWindow::initInstallationMode()
     wlcLbl->resize(282, 200);
     wlcLbl->setEMFIcon(IDI_WELCOME, 282, 200);
     wlcLbl->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
-    wlcLbl->setProperty(UIWidget::HSizeBehavior, UIWidget::Expanding);
-    wlcLbl->setProperty(UIWidget::VSizeBehavior, UIWidget::Fixed);
+    wlcLbl->setSizePolicy(SizePolicy::HSizeBehavior, SizePolicy::Expanding);
+    wlcLbl->setSizePolicy(SizePolicy::VSizeBehavior, SizePolicy::Fixed);
     m_cenPanelVlut->addWidget(wlcLbl);
 
     /* Check box section*/
@@ -249,8 +250,8 @@ void MainWindow::initControlMode(const std::wstring &_arch)
     m_versionLbl = new UILabel(m_cenPanel);
     setControlLabelStyle(m_versionLbl);
     m_versionLbl->setText(fillInstalledVerInfo());
-    m_versionLbl->setProperty(UIWidget::HSizeBehavior, UIWidget::Expanding);
-    m_versionLbl->setProperty(UIWidget::VSizeBehavior, UIWidget::Fixed);
+    m_versionLbl->setSizePolicy(SizePolicy::HSizeBehavior, SizePolicy::Expanding);
+    m_versionLbl->setSizePolicy(SizePolicy::VSizeBehavior, SizePolicy::Fixed);
     m_versionLbl->metrics()->setMetrics(Metrics::TextMarginLeft, 12);
     m_cenPanelVlut->setContentMargins(18, 6, 6, 6);
     m_cenPanelVlut->addWidget(m_versionLbl);
@@ -259,8 +260,8 @@ void MainWindow::initControlMode(const std::wstring &_arch)
         UILabel *errLbl = new UILabel(m_cenPanel);
         setControlLabelStyle(errLbl);
         errLbl->setText(_TR(LABEL_NO_OPTIONS));
-        errLbl->setProperty(UIWidget::HSizeBehavior, UIWidget::Expanding);
-        errLbl->setProperty(UIWidget::VSizeBehavior, UIWidget::Expanding);
+        errLbl->setSizePolicy(SizePolicy::HSizeBehavior, SizePolicy::Expanding);
+        errLbl->setSizePolicy(SizePolicy::VSizeBehavior, SizePolicy::Expanding);
         errLbl->metrics()->setMetrics(Metrics::TextMarginLeft, 24);
         m_cenPanelVlut->addWidget(errLbl);
         return;
@@ -271,14 +272,6 @@ void MainWindow::initControlMode(const std::wstring &_arch)
 bool MainWindow::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
 {
     switch (msg) {
-    case WM_INVOKEMETHOD: {
-        if (std::function<void()> *func = (std::function<void()>*)wParam) {
-            if (*func)
-                (*func)();
-            delete func;
-        }
-        break;
-    }
     }
     return UIWindow::event(msg, wParam, lParam, result);
 }
@@ -289,7 +282,7 @@ void MainWindow::startInstall()
     m_comntLbl = new UILabel(m_cenPanel);
     m_comntLbl->setText(_TR(LABEL_DOWNLOAD), true);
     m_comntLbl->setGeometry(0, m_cenPanel->size().height - 156, m_cenPanel->size().width, 24);
-    m_comntLbl->metrics()->setMetrics(Metrics::FontHeight, 20);
+    m_comntLbl->setFont(L"Segoe UI", 12);
     setLabelStyle(m_comntLbl);
 
     m_comntInfoLbl = new UILabel(m_cenPanel);
@@ -339,7 +332,7 @@ void MainWindow::startInstall()
                         m_comntLbl->close();
                         m_comntInfoLbl->close();
                         m_bar->close();
-                        invokeMethod(&MainWindow::finishInstall, this, app_path);
+                        UIThread::invoke(this, &MainWindow::finishInstall, app_path);
                     } else {
                         m_bar->pulse(false);
                         m_bar->setProgress(0);
@@ -419,7 +412,7 @@ void MainWindow::startUpdate()
     }
 
     CDownloader *dnl = startDownload(m_package == L"msi" ? L"msi" : L"iss", m_arch, tmp_path, [=]() {
-            if (!NS_Utils::checkAndWaitForAppClosure(nativeWindowHandle())) {
+            if (!NS_Utils::checkAndWaitForAppClosure(platformWindow())) {
                 m_bar->setProgress(0);
                 m_comntInfoLbl->setText(_TR(LABEL_ERR_CANCELLED), true);
                 return;
@@ -540,7 +533,7 @@ void MainWindow::startUpdate()
 void MainWindow::startUninstall()
 {
     m_cancelBtn->setDisabled(true);
-    if (!NS_Utils::checkAndWaitForAppClosure(nativeWindowHandle())) {
+    if (!NS_Utils::checkAndWaitForAppClosure(platformWindow())) {
         m_bar->setProgress(0);
         m_comntInfoLbl->setText(_TR(LABEL_ERR_CANCELLED), true);
         createCloseAndBackButtons();
@@ -668,8 +661,8 @@ void MainWindow::createSelectionPage()
     applyBtn->onClick([=]() {
         wstring msg = m_uninsRadio->isChecked() ? _TR(MSG_REMOVE) : /*m_repRadio->isChecked() ? _TR(MSG_REPAIR) :*/ _TR(MSG_UPDATE);
         NS_Utils::Replace(msg, L"%1", _T(WINDOW_NAME));
-        if (IDOK == NS_Utils::ShowTaskDialog(nativeWindowHandle(), msg.c_str(), TD_WARNING_ICON)) {
-            if (!NS_Utils::checkAndWaitForAppClosure(nativeWindowHandle()))
+        if (IDOK == NS_Utils::ShowTaskDialog(platformWindow(), msg.c_str(), TD_WARNING_ICON)) {
+            if (!NS_Utils::checkAndWaitForAppClosure(platformWindow()))
                 return;
             m_cenPanel->disconnect(m_resize_conn);
             m_updRadio->close();
@@ -747,7 +740,7 @@ void MainWindow::createProgressPage(const std::wstring &text)
 
 void MainWindow::createCloseButton()
 {
-    invokeMethod([=]() {
+    UIThread::invoke(this, [=]() {
         m_cenPanel->disconnect(m_resize_conn);
         m_cancelBtn->close();
         UIButton *closeBtn = new UIButton(m_cenPanel);
@@ -767,7 +760,7 @@ void MainWindow::createCloseButton()
 
 void MainWindow::createCloseAndBackButtons()
 {
-    invokeMethod([=]() {
+    UIThread::invoke(this, [=]() {
         m_cenPanel->disconnect(m_resize_conn);
         m_cancelBtn->close();
 
@@ -877,7 +870,7 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
                 std::transform(hash.begin(), hash.end(), hash.begin(), ::tolower);
                 NS_File::removeFile(tmp_path);
 
-                invokeMethod([=]() {
+                UIThread::invoke(this, [=]() {
                     dnl->stop();
                     dnl->onProgress([=](int percent) {
                         m_bar->setProgress(percent);
@@ -930,10 +923,3 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
     });
     return dnl;
 }
-
-template<typename Fn, typename... Args>
-void MainWindow::invokeMethod(Fn&& fn, Args&&... args)
-{
-    std::function<void()> *func = new std::function<void()>(std::bind(std::forward<Fn>(fn), std::forward<Args>(args)...));
-    PostMessage(m_hWnd, WM_INVOKEMETHOD, (WPARAM)func, 0);
-}   // NOLINT

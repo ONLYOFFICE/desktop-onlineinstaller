@@ -1,25 +1,26 @@
-#ifndef LABEL_H
-#define LABEL_H
+#ifndef UILABEL_H
+#define UILABEL_H
 
 #include "uiwidget.h"
 #include "uiconhandler.h"
 
 
-class UILabel : public UIWidget, public UIconHandler
+class DECL_VISUALUI UILabel : public UIWidget, public UIconHandler
 {
 public:
-    UILabel(UIWidget *parent = nullptr);
+    explicit UILabel(UIWidget *parent = nullptr);
     virtual ~UILabel();
 
-    void setText(const std::wstring &text, bool multiline = false);
+    void setText(const tstring &text, bool multiline = false);
+
     /* callback */
 
 protected:
-    virtual bool event(UINT, WPARAM, LPARAM, LRESULT*) override;
+    virtual void onPaint(const RECT &rc) override;
+    tstring m_text;
 
 private:
-    std::wstring m_text;
     bool  m_multiline;
 };
 
-#endif // LABEL_H
+#endif // UILABEL_H

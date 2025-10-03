@@ -1,20 +1,35 @@
-#ifndef LAYOUTITEM_H
-#define LAYOUTITEM_H
+#ifndef UILAYOUTITEM_H
+#define UILAYOUTITEM_H
+
+#include "uidefines.h"
 
 
 class UIWidget;
-class UILayout;
-
-class UILayoutItem
+// class UILayout;
+class UISpacer;
+class DECL_VISUALUI UILayoutItem
 {
 public:
     UILayoutItem();
     ~UILayoutItem();
 
-    virtual UIWidget *widget();
-    virtual UILayout *layout();
+    UIWidget *widget() const noexcept;
+    // UILayout *layout() const noexcept;
+    UISpacer *spacer() const noexcept;
 
-protected:
+private:
+    friend class UIBoxLayout;
+    void calcSize(double dpi);
+    void move(int x, int y);
+    void setGeometry(int x, int y, int w, int h);
+
+    UIWidget *wgt;
+    // UILayout *lut;
+    UISpacer *spr;
+    int hsb,
+        vsb,
+        width,
+        height;
 };
 
-#endif // LAYOUTITEM_H
+#endif // UILAYOUTITEM_H

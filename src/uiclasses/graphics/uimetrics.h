@@ -1,14 +1,16 @@
-#ifndef METRICS_H
-#define METRICS_H
+#ifndef UIMETRICS_H
+#define UIMETRICS_H
 
+#include "uidefines.h"
 
-class Metrics
+class DECL_VISUALUI Metrics
 {
 public:
     Metrics();
     ~Metrics();
 
     enum Alignment : unsigned char {
+        AlignNone    = 0,
         AlignHLeft   = 1,
         AlignHCenter = 2,
         AlignHRight  = 4,
@@ -28,8 +30,6 @@ public:
         IconMarginRight,
         IconMarginBottom,
         IconAlignment,
-        FontWidth,
-        FontHeight,
         PrimitiveWidth,
         AlternatePrimitiveWidth,
         PrimitiveRadius,
@@ -40,16 +40,14 @@ public:
         TextMarginRight,
         TextMarginBottom,
         TextAlignment,
-        METRICS_COUNT
+        METRICS_LAST
     };
 
-    void setMetrics(Role, int);
-    int  value(Role);
-
-protected:
+    void setMetrics(Role, int) noexcept;
+    int  value(Role) const noexcept;
 
 private:
-    int metrics[METRICS_COUNT];
+    int metrics[METRICS_LAST];
 };
 
-#endif // METRICS_H
+#endif // UIMETRICS_H

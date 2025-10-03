@@ -17,17 +17,17 @@ UIDrawningSurface::~UIDrawningSurface()
     delete m_metrics, m_metrics = nullptr;
 }
 
-Metrics *UIDrawningSurface::metrics()
+Metrics *UIDrawningSurface::metrics() const noexcept
 {
     return m_metrics;
 }
 
-Palette *UIDrawningSurface::palette()
+Palette *UIDrawningSurface::palette() const noexcept
 {
     return m_palette;
 }
 
-UIDrawingEngine *UIDrawningSurface::engine()
+UIDrawingEngine *UIDrawningSurface::engine() const noexcept
 {
     return m_engine;
 }

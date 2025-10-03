@@ -1,15 +1,12 @@
-#ifndef OBJECT_H
-#define OBJECT_H
+#ifndef UIOBJECT_H
+#define UIOBJECT_H
 
-#include <string>
+#include "uidefines.h"
 
 
-class UIObject
+class DECL_VISUALUI UIObject
 {
 public:
-    UIObject(UIObject *parent = nullptr);
-    virtual ~UIObject();
-
     enum ObjectType : unsigned char {
         ApplicationType,
         WindowType,
@@ -18,18 +15,28 @@ public:
         PopupType
     };
 
-    UIObject *parent();
-    void setParent(UIObject*);
-    void setObjectName(const std::wstring&);
-    std::wstring objectName();
+    explicit UIObject(ObjectType type, UIObject *parent = nullptr);
+    virtual ~UIObject();
+
+    void setParent(UIObject*) noexcept;
+    void setObjectName(const tstring&);
+    virtual void setObjectGroupId(const tstring &id);
+    UIObject *parent() const noexcept;
+    ObjectType objectType() const noexcept;
+    tstring objectName() const noexcept;
+    tstring objectGroupId() const noexcept;
     virtual void disconnect(int);
 
 protected:
     static int m_connectionId;
 
 private:
-    UIObject      *m_parent;
-    std::wstring m_object_name;
+    UIObject();
+
+    UIObject  *m_parent;
+    ObjectType m_objectType;
+    tstring    m_objectName;
+    tstring    m_groupId;
 };
 
-#endif // OBJECT_H
+#endif // UIOBJECT_H

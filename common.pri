@@ -9,6 +9,7 @@ TEMPLATE = app
 CORE_ROOT_DIR = $$PWD/../core
 UICLASSES = $$PWD/src/uiclasses
 
+DEFINES += VISUALUI_STATIC
 CONFIG += core_no_dst
 include($$CORE_ROOT_DIR/Common/base.pri)
 
@@ -32,16 +33,36 @@ HEADERS += $$PWD/src/version.h \
            $$PWD/src/cjson.h \
            $$PWD/src/utils.h \
            $$UICLASSES/common/uidefines.h \
+           $$UICLASSES/common/uiplatformtypes.h \
            $$UICLASSES/common/uiutils.h \
            $$UICLASSES/common/uicommon.h \
            $$UICLASSES/graphics/uimetrics.h \
            $$UICLASSES/graphics/uipalette.h \
            $$UICLASSES/graphics/uidrawningengine.h \
            $$UICLASSES/graphics/uidrawingsurface.h \
+           $$UICLASSES/graphics/uistyle.h \
+           $$UICLASSES/graphics/uigeometryanimation.h \
+           $$UICLASSES/graphics/uiopacityanimation.h \
            $$UICLASSES/graphics/uiconhandler.h \
+           $$UICLASSES/graphics/uidraghandler.h \
+           $$UICLASSES/graphics/uitooltiphandler.h \
+           $$UICLASSES/graphics/uipixmap.h \
            $$UICLASSES/core/uiobject.h \
+           $$UICLASSES/core/uicursor.h \
            $$UICLASSES/core/uiapplication.h \
+           $$UICLASSES/core/uithread.h \
+           $$UICLASSES/core/uifontmetrics.h \
+           $$UICLASSES/core/uitimer.h \
+           $$UICLASSES/core/uieventloop.h \
+           $$UICLASSES/core/uixmldocument.h \
+           # $$UICLASSES/dialogs/uipopupmessage.h \
+           # $$UICLASSES/dialogs/uidialog.h \
+           # $$UICLASSES/dialogs/uifiledialog.h \
            $$UICLASSES/widgets/uiwindow.h \
+           $$UICLASSES/widgets/uiabstractwindow.h \
+           $$UICLASSES/widgets/uiabstractpopup.h \
+           $$UICLASSES/widgets/uitooltip.h \
+           # $$UICLASSES/widgets/uimenu.h \
            $$UICLASSES/widgets/uiwidget.h \
            $$UICLASSES/widgets/uilabel.h \
            $$UICLASSES/widgets/uicaption.h \
@@ -49,7 +70,10 @@ HEADERS += $$PWD/src/version.h \
            $$UICLASSES/widgets/uibutton.h \
            $$UICLASSES/widgets/uicheckbox.h \
            $$UICLASSES/widgets/uiradiobutton.h \
+           # $$UICLASSES/widgets/uitogglebutton.h \
            $$UICLASSES/widgets/uiprogressbar.h \
+           # $$UICLASSES/widgets/uilineedit.h \
+           $$UICLASSES/layout/uispacer.h \
            $$UICLASSES/layout/uilayoutitem.h \
            $$UICLASSES/layout/uilayout.h \
            $$UICLASSES/layout/uiboxlayout.h
@@ -66,10 +90,28 @@ SOURCES += $$PWD/src/main.cpp \
            $$UICLASSES/graphics/uipalette.cpp \
            $$UICLASSES/graphics/uidrawningengine.cpp \
            $$UICLASSES/graphics/uidrawingsurface.cpp \
+           $$UICLASSES/graphics/uistyle.cpp \
+           $$UICLASSES/graphics/uigeometryanimation.cpp \
+           $$UICLASSES/graphics/uiopacityanimation.cpp \
            $$UICLASSES/graphics/uiconhandler.cpp \
+           $$UICLASSES/graphics/uidraghandler.cpp \
+           $$UICLASSES/graphics/uitooltiphandler.cpp \
+           $$UICLASSES/graphics/uipixmap.cpp \
            $$UICLASSES/core/uiobject.cpp \
+           $$UICLASSES/core/uicursor.cpp \
            $$UICLASSES/core/uiapplication.cpp \
+           $$UICLASSES/core/uifontmetrics.cpp \
+           $$UICLASSES/core/uitimer.cpp \
+           $$UICLASSES/core/uieventloop.cpp \
+           $$UICLASSES/core/uixmldocument.cpp \
+           # $$UICLASSES/dialogs/uipopupmessage.cpp \
+           # $$UICLASSES/dialogs/uidialog.cpp \
+           # $$UICLASSES/dialogs/uifiledialog.cpp \
            $$UICLASSES/widgets/uiwindow.cpp \
+           $$UICLASSES/widgets/uiabstractwindow.cpp \
+           $$UICLASSES/widgets/uiabstractpopup.cpp \
+           $$UICLASSES/widgets/uitooltip.cpp \
+           # $$UICLASSES/widgets/uimenu.cpp \
            $$UICLASSES/widgets/uiwidget.cpp \
            $$UICLASSES/widgets/uilabel.cpp \
            $$UICLASSES/widgets/uicaption.cpp \
@@ -77,7 +119,10 @@ SOURCES += $$PWD/src/main.cpp \
            $$UICLASSES/widgets/uibutton.cpp \
            $$UICLASSES/widgets/uicheckbox.cpp \
            $$UICLASSES/widgets/uiradiobutton.cpp \
+           # $$UICLASSES/widgets/uitogglebutton.cpp \
            $$UICLASSES/widgets/uiprogressbar.cpp \
+           # $$UICLASSES/widgets/uilineedit.cpp \
+           $$UICLASSES/layout/uispacer.cpp \
            $$UICLASSES/layout/uilayoutitem.cpp \
            $$UICLASSES/layout/uilayout.cpp \
            $$UICLASSES/layout/uiboxlayout.cpp

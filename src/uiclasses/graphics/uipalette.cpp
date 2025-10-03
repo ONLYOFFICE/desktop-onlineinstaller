@@ -1,4 +1,7 @@
 #include "uipalette.h"
+#ifdef __linux__
+# define RGB(r, g ,b) ((DWORD) (((BYTE) (r) | ((WORD) (g) << 8)) | (((DWORD) (BYTE) (b)) << 16)))
+#endif
 
 
 Palette::Palette()
@@ -27,10 +30,10 @@ Palette::Palette()
     palette[Primitive][Normal]    = 0xeeeeee;
     palette[Primitive][Hover]     = 0xeeeeee;
     palette[Primitive][Pressed]   = 0xeeeeee;
-    palette[AlternatePrimitive][Disabled]  = 0x888888;
-    palette[AlternatePrimitive][Normal]    = 0x333333;
-    palette[AlternatePrimitive][Hover]     = 0x333333;
-    palette[AlternatePrimitive][Pressed]   = 0x333333;
+    palette[AlternatePrimitive][Disabled] = 0x888888;
+    palette[AlternatePrimitive][Normal]   = 0x333333;
+    palette[AlternatePrimitive][Hover]    = 0x333333;
+    palette[AlternatePrimitive][Pressed]  = 0x333333;
 
     setCurrentState(Normal);
 }
@@ -40,18 +43,18 @@ Palette::~Palette()
 
 }
 
-COLORREF Palette::color(Role role)
+COLORREF Palette::color(Role role) const noexcept
 {
     return RGB((currentColors[role] & 0xff0000) >> 16, (currentColors[role] & 0xff00) >> 8, currentColors[role] & 0xff);
 }
 
-void Palette::setColor(Role role, State state, DWORD color)
+void Palette::setColor(Role role, State state, DWORD color) noexcept
 {
     palette[role][state] = color;
     currentColors[role] = palette[role][currentState];
 }
 
-void Palette::setCurrentState(State state)
+void Palette::setCurrentState(State state) noexcept
 {
     currentColors[Background] = palette[Background][state];
     currentColors[Border]     = palette[Border][state];

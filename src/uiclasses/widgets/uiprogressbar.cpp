@@ -1,22 +1,39 @@
 #include "uiprogressbar.h"
 #include "uidrawningengine.h"
+#include "uitimer.h"
+#ifdef __linux__
+# include "uiapplication.h"
 
+# define DEFAULT_TIMER_STEP 16
+#else
+# define DEFAULT_TIMER_STEP USER_TIMER_MINIMUM
+#endif
 #define DEFAULT_PULSE_STEP 1
-
 
 UIProgressBar::UIProgressBar(UIWidget *parent) :
     UIWidget(parent, ObjectType::WidgetType),
+    m_timer(new UITimer),
     m_progress(0),
     m_pulse_pos(-1),
     m_pulse_direction(1),
     m_pulse_step(DEFAULT_PULSE_STEP)
 {
-
+    m_timer->onTimeout([this]() {
+        m_pulse_pos += m_pulse_direction * m_pulse_step;
+        if (m_pulse_pos >= 100) {
+            m_pulse_pos = 100;
+            m_pulse_direction = -1;
+        } else if (m_pulse_pos <= 0) {
+            m_pulse_pos = 0;
+            m_pulse_direction = 1;
+        }
+        update();
+    });
 }
 
 UIProgressBar::~UIProgressBar()
 {
-
+    delete m_timer; m_timer = nullptr;
 }
 
 void UIProgressBar::setProgress(int progress)
@@ -30,11 +47,9 @@ void UIProgressBar::pulse(bool enable)
     m_pulse_pos = enable ? 0 : -1;
     m_pulse_direction = 1;
     if (enable) {
-        // timeBeginPeriod(1);
-        SetTimer(m_hWnd, PROGRESS_PULSE_TIMER_ID, 17, NULL);
+        m_timer->start(DEFAULT_TIMER_STEP);
     } else {
-        KillTimer(m_hWnd, PROGRESS_PULSE_TIMER_ID);
-        // timeEndPeriod(1);
+        m_timer->stop();
     }
 }
 
@@ -48,63 +63,27 @@ void UIProgressBar::setPulseStep(int step)
     m_pulse_step = step;
 }
 
+#ifdef _WIN32
 bool UIProgressBar::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
 {
     switch (msg) {
-    // case WM_LBUTTONDOWN: {
-    //     palette()->setCurrentState(Palette::Pressed);
-    //     repaint();
-    //     return false;
-    // }
-
-    // case WM_LBUTTONUP: {
-    //     palette()->setCurrentState(Palette::Hover);
-    //     repaint();
-    //     break;
-    // }
-    // case WM_MOUSEENTER: {
-    //     palette()->setCurrentState(Palette::Hover);
-    //     repaint();
-    //     break;
-    // }
-
-    // case WM_MOUSELEAVE:
-    // case WM_NCMOUSELEAVE: {
-    //     palette()->setCurrentState(Palette::Normal);
-    //     repaint();
-    //     break;
-    // }
-
-    case WM_PAINT: {
-        RECT rc;
-        GetClientRect(m_hWnd, &rc);
-
-        engine()->Begin(this, m_hWnd, &rc);
-        engine()->DrawProgressBar(m_progress, m_pulse_pos);
-        engine()->End();
-
-        *result = FALSE;
-        return true;
-    }
-
-    case WM_TIMER: {
-        if (wParam == PROGRESS_PULSE_TIMER_ID) {
-            m_pulse_pos += m_pulse_direction * m_pulse_step;
-            if (m_pulse_pos >= 100) {
-                m_pulse_pos = 100;
-                m_pulse_direction = -1;
-            } else
-            if (m_pulse_pos <= 0) {
-                m_pulse_pos = 0;
-                m_pulse_direction = 1;
-            }
-            update();
-        }
-        break;
-    }
-
     default:
         break;
     }
     return UIWidget::event(msg, wParam, lParam, result);
+}
+#else
+bool UIProgressBar::event(uint ev_type, void *param)
+{
+    switch (ev_type) {
+    default:
+        break;
+    }
+    return UIWidget::event(ev_type, param);
+}
+#endif
+
+void UIProgressBar::onPaint(const RECT&)
+{
+    engine()->DrawProgressBar(m_progress, m_pulse_pos);
 }
