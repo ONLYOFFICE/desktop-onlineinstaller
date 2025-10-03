@@ -8,19 +8,19 @@
 
 
 
-class Layout : public LayoutItem
+class UILayout : public UILayoutItem
 {
 public:
-    Layout(Object *parent = nullptr);
-    virtual ~Layout();
+    UILayout(UIObject *parent = nullptr);
+    virtual ~UILayout();
 
-    virtual void addWidget(Widget *wgt) = 0;
+    virtual void addWidget(UIWidget *wgt) = 0;
 
 protected:
     Margins m_margins;
 
 private:
-    friend class Widget;
+    friend class UIWidget;
     virtual void onResize(int w, int h) = 0;
 };
 

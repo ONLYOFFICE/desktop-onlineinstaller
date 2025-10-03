@@ -5,11 +5,11 @@
 #include "uiconhandler.h"
 
 
-class Label : public Widget, public IconHandler
+class UILabel : public UIWidget, public UIconHandler
 {
 public:
-    Label(Widget *parent = nullptr);
-    virtual ~Label();
+    UILabel(UIWidget *parent = nullptr);
+    virtual ~UILabel();
 
     void setText(const std::wstring &text, bool multiline = false);
     /* callback */

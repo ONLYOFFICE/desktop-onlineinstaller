@@ -4,11 +4,11 @@
 #include "uiabstractbutton.h"
 
 
-class RadioButton : public AbstractButton
+class UIRadioButton : public UIAbstractButton
 {
 public:
-    RadioButton(Widget *parent = nullptr, const std::wstring &text = L"");
-    virtual ~RadioButton();
+    UIRadioButton(UIWidget *parent = nullptr, const std::wstring &text = L"");
+    virtual ~UIRadioButton();
 
     void setChecked(bool checked);
     bool isChecked();

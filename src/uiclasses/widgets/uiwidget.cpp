@@ -26,13 +26,13 @@ static bool isAllocOnHeap(void *addr) {
 }
 
 
-Widget::Widget(Widget *parent) :
-    Widget(parent, ObjectType::WidgetType)
+UIWidget::UIWidget(UIWidget *parent) :
+    UIWidget(parent, ObjectType::WidgetType)
 {}
 
-Widget::Widget(Widget *parent, ObjectType type, HWND hwnd, const Rect &rc) :
-    Object(parent),
-    DrawningSurface(),
+UIWidget::UIWidget(UIWidget *parent, ObjectType type, HWND hwnd, const Rect &rc) :
+    UIObject(parent),
+    UIDrawningSurface(),
     m_hWnd(hwnd),
     m_hFont(nullptr),
     m_layout(nullptr),
@@ -49,11 +49,11 @@ Widget::Widget(Widget *parent, ObjectType type, HWND hwnd, const Rect &rc) :
         ::SetWindowLong(m_hWnd, GWL_STYLE, style);
         SetParent(m_hWnd, parent->nativeWindowHandle());
     } else {
-        Application::instance()->registerWidget(this, type, rc);
+        UIApplication::instance()->registerWidget(this, type, rc);
     }
 }
 
-Widget::~Widget()
+UIWidget::~UIWidget()
 {
     m_is_class_destroyed = true;
     if (m_layout) {
@@ -67,51 +67,51 @@ Widget::~Widget()
         DeleteObject(m_hFont);
 }
 
-void Widget::setGeometry(int x, int y, int width, int height)
+void UIWidget::setGeometry(int x, int y, int width, int height)
 {
     SetWindowPos(m_hWnd, NULL, x, y, width, height, SWP_FRAMECHANGED | SWP_NOZORDER | SWP_NOOWNERZORDER /*| SWP_NOSENDCHANGING*/);
 }
 
-void Widget::setDisabled(bool disable)
+void UIWidget::setDisabled(bool disable)
 {
     m_disabled = disable;
     palette()->setCurrentState(disable ? Palette::Disabled : Palette::Normal);
     update();
 }
 
-void Widget::close()
+void UIWidget::close()
 {
     PostMessage(m_hWnd, WM_CLOSE, 0, 0);
 }
 
-void Widget::move(int x, int y)
+void UIWidget::move(int x, int y)
 {
     SetWindowPos(m_hWnd, NULL, x, y, 0, 0, SWP_NOSIZE | SWP_FRAMECHANGED | SWP_NOZORDER | SWP_NOOWNERZORDER /*| SWP_NOSENDCHANGING*/);
 }
 
-void Widget::resize(int w, int h)
+void UIWidget::resize(int w, int h)
 {
     SetWindowPos(m_hWnd, NULL, 0, 0, w, h, SWP_NOMOVE | SWP_FRAMECHANGED | SWP_NOZORDER | SWP_NOOWNERZORDER /*| SWP_NOSENDCHANGING*/);
 }
 
-Widget *Widget::parentWidget()
+UIWidget *UIWidget::parentWidget()
 {
-    return dynamic_cast<Widget*>(parent());
+    return dynamic_cast<UIWidget*>(parent());
 }
 
-std::wstring Widget::title()
+std::wstring UIWidget::title()
 {
     return m_title;
 }
 
-Size Widget::size()
+Size UIWidget::size()
 {
     RECT rc;
     GetClientRect(m_hWnd, &rc);
     return Size(rc.right - rc.left, rc.bottom - rc.top);
 }
 
-void Widget::size(int *width, int *height)
+void UIWidget::size(int *width, int *height)
 {
     RECT rc;
     GetClientRect(m_hWnd, &rc);
@@ -119,18 +119,18 @@ void Widget::size(int *width, int *height)
     *height =  rc.bottom - rc.top;
 }
 
-void Widget::setWindowTitle(const std::wstring &title)
+void UIWidget::setWindowTitle(const std::wstring &title)
 {
     m_title = title;
     SetWindowText(m_hWnd, title.c_str());
 }
 
-void Widget::setProperty(Properties property, int val)
+void UIWidget::setProperty(Properties property, int val)
 {
     m_properties[property] = val;
 }
 
-void Widget::setFont(const std::wstring &font)
+void UIWidget::setFont(const std::wstring &font)
 {
     if (m_hFont) {
         DeleteObject(m_hFont);
@@ -141,30 +141,30 @@ void Widget::setFont(const std::wstring &font)
                           font.empty() ? L"Arial" : font.c_str());
 }
 
-void Widget::show()
+void UIWidget::show()
 {
     ShowWindow(m_hWnd, SW_SHOWNORMAL);
     UpdateWindow(m_hWnd);
 }
 
-void Widget::hide()
+void UIWidget::hide()
 {
     ShowWindow(m_hWnd, SW_HIDE);
 }
 
-void Widget::repaint()
+void UIWidget::repaint()
 {
     if (IsWindowVisible(m_hWnd))
         RedrawWindow(m_hWnd, NULL, NULL, RDW_INVALIDATE | RDW_NOERASE | RDW_INTERNALPAINT | RDW_UPDATENOW);
 }
 
-void Widget::update()
+void UIWidget::update()
 {
     if (IsWindowVisible(m_hWnd))
         RedrawWindow(m_hWnd, NULL, NULL, RDW_INVALIDATE | RDW_NOERASE | RDW_INTERNALPAINT);
 }
 
-void Widget::setLayout(Layout *layout)
+void UIWidget::setLayout(UILayout *layout)
 {
     if (m_layout) {
         // TODO: error: trying to add a layout when the widget contains a layout
@@ -173,69 +173,69 @@ void Widget::setLayout(Layout *layout)
     }
 }
 
-bool Widget::isCreated()
+bool UIWidget::isCreated()
 {
     return m_is_created;
 }
 
-bool Widget::underMouse()
+bool UIWidget::underMouse()
 {
     POINT pt;
     GetCursorPos(&pt);
     return WindowFromPoint(pt) == m_hWnd;
 }
 
-int Widget::property(Properties property)
+int UIWidget::property(Properties property)
 {
     return m_properties[property];
 }
 
-Layout *Widget::layout()
+UILayout *UIWidget::layout()
 {
     return m_layout;
 }
 
-HWND Widget::nativeWindowHandle()
+HWND UIWidget::nativeWindowHandle()
 {
     return m_hWnd;
 }
 
-Widget *Widget::widgetFromHwnd(Widget *parent, HWND hwnd)
+UIWidget *UIWidget::widgetFromHwnd(UIWidget *parent, HWND hwnd)
 {
-    return new Widget(parent, Object::WidgetType, hwnd);
+    return new UIWidget(parent, UIObject::WidgetType, hwnd);
 }
 
-int Widget::onResize(const FnVoidIntInt &callback)
+int UIWidget::onResize(const FnVoidIntInt &callback)
 {
     m_resize_callbacks[++m_connectionId] = callback;
     return m_connectionId;
 }
 
-int Widget::onMove(const FnVoidIntInt &callback)
+int UIWidget::onMove(const FnVoidIntInt &callback)
 {
     m_move_callbacks[++m_connectionId] = callback;
     return m_connectionId;
 }
 
-int Widget::onAboutToDestroy(const FnVoidVoid &callback)
+int UIWidget::onAboutToDestroy(const FnVoidVoid &callback)
 {
     m_destroy_callbacks[++m_connectionId] = callback;
     return m_connectionId;
 }
 
-int Widget::onCreate(const FnVoidVoid &callback)
+int UIWidget::onCreate(const FnVoidVoid &callback)
 {
     m_create_callbacks[++m_connectionId] = callback;
     return m_connectionId;
 }
 
-int Widget::onClose(const FnVoidBoolPtr &callback)
+int UIWidget::onClose(const FnVoidBoolPtr &callback)
 {
     m_close_callbacks[++m_connectionId] = callback;
     return m_connectionId;
 }
 
-void Widget::disconnect(int connectionId)
+void UIWidget::disconnect(int connectionId)
 {
     {
         auto it = m_resize_callbacks.find(connectionId);
@@ -274,7 +274,7 @@ void Widget::disconnect(int connectionId)
     }
 }
 
-bool Widget::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
+bool UIWidget::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
 {
     switch (msg) {
     case WM_ACTIVATE:
@@ -285,7 +285,7 @@ bool Widget::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
         for (auto it = m_create_callbacks.begin(); it != m_create_callbacks.end(); it++)
             if (it->second)
                 (it->second)();
-        setFont(Application::instance()->font());
+        setFont(UIApplication::instance()->font());
         break;
     }
 
@@ -411,7 +411,7 @@ bool Widget::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
     return false;
 }
 
-void Widget::setNativeWindowHandle(HWND hWnd)
+void UIWidget::setNativeWindowHandle(HWND hWnd)
 {
     m_hWnd = hWnd;
 }

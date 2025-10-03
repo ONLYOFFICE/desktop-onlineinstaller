@@ -1,22 +1,22 @@
 #include "uilayoutitem.h"
 
 
-LayoutItem::LayoutItem()
+UILayoutItem::UILayoutItem()
 {
 
 }
 
-LayoutItem::~LayoutItem()
+UILayoutItem::~UILayoutItem()
 {
 
 }
 
-Widget *LayoutItem::widget()
+UIWidget *UILayoutItem::widget()
 {
     return nullptr;
 }
 
-Layout *LayoutItem::layout()
+UILayout *UILayoutItem::layout()
 {
     return nullptr;
 }

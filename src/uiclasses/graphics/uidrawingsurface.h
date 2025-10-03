@@ -4,23 +4,23 @@
 
 class Metrics;
 class Palette;
-class DrawingEngine;
-class DrawningSurface
+class UIDrawingEngine;
+class UIDrawningSurface
 {
 public:
-    DrawningSurface();
-    virtual ~DrawningSurface();
+    UIDrawningSurface();
+    virtual ~UIDrawningSurface();
 
     Metrics *metrics();
     Palette *palette();
 
 protected:
-    DrawingEngine *engine();
+    UIDrawingEngine *engine();
 
 private:
     Metrics *m_metrics;
     Palette *m_palette;
-    DrawingEngine *m_engine;
+    UIDrawingEngine *m_engine;
 };
 
 #endif // DRAWNINGSURFACE_H

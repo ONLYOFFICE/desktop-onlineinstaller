@@ -166,7 +166,7 @@ namespace NS_Utils
 
     bool IsRtlLanguage(unsigned long lcid)
     {
-        if (Utils::getWinVersion() >= Utils::WinVer::Win7) {
+        if (UIUtils::getWinVersion() >= UIUtils::WinVer::Win7) {
             DWORD layout = 0;
             if (GetLocaleInfo(lcid, LOCALE_IREADINGLAYOUT | LOCALE_RETURN_NUMBER, (LPWSTR)&layout, sizeof(layout)/sizeof(WCHAR)) > 0)
                 return layout == 1;

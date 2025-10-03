@@ -4,30 +4,30 @@
 #include <windowsx.h>
 
 
-RadioButton::RadioButton(Widget *parent, const std::wstring &text) :
-    AbstractButton(parent, text),
+UIRadioButton::UIRadioButton(UIWidget *parent, const std::wstring &text) :
+    UIAbstractButton(parent, text),
     m_checked(false)
 {
     metrics()->setMetrics(Metrics::TextAlignment, Metrics::AlignHLeft | Metrics::AlignVCenter);
 }
 
-RadioButton::~RadioButton()
+UIRadioButton::~UIRadioButton()
 {
 
 }
 
-void RadioButton::setChecked(bool checked)
+void UIRadioButton::setChecked(bool checked)
 {
     m_checked = checked;
     update();
 }
 
-bool RadioButton::isChecked()
+bool UIRadioButton::isChecked()
 {
     return m_checked;
 }
 
-bool RadioButton::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
+bool UIRadioButton::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
 {
     switch (msg) {
     case WM_PAINT: {
@@ -48,12 +48,12 @@ bool RadioButton::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
     default:
         break;
     }
-    return AbstractButton::event(msg, wParam, lParam, result);
+    return UIAbstractButton::event(msg, wParam, lParam, result);
 }
 
-void RadioButton::click()
+void UIRadioButton::click()
 {
     m_checked = true;
     update();
-    AbstractButton::click();
+    UIAbstractButton::click();
 }

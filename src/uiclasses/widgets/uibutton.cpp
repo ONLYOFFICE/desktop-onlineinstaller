@@ -12,9 +12,9 @@ static bool isArrangingAllowed() {
     return (arranging == TRUE);
 }
 
-Button::Button(Widget *parent, const std::wstring &text) :
-    AbstractButton(parent, text),
-    IconHandler(this),
+UIButton::UIButton(UIWidget *parent, const std::wstring &text) :
+    UIAbstractButton(parent, text),
+    UIconHandler(this),
     m_stockIcon(StockIcon::None),
     supportSnapLayouts(false),
     snapLayoutAllowed(false),
@@ -23,26 +23,26 @@ Button::Button(Widget *parent, const std::wstring &text) :
 
 }
 
-Button::~Button()
+UIButton::~UIButton()
 {
 
 }
 
-void Button::setSupportSnapLayouts()
+void UIButton::setSupportSnapLayouts()
 {
-    if (Utils::getWinVersion() > Utils::WinVer::Win10) {
+    if (UIUtils::getWinVersion() > UIUtils::WinVer::Win10) {
         snapLayoutAllowed = isArrangingAllowed();
         supportSnapLayouts = true;
     }
 }
 
-void Button::setStockIcon(StockIcon stockIcon)
+void UIButton::setStockIcon(StockIcon stockIcon)
 {
     m_stockIcon = stockIcon;
     update();
 }
 
-bool Button::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
+bool UIButton::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
 {
     switch (msg) {
     case WM_PAINT: {
@@ -106,7 +106,7 @@ bool Button::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
     }
 
     case WM_CAPTURECHANGED: {
-        if (Utils::getWinVersion() > Utils::WinVer::Win10) {
+        if (UIUtils::getWinVersion() > UIUtils::WinVer::Win10) {
             click();
         }
         break;
@@ -115,5 +115,5 @@ bool Button::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
     default:
         break;
     }
-    return AbstractButton::event(msg, wParam, lParam, result);
+    return UIAbstractButton::event(msg, wParam, lParam, result);
 }

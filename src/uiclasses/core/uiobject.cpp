@@ -1,40 +1,40 @@
 #include "uiobject.h"
 
 
-int Object::m_connectionId = 0;
+int UIObject::m_connectionId = 0;
 
-Object::Object(Object *parent) :
+UIObject::UIObject(UIObject *parent) :
     m_parent(parent)
 {
 
 }
 
-Object::~Object()
+UIObject::~UIObject()
 {
 
 }
 
-Object *Object::parent()
+UIObject *UIObject::parent()
 {
     return m_parent;
 }
 
-void Object::setParent(Object *parent)
+void UIObject::setParent(UIObject *parent)
 {
     m_parent = parent;
 }
 
-void Object::setObjectName(const std::wstring &object_name)
+void UIObject::setObjectName(const std::wstring &object_name)
 {
     m_object_name = object_name;
 }
 
-std::wstring Object::objectName()
+std::wstring UIObject::objectName()
 {
     return m_object_name;
 }
 
-void Object::disconnect(int connectionId)
+void UIObject::disconnect(int connectionId)
 {
 
 }

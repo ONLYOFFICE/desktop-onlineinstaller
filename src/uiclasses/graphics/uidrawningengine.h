@@ -6,17 +6,17 @@
 #include <string>
 
 
-class DrawningSurface;
-class DrawingEngine
+class UIDrawningSurface;
+class UIDrawingEngine
 {
 public:
-    DrawingEngine(const DrawingEngine&) = delete;
-    DrawingEngine& operator=(const DrawingEngine&) = delete;
-    static DrawingEngine *instance();
+    UIDrawingEngine(const UIDrawingEngine&) = delete;
+    UIDrawingEngine& operator=(const UIDrawingEngine&) = delete;
+    static UIDrawingEngine *instance();
 
 
-    DrawningSurface *surface();
-    void Begin(DrawningSurface*, HWND, RECT *rc);
+    UIDrawningSurface *surface();
+    void Begin(UIDrawningSurface*, HWND, RECT *rc);
     void FillBackground() const;
     // void DrawRoundedRect();
     void DrawBorder() const;
@@ -34,7 +34,7 @@ public:
     void DrawText(const RECT &rc, const std::wstring &text, HFONT hFont, bool multiline = false) const;
     void End();
 
-    // void LayeredBegin(DrawningSurface*, HWND, RECT *rc);
+    // void LayeredBegin(UIDrawningSurface*, HWND, RECT *rc);
     // void LayeredDrawRoundedRect() const;
     void LayeredDrawText(RECT &rc, const std::wstring &text, HFONT hFont, bool rtl = false) const;
     // void LayeredDrawShadow(int shadowWidth, int rad);
@@ -42,10 +42,10 @@ public:
     // void LayeredEnd();
 
 private:
-    DrawingEngine();
-    ~DrawingEngine();
+    UIDrawingEngine();
+    ~UIDrawingEngine();
 
-    DrawningSurface *m_ds;
+    UIDrawningSurface *m_ds;
     RECT *m_rc;
     PAINTSTRUCT *m_ps;
     HWND m_hwnd;

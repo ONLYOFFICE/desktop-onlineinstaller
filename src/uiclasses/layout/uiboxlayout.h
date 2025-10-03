@@ -5,17 +5,17 @@
 #include <unordered_map>
 
 
-class BoxLayout : public Layout
+class UIBoxLayout : public UILayout
 {
 public:
     enum Direction : unsigned char {
         Horizontal,
         Vertical
     };
-    BoxLayout(Direction);
-    ~BoxLayout();
+    UIBoxLayout(Direction);
+    ~UIBoxLayout();
 
-    virtual void addWidget(Widget *wgt) override;
+    virtual void addWidget(UIWidget *wgt) override;
     virtual void setContentMargins(int, int, int, int);
     virtual void setSpacing(int);
 
@@ -23,8 +23,8 @@ protected:
 
 private:
     virtual void onResize(int w, int h) override;
-    std::unordered_map<Widget*, int> m_destroy_conn;
-    std::vector<Widget*> m_widgets;
+    std::unordered_map<UIWidget*, int> m_destroy_conn;
+    std::vector<UIWidget*> m_widgets;
     Direction m_direction;
     int m_spacing;
     int m_total_fixed_size;

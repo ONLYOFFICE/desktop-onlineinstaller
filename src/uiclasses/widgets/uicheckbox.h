@@ -4,11 +4,11 @@
 #include "uiabstractbutton.h"
 
 
-class CheckBox : public AbstractButton
+class UICheckBox : public UIAbstractButton
 {
 public:
-    CheckBox(Widget *parent = nullptr, const std::wstring &text = L"");
-    virtual ~CheckBox();
+    UICheckBox(UIWidget *parent = nullptr, const std::wstring &text = L"");
+    virtual ~UICheckBox();
 
     void setChecked(bool checked);
     bool isChecked();

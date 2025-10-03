@@ -5,11 +5,11 @@
 #include <unordered_map>
 
 
-class AbstractButton : public Widget
+class UIAbstractButton : public UIWidget
 {
 public:
-    AbstractButton(Widget *parent = nullptr, const std::wstring &text = L"");
-    virtual ~AbstractButton();
+    UIAbstractButton(UIWidget *parent = nullptr, const std::wstring &text = L"");
+    virtual ~UIAbstractButton();
 
     void setText(const std::wstring &text);
     void adjustSizeBasedOnContent();

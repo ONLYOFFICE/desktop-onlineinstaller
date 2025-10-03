@@ -6,21 +6,21 @@
 #include <Windows.h>
 
 
-class Widget;
-class Application : public Object
+class UIWidget;
+class UIApplication : public UIObject
 {
 public:
-    Application(HINSTANCE hInstance, PWSTR cmdline, int cmdshow);
-    Application(const Application&) = delete;
-    ~Application();
+    UIApplication(HINSTANCE hInstance, PWSTR cmdline, int cmdshow);
+    UIApplication(const UIApplication&) = delete;
+    ~UIApplication();
 
     enum LayoutDirection : unsigned char {
         LeftToRight = 0,
         RightToLeft
     };
 
-    Application& operator=(const Application&) = delete;
-    static Application *instance();
+    UIApplication& operator=(const UIApplication&) = delete;
+    static UIApplication *instance();
     HINSTANCE moduleHandle();
     void setLayoutDirection(LayoutDirection);
     void setFont(const std::wstring &font) const;
@@ -30,12 +30,12 @@ public:
     void exit(int);
 
 private:
-    Application();
-    friend class Widget;
-    void registerWidget(Widget*, ObjectType, const Rect &rc);
+    UIApplication();
+    friend class UIWidget;
+    void registerWidget(UIWidget*, ObjectType, const Rect &rc);
     class ApplicationPrivate;
     ApplicationPrivate *d_ptr;
-    static Application *inst;
+    static UIApplication *inst;
 };
 
 #endif // APPLICATION_H

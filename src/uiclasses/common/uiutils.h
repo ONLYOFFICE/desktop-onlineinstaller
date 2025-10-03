@@ -5,7 +5,7 @@
 #include <gdiplus.h>
 
 
-namespace Utils
+namespace UIUtils
 {
     enum WinVer : BYTE {
         Undef, WinXP, WinVista, Win7, Win8, Win8_1, Win10, Win11

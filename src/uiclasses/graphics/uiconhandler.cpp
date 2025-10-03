@@ -4,7 +4,7 @@
 #include "uiutils.h"
 
 
-IconHandler::IconHandler(Widget *owner) :
+UIconHandler::UIconHandler(UIWidget *owner) :
     m_hIcon(nullptr),
     m_hEmf(nullptr),
     m_hBmp(nullptr),
@@ -13,7 +13,7 @@ IconHandler::IconHandler(Widget *owner) :
 
 }
 
-IconHandler::~IconHandler()
+UIconHandler::~UIconHandler()
 {
     if (m_hIcon) {
         DestroyIcon(m_hIcon);
@@ -27,7 +27,7 @@ IconHandler::~IconHandler()
     }
 }
 
-void IconHandler::setIcon(const std::wstring &path, int w, int h)
+void UIconHandler::setIcon(const std::wstring &path, int w, int h)
 {
     m_owner->metrics()->setMetrics(Metrics::IconWidth, w);
     m_owner->metrics()->setMetrics(Metrics::IconHeight, h);
@@ -39,7 +39,7 @@ void IconHandler::setIcon(const std::wstring &path, int w, int h)
     m_owner->update();
 }
 
-void IconHandler::setIcon(int id, int w, int h)
+void UIconHandler::setIcon(int id, int w, int h)
 {
     if (m_hIcon) {
         DestroyIcon(m_hIcon);
@@ -52,7 +52,7 @@ void IconHandler::setIcon(int id, int w, int h)
     m_owner->update();
 }
 
-void IconHandler::setEMFIcon(const std::wstring &path, int w, int h)
+void UIconHandler::setEMFIcon(const std::wstring &path, int w, int h)
 {
     if (m_hEmf) {
         delete m_hEmf, m_hEmf = nullptr;
@@ -63,29 +63,29 @@ void IconHandler::setEMFIcon(const std::wstring &path, int w, int h)
     m_owner->update();
 }
 
-void IconHandler::setEMFIcon(int id, int w, int h)
+void UIconHandler::setEMFIcon(int id, int w, int h)
 {
     if (m_hEmf) {
         delete m_hEmf, m_hEmf = nullptr;
     }
     m_owner->metrics()->setMetrics(Metrics::IconWidth, w);
     m_owner->metrics()->setMetrics(Metrics::IconHeight, h);
-    Utils::loadEmfResource(m_hEmf, id, RT_RCDATA);
+    UIUtils::loadEmfResource(m_hEmf, id, RT_RCDATA);
     m_owner->update();
 }
 
-void IconHandler::setImage(int id, int w, int h)
+void UIconHandler::setImage(int id, int w, int h)
 {
     if (m_hBmp) {
         delete m_hBmp, m_hBmp = nullptr;
     }
     m_owner->metrics()->setMetrics(Metrics::IconWidth, w);
     m_owner->metrics()->setMetrics(Metrics::IconHeight, h);
-    Utils::loadImageResource(m_hBmp, id, L"PNG");
+    UIUtils::loadImageResource(m_hBmp, id, L"PNG");
     m_owner->update();
 }
 
-void IconHandler::setImage(const std::wstring &path, int w, int h)
+void UIconHandler::setImage(const std::wstring &path, int w, int h)
 {
     m_owner->metrics()->setMetrics(Metrics::IconWidth, w);
     m_owner->metrics()->setMetrics(Metrics::IconHeight, h);
@@ -96,7 +96,7 @@ void IconHandler::setImage(const std::wstring &path, int w, int h)
     m_owner->update();
 }
 
-void IconHandler::setIconSize(int w, int h)
+void UIconHandler::setIconSize(int w, int h)
 {
     m_owner->metrics()->setMetrics(Metrics::IconWidth, w);
     m_owner->metrics()->setMetrics(Metrics::IconHeight, h);

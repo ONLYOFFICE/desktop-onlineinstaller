@@ -25,7 +25,7 @@ static void RoundedPath(Gdiplus::GraphicsPath &ph, int x, int y, int width, int 
     ph.CloseFigure();
 }
 
-DrawingEngine::DrawingEngine() :
+UIDrawingEngine::UIDrawingEngine() :
     m_ds(nullptr),
     m_ps(nullptr),
     m_hwnd(nullptr),
@@ -38,23 +38,23 @@ DrawingEngine::DrawingEngine() :
 
 }
 
-DrawingEngine* DrawingEngine::instance()
+UIDrawingEngine* UIDrawingEngine::instance()
 {
-    static DrawingEngine inst;
+    static UIDrawingEngine inst;
     return &inst;
 }
 
-DrawingEngine::~DrawingEngine()
+UIDrawingEngine::~UIDrawingEngine()
 {
 
 }
 
-DrawningSurface *DrawingEngine::surface()
+UIDrawningSurface *UIDrawingEngine::surface()
 {
     return m_ds;
 }
 
-void DrawingEngine::Begin(DrawningSurface *ds, HWND hwnd, RECT *rc)
+void UIDrawingEngine::Begin(UIDrawningSurface *ds, HWND hwnd, RECT *rc)
 {
     if (m_ds) {
         printf("Engine is buisy...\n");
@@ -68,7 +68,7 @@ void DrawingEngine::Begin(DrawningSurface *ds, HWND hwnd, RECT *rc)
     m_hdc = BeginPaint(hwnd, m_ps);
 }
 
-void DrawingEngine::FillBackground() const
+void UIDrawingEngine::FillBackground() const
 {
     HBRUSH bkgBrush = CreateSolidBrush(m_ds->palette()->color(Palette::Background));
     HBRUSH oldBkgBrush = (HBRUSH)SelectObject(m_hdc, bkgBrush);
@@ -77,7 +77,7 @@ void DrawingEngine::FillBackground() const
     DeleteObject(bkgBrush);
 }
 
-// void DrawingEngine::DrawRoundedRect()
+// void UIDrawingEngine::DrawRoundedRect()
 // {
 //     int x = m_rc->left + m_ds->metrics()->value(Metrics::BorderWidth) - 1;
 //     int y = m_rc->top + m_ds->metrics()->value(Metrics::BorderWidth) - 1;
@@ -116,7 +116,7 @@ void DrawingEngine::FillBackground() const
 //     m_memDC = nullptr;
 // }
 
-void DrawingEngine::DrawBorder() const
+void UIDrawingEngine::DrawBorder() const
 {
     RECT rc;
     SetRect(&rc, m_rc->left, m_rc->top, m_rc->right, m_rc->bottom);
@@ -136,7 +136,7 @@ void DrawingEngine::DrawBorder() const
     DeleteObject(brdBrush);
 }
 
-void DrawingEngine::DrawTopBorder(int brdWidth, COLORREF brdColor) const
+void UIDrawingEngine::DrawTopBorder(int brdWidth, COLORREF brdColor) const
 {
     HPEN pen = CreatePen(PS_SOLID, brdWidth, brdColor);
     HPEN oldPen = (HPEN)SelectObject(m_hdc, pen);
@@ -146,14 +146,14 @@ void DrawingEngine::DrawTopBorder(int brdWidth, COLORREF brdColor) const
     DeleteObject(pen);
 }
 
-void DrawingEngine::DrawIcon(HICON hIcon) const
+void UIDrawingEngine::DrawIcon(HICON hIcon) const
 {
     int x = m_rc->left + (m_rc->right - m_rc->left - m_ds->metrics()->value(Metrics::IconWidth)) / 2;
     int y = m_rc->top + (m_rc->bottom - m_rc->top - m_ds->metrics()->value(Metrics::IconHeight)) / 2;
     DrawIconEx(m_hdc, x, y, hIcon, m_ds->metrics()->value(Metrics::IconWidth), m_ds->metrics()->value(Metrics::IconHeight), 0, NULL, DI_NORMAL);
 }
 
-void DrawingEngine::DrawEmfIcon(Gdiplus::Metafile *hEmf) const
+void UIDrawingEngine::DrawEmfIcon(Gdiplus::Metafile *hEmf) const
 {
     int w = m_ds->metrics()->value(Metrics::IconWidth);
     int h = m_ds->metrics()->value(Metrics::IconHeight);
@@ -171,7 +171,7 @@ void DrawingEngine::DrawEmfIcon(Gdiplus::Metafile *hEmf) const
     gr.DrawImage(&bmp, x, y, w, h);
 }
 
-void DrawingEngine::DrawImage(Gdiplus::Bitmap *hBmp) const
+void UIDrawingEngine::DrawImage(Gdiplus::Bitmap *hBmp) const
 {
     int x = m_rc->left + (m_rc->right - m_rc->left - m_ds->metrics()->value(Metrics::IconWidth)) / 2;
     int y = m_rc->top + (m_rc->bottom - m_rc->top - m_ds->metrics()->value(Metrics::IconHeight)) / 2;
@@ -182,7 +182,7 @@ void DrawingEngine::DrawImage(Gdiplus::Bitmap *hBmp) const
     gr.DrawImage(hBmp, x, y, m_ds->metrics()->value(Metrics::IconWidth), m_ds->metrics()->value(Metrics::IconHeight));
 }
 
-void DrawingEngine::DrawStockCloseIcon()
+void UIDrawingEngine::DrawStockCloseIcon()
 {
     HPEN hPen = CreatePen(PS_SOLID, m_ds->metrics()->value(Metrics::PrimitiveWidth), m_ds->palette()->color(Palette::Primitive));
     HPEN oldPen = (HPEN)SelectObject(m_hdc, hPen);
@@ -200,7 +200,7 @@ void DrawingEngine::DrawStockCloseIcon()
     DeleteObject(hPen);
 }
 
-void DrawingEngine::DrawStockMinimizeIcon()
+void UIDrawingEngine::DrawStockMinimizeIcon()
 {
     HPEN hPen = CreatePen(PS_SOLID, m_ds->metrics()->value(Metrics::PrimitiveWidth), m_ds->palette()->color(Palette::Primitive));
     HPEN oldPen = (HPEN)SelectObject(m_hdc, hPen);
@@ -212,7 +212,7 @@ void DrawingEngine::DrawStockMinimizeIcon()
     DeleteObject(hPen);
 }
 
-void DrawingEngine::DrawStockMaximizeIcon()
+void UIDrawingEngine::DrawStockMaximizeIcon()
 {
     HPEN hPen = CreatePen(PS_SOLID, m_ds->metrics()->value(Metrics::PrimitiveWidth), m_ds->palette()->color(Palette::Primitive));
     HPEN oldPen = (HPEN)SelectObject(m_hdc, hPen);
@@ -236,7 +236,7 @@ void DrawingEngine::DrawStockMaximizeIcon()
     DeleteObject(hPen);
 }
 
-void DrawingEngine::DrawStockRestoreIcon()
+void UIDrawingEngine::DrawStockRestoreIcon()
 {
     HPEN hPen = CreatePen(PS_SOLID, m_ds->metrics()->value(Metrics::PrimitiveWidth), m_ds->palette()->color(Palette::Primitive));
     HPEN oldPen = (HPEN)SelectObject(m_hdc, hPen);
@@ -251,7 +251,7 @@ void DrawingEngine::DrawStockRestoreIcon()
     DeleteObject(hPen);
 }
 
-void DrawingEngine::DrawCheckBox(const std::wstring &text, HFONT hFont, bool checked)
+void UIDrawingEngine::DrawCheckBox(const std::wstring &text, HFONT hFont, bool checked)
 {
     int iconWidth = m_ds->metrics()->value(Metrics::IconWidth);
     int iconHeight = m_ds->metrics()->value(Metrics::IconHeight);
@@ -310,7 +310,7 @@ void DrawingEngine::DrawCheckBox(const std::wstring &text, HFONT hFont, bool che
     m_memDC = nullptr;
 }
 
-void DrawingEngine::DrawRadioButton(const std::wstring &text, HFONT hFont, bool checked)
+void UIDrawingEngine::DrawRadioButton(const std::wstring &text, HFONT hFont, bool checked)
 {
     int x = m_rc->left + 1;
     int y = m_rc->top + (m_rc->bottom - m_rc->top - m_ds->metrics()->value(Metrics::IconHeight)) / 2;
@@ -357,7 +357,7 @@ void DrawingEngine::DrawRadioButton(const std::wstring &text, HFONT hFont, bool 
     m_memDC = nullptr;
 }
 
-void DrawingEngine::DrawProgressBar(int progress, int pulse_pos)
+void UIDrawingEngine::DrawProgressBar(int progress, int pulse_pos)
 {
     int x = m_rc->left + m_ds->metrics()->value(Metrics::BorderWidth) + m_ds->metrics()->value(Metrics::IconMarginLeft);
     int y = m_rc->top + m_ds->metrics()->value(Metrics::BorderWidth) + m_ds->metrics()->value(Metrics::IconMarginTop);
@@ -423,7 +423,7 @@ void DrawingEngine::DrawProgressBar(int progress, int pulse_pos)
     m_memDC = nullptr;
 }
 
-void DrawingEngine::DrawText(const RECT &rc, const std::wstring &text, HFONT hFont, bool multiline) const
+void UIDrawingEngine::DrawText(const RECT &rc, const std::wstring &text, HFONT hFont, bool multiline) const
 {
     HFONT hOldFont = (HFONT) SelectObject(m_hdc, hFont);
     SetBkMode(m_hdc, TRANSPARENT);
@@ -449,7 +449,7 @@ void DrawingEngine::DrawText(const RECT &rc, const std::wstring &text, HFONT hFo
     SetBkMode(m_hdc, OPAQUE);
 }
 
-void DrawingEngine::End()
+void UIDrawingEngine::End()
 {
     EndPaint(m_hwnd, m_ps);
     delete m_ps;
@@ -460,7 +460,7 @@ void DrawingEngine::End()
     m_ds = nullptr;
 }
 
-// void DrawingEngine::LayeredBegin(DrawningSurface *ds, HWND hwnd, RECT *rc)
+// void UIDrawingEngine::LayeredBegin(UIDrawningSurface *ds, HWND hwnd, RECT *rc)
 // {
 //     if (m_ds) {
 //         printf("Engine is buisy....\n");
@@ -481,7 +481,7 @@ void DrawingEngine::End()
 //     // gr->SetInterpolationMode(Gdiplus::InterpolationModeHighQuality);
 // }
 
-// void DrawingEngine::LayeredDrawRoundedRect() const
+// void UIDrawingEngine::LayeredDrawRoundedRect() const
 // {
 //     int x = m_rc->left + m_ds->metrics()->value(Metrics::ShadowWidth) + m_ds->metrics()->value(Metrics::BorderWidth) - 1;
 //     int y = m_rc->top + m_ds->metrics()->value(Metrics::ShadowWidth) + m_ds->metrics()->value(Metrics::BorderWidth) - 1;
@@ -500,7 +500,7 @@ void DrawingEngine::End()
 //     m_graphics->FillPath(&brush, &ph);
 // }
 
-void DrawingEngine::LayeredDrawText(RECT &rc, const std::wstring &text, HFONT hFont, bool rtl) const
+void UIDrawingEngine::LayeredDrawText(RECT &rc, const std::wstring &text, HFONT hFont, bool rtl) const
 {
 //     Gdiplus::FontFamily fntFam(L"Segoe UI");
 //     Gdiplus::Font font(&fntFam, m_ds->metrics()->value(Metrics::FontHeight), Gdiplus::FontStyleRegular, Gdiplus::Unit::UnitPixel);
@@ -533,7 +533,7 @@ void DrawingEngine::LayeredDrawText(RECT &rc, const std::wstring &text, HFONT hF
     m_graphics->DrawString(text.c_str(), -1, &font, rcF, &strFmt, &brush);
 }
 
-// void DrawingEngine::LayeredDrawShadow(int shadowWidth, int rad)
+// void UIDrawingEngine::LayeredDrawShadow(int shadowWidth, int rad)
 // {
 // #define SHADOW_TRANSPATENCY 0x26
 //     for (int i = 0; i < shadowWidth; i++) {
@@ -551,7 +551,7 @@ void DrawingEngine::LayeredDrawText(RECT &rc, const std::wstring &text, HFONT hF
 //     }
 // }
 
-// void DrawingEngine::LayeredUpdate(BYTE alpha)
+// void UIDrawingEngine::LayeredUpdate(BYTE alpha)
 // {
 //     RECT wrc;
 //     GetWindowRect(m_hwnd, &wrc);
@@ -568,7 +568,7 @@ void DrawingEngine::LayeredDrawText(RECT &rc, const std::wstring &text, HFONT hF
 //     ReleaseDC(NULL, scrDC);
 // }
 
-// void DrawingEngine::LayeredEnd()
+// void UIDrawingEngine::LayeredEnd()
 // {
 //     delete m_graphics;
 //     m_graphics = nullptr;

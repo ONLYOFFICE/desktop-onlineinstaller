@@ -16,13 +16,13 @@ struct FRAME {
     int left, top;
 };
 
-class Window : public Widget
+class UIWindow : public UIWidget
 {
 public:
-    Window(Widget *parent = nullptr, const Rect &rc = DEFAULT_WINDOW_RECT);
-    virtual ~Window();
+    UIWindow(UIWidget *parent = nullptr, const Rect &rc = DEFAULT_WINDOW_RECT);
+    virtual ~UIWindow();
 
-    void setCentralWidget(Widget*);
+    void setCentralWidget(UIWidget*);
     void setContentsMargins(int, int, int, int);
     void setResizable(bool);
     void showAll();
@@ -30,11 +30,11 @@ public:
     void showMinimized();
     void showMaximized();
     void setIcon(int);
-    void setLayout(Layout*) = delete;
+    void setLayout(UILayout*) = delete;
     bool isMinimized();
     bool isMaximized();
-    Widget *centralWidget();
-    Layout *layout() = delete;
+    UIWidget *centralWidget();
+    UILayout *layout() = delete;
 
     /* callback */
     int onStateChanged(const FnVoidInt &callback);
@@ -45,7 +45,7 @@ protected:
     virtual bool event(UINT, WPARAM, LPARAM, LRESULT*) override;
 
 private:
-    Widget  *m_centralWidget;
+    UIWidget *m_centralWidget;
     Margins  m_contentMargins;
     COLORREF m_brdColor;
     int      m_brdWidth,

@@ -1,12 +1,12 @@
 #include "uilayout.h"
 
 
-Layout::Layout(Object *parent)
+UILayout::UILayout(UIObject *parent)
 {
 
 }
 
-Layout::~Layout()
+UILayout::~UILayout()
 {
 
 }

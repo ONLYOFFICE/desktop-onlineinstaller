@@ -5,11 +5,11 @@
 #include <Windows.h>
 
 
-class Caption : public Label
+class UICaption : public UILabel
 {
 public:
-    Caption(Widget *parent = nullptr);
-    ~Caption();
+    UICaption(UIWidget *parent = nullptr);
+    ~UICaption();
 
     void setResizingAvailable(bool);
 

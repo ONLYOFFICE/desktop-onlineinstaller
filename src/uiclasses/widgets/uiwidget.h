@@ -9,11 +9,11 @@
 #include <Windows.h>
 
 
-class Widget : public Object, public DrawningSurface
+class UIWidget : public UIObject, public UIDrawningSurface
 {
 public:
-    Widget(Widget *parent = nullptr);
-    virtual ~Widget();
+    UIWidget(UIWidget *parent = nullptr);
+    virtual ~UIWidget();
 
     enum Properties : BYTE {
         HSizeBehavior,
@@ -32,7 +32,7 @@ public:
     void close();
     void move(int, int);
     void resize(int, int);
-    Widget* parentWidget();
+    UIWidget* parentWidget();
     std::wstring title();
     Size size();
     void size(int*, int*);
@@ -43,13 +43,13 @@ public:
     void hide();
     void repaint();
     void update();
-    void setLayout(Layout *lut);
+    void setLayout(UILayout *lut);
     bool isCreated();
     bool underMouse();
     int  property(Properties);
-    Layout* layout();
+    UILayout* layout();
     HWND nativeWindowHandle();
-    static Widget* widgetFromHwnd(Widget *parent, HWND);
+    static UIWidget* widgetFromHwnd(UIWidget *parent, HWND);
 
     /* callback */
     int onResize(const FnVoidIntInt &callback);
@@ -61,13 +61,13 @@ public:
     virtual void disconnect(int) override;
 
 protected:
-    friend class Application;
-    Widget(Widget *parent, ObjectType type, HWND hWnd = nullptr, const Rect &rc = Rect(CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT));
+    friend class UIApplication;
+    UIWidget(UIWidget *parent, ObjectType type, HWND hWnd = nullptr, const Rect &rc = Rect(CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT));
     virtual bool event(UINT, WPARAM, LPARAM, LRESULT*);
 
     HWND         m_hWnd;
     HFONT        m_hFont;
-    Layout      *m_layout;
+    UILayout      *m_layout;
     std::wstring m_title;
     bool         m_disabled;
 

@@ -34,7 +34,7 @@ int WINAPI _tWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInstance, _In
         return 0;
     }
 
-    if (Utils::getWinVersion() < Utils::Win7) {
+    if (UIUtils::getWinVersion() < UIUtils::Win7) {
         wstring msg(_TR(MSG_ERR_SYSTEM));
         NS_Utils::Replace(msg, L"%1", _TR(CAPTION));
         NS_Utils::ShowMessage(msg);
@@ -50,10 +50,10 @@ int WINAPI _tWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInstance, _In
     wstring path, arch;
     bool app_installed = NS_Utils::IsAppInstalled(path, &arch);
 
-    Application app(hInst, lpCmdLine, nCmdShow);
+    UIApplication app(hInst, lpCmdLine, nCmdShow);
     app.setFont(L"Segoe UI");
     if (NS_Utils::IsRtlLanguage(lcid))
-        app.setLayoutDirection(Application::RightToLeft);
+        app.setLayoutDirection(UIApplication::RightToLeft);
     int scrWidth = GetSystemMetrics(SM_CXSCREEN);
     int scrHeight = GetSystemMetrics(SM_CYSCREEN);
     int x = (scrWidth - WINDOW_SIZE.width) / 2;

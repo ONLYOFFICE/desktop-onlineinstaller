@@ -3,20 +3,20 @@
 #include <cmath>
 
 
-BoxLayout::BoxLayout(Direction direction) :
+UIBoxLayout::UIBoxLayout(Direction direction) :
     m_direction(direction)
 {
     m_margins = Margins(6,6,6,6);
     m_spacing = 6;
 }
 
-BoxLayout::~BoxLayout()
+UIBoxLayout::~UIBoxLayout()
 {
     for (auto it = m_destroy_conn.begin(); it != m_destroy_conn.end(); it++)
         it->first->disconnect(it->second);
 }
 
-void BoxLayout::addWidget(Widget *wgt)
+void UIBoxLayout::addWidget(UIWidget *wgt)
 {
     m_widgets.push_back(wgt);
     // int destroy_conn = wgt->onAboutToDestroy([=]() {
@@ -31,17 +31,17 @@ void BoxLayout::addWidget(Widget *wgt)
     // m_destroy_conn[wgt] = destroy_conn;
 }
 
-void BoxLayout::setContentMargins(int left, int top, int right, int bottom)
+void UIBoxLayout::setContentMargins(int left, int top, int right, int bottom)
 {
     m_margins = Margins(left, top, right, bottom);
 }
 
-void BoxLayout::setSpacing(int spacing)
+void UIBoxLayout::setSpacing(int spacing)
 {
     m_spacing = spacing;
 }
 
-void BoxLayout::onResize(int w, int h)
+void UIBoxLayout::onResize(int w, int h)
 {
     int amount = m_widgets.size();
     if (amount > 0) {
@@ -55,14 +55,14 @@ void BoxLayout::onResize(int w, int h)
         if (m_direction == Horizontal) {
             sum_width -= (amount - 1) * m_spacing;
             for (int i = 0; i < amount; i++) {
-                Widget::SizeBehavior sb = (Widget::SizeBehavior)m_widgets[i]->property(Widget::HSizeBehavior);
-                if (sb == Widget::SizeBehavior::Fixed) {
+                UIWidget::SizeBehavior sb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::HSizeBehavior);
+                if (sb == UIWidget::SizeBehavior::Fixed) {
                     int _w = 0, _h = 0;
                     m_widgets[i]->size(&_w, &_h);
                     sum_fixed_width_or_height += _w;
                     ++num_fixed;
                 } else
-                if (sb == Widget::SizeBehavior::Expanding) {
+                if (sb == UIWidget::SizeBehavior::Expanding) {
                     last_expanding = i;
                 }
             }
@@ -74,23 +74,23 @@ void BoxLayout::onResize(int w, int h)
                         sep_width = (sum_width - sum_fixed_width_or_height) - (amount - num_fixed - 1)*sep_width;
                     int _w = 0, _h = 0;
                     m_widgets[i]->size(&_w, &_h);
-                    Widget::SizeBehavior hsb = (Widget::SizeBehavior)m_widgets[i]->property(Widget::HSizeBehavior);
-                    Widget::SizeBehavior vsb = (Widget::SizeBehavior)m_widgets[i]->property(Widget::VSizeBehavior);
-                    if (hsb == Widget::SizeBehavior::Fixed) {
-                        if (vsb == Widget::SizeBehavior::Fixed) {
+                    UIWidget::SizeBehavior hsb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::HSizeBehavior);
+                    UIWidget::SizeBehavior vsb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::VSizeBehavior);
+                    if (hsb == UIWidget::SizeBehavior::Fixed) {
+                        if (vsb == UIWidget::SizeBehavior::Fixed) {
                             m_widgets[i]->move(x, y);
                         } else
-                        if (vsb == Widget::SizeBehavior::Expanding) {
+                        if (vsb == UIWidget::SizeBehavior::Expanding) {
                             m_widgets[i]->setGeometry(x, y, _w, sum_height);
                         }
                         x += _w + m_spacing;
 
                     } else
-                    if (hsb == Widget::SizeBehavior::Expanding) {
-                        if (vsb == Widget::SizeBehavior::Fixed) {
+                    if (hsb == UIWidget::SizeBehavior::Expanding) {
+                        if (vsb == UIWidget::SizeBehavior::Fixed) {
                             m_widgets[i]->setGeometry(x, y, sep_width, _h);
                         } else
-                        if (vsb == Widget::SizeBehavior::Expanding) {
+                        if (vsb == UIWidget::SizeBehavior::Expanding) {
                             m_widgets[i]->setGeometry(x, y, sep_width, sum_height);
                         }
                         x += sep_width + m_spacing;
@@ -102,26 +102,26 @@ void BoxLayout::onResize(int w, int h)
                 for (int i = 0; i < amount; i++) {
                     if (i == amount - 1)
                         sep_width = sum_width - i*sep_width;
-                    Widget::SizeBehavior hsb = (Widget::SizeBehavior)m_widgets[i]->property(Widget::HSizeBehavior);
-                    Widget::SizeBehavior vsb = (Widget::SizeBehavior)m_widgets[i]->property(Widget::VSizeBehavior);
-                    if (hsb == Widget::SizeBehavior::Fixed) {
-                        if (vsb == Widget::SizeBehavior::Fixed) {
+                    UIWidget::SizeBehavior hsb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::HSizeBehavior);
+                    UIWidget::SizeBehavior vsb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::VSizeBehavior);
+                    if (hsb == UIWidget::SizeBehavior::Fixed) {
+                        if (vsb == UIWidget::SizeBehavior::Fixed) {
                             m_widgets[i]->move(x, y);
                         } else
-                        if (vsb == Widget::SizeBehavior::Expanding) {
+                        if (vsb == UIWidget::SizeBehavior::Expanding) {
                             int _w = 0, _h = 0;
                             m_widgets[i]->size(&_w, &_h);
                             m_widgets[i]->setGeometry(x, y, _w, sum_height);
                         }
 
                     } else
-                    if (hsb == Widget::SizeBehavior::Expanding) {
-                        if (vsb == Widget::SizeBehavior::Fixed) {
+                    if (hsb == UIWidget::SizeBehavior::Expanding) {
+                        if (vsb == UIWidget::SizeBehavior::Fixed) {
                             int _w = 0, _h = 0;
                             m_widgets[i]->size(&_w, &_h);
                             m_widgets[i]->setGeometry(x, y, sep_width, _h);
                         } else
-                        if (vsb == Widget::SizeBehavior::Expanding) {
+                        if (vsb == UIWidget::SizeBehavior::Expanding) {
                             m_widgets[i]->setGeometry(x, y, sep_width, sum_height);
                         }
                     }
@@ -132,14 +132,14 @@ void BoxLayout::onResize(int w, int h)
         } else {
             sum_height -= (amount - 1) * m_spacing;
             for (int i = 0; i < amount; i++) {
-                Widget::SizeBehavior sb = (Widget::SizeBehavior)m_widgets[i]->property(Widget::VSizeBehavior);
-                if (sb == Widget::SizeBehavior::Fixed) {
+                UIWidget::SizeBehavior sb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::VSizeBehavior);
+                if (sb == UIWidget::SizeBehavior::Fixed) {
                     int _w = 0, _h = 0;
                     m_widgets[i]->size(&_w, &_h);
                     sum_fixed_width_or_height += _h;
                     ++num_fixed;
                 } else
-                if (sb == Widget::SizeBehavior::Expanding) {
+                if (sb == UIWidget::SizeBehavior::Expanding) {
                     last_expanding = i;
                 }
             }
@@ -151,23 +151,23 @@ void BoxLayout::onResize(int w, int h)
                         sep_height = (sum_height - sum_fixed_width_or_height) - (amount - num_fixed - 1)*sep_height;
                     int _w = 0, _h = 0;
                     m_widgets[i]->size(&_w, &_h);
-                    Widget::SizeBehavior hsb = (Widget::SizeBehavior)m_widgets[i]->property(Widget::HSizeBehavior);
-                    Widget::SizeBehavior vsb = (Widget::SizeBehavior)m_widgets[i]->property(Widget::VSizeBehavior);
-                    if (vsb == Widget::SizeBehavior::Fixed) {
-                        if (hsb == Widget::SizeBehavior::Fixed) {
+                    UIWidget::SizeBehavior hsb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::HSizeBehavior);
+                    UIWidget::SizeBehavior vsb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::VSizeBehavior);
+                    if (vsb == UIWidget::SizeBehavior::Fixed) {
+                        if (hsb == UIWidget::SizeBehavior::Fixed) {
                             m_widgets[i]->move(x, y);
                         } else
-                        if (hsb == Widget::SizeBehavior::Expanding) {
+                        if (hsb == UIWidget::SizeBehavior::Expanding) {
                             m_widgets[i]->setGeometry(x, y, sum_width, _h);
                         }
                         y += _h + m_spacing;
 
                     } else
-                    if (vsb == Widget::SizeBehavior::Expanding) {
-                        if (hsb == Widget::SizeBehavior::Fixed) {
+                    if (vsb == UIWidget::SizeBehavior::Expanding) {
+                        if (hsb == UIWidget::SizeBehavior::Fixed) {
                             m_widgets[i]->setGeometry(x, y, _w, sep_height);
                         } else
-                        if (hsb == Widget::SizeBehavior::Expanding) {
+                        if (hsb == UIWidget::SizeBehavior::Expanding) {
                             m_widgets[i]->setGeometry(x, y, sum_width, sep_height);
                         }
                         y += sep_height + m_spacing;
@@ -179,26 +179,26 @@ void BoxLayout::onResize(int w, int h)
                 for (int i = 0; i < amount; i++) {
                     if (i == amount - 1)
                         sep_height = sum_height - i*sep_height;
-                    Widget::SizeBehavior hsb = (Widget::SizeBehavior)m_widgets[i]->property(Widget::HSizeBehavior);
-                    Widget::SizeBehavior vsb = (Widget::SizeBehavior)m_widgets[i]->property(Widget::VSizeBehavior);
-                    if (vsb == Widget::SizeBehavior::Fixed) {
-                        if (hsb == Widget::SizeBehavior::Fixed) {
+                    UIWidget::SizeBehavior hsb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::HSizeBehavior);
+                    UIWidget::SizeBehavior vsb = (UIWidget::SizeBehavior)m_widgets[i]->property(UIWidget::VSizeBehavior);
+                    if (vsb == UIWidget::SizeBehavior::Fixed) {
+                        if (hsb == UIWidget::SizeBehavior::Fixed) {
                             m_widgets[i]->move(x, y);
                         } else
-                        if (hsb == Widget::SizeBehavior::Expanding) {
+                        if (hsb == UIWidget::SizeBehavior::Expanding) {
                             int _w = 0, _h = 0;
                             m_widgets[i]->size(&_w, &_h);
                             m_widgets[i]->setGeometry(x, y, sum_width, _h);
                         }
 
                     } else
-                    if (vsb == Widget::SizeBehavior::Expanding) {
-                        if (hsb == Widget::SizeBehavior::Fixed) {
+                    if (vsb == UIWidget::SizeBehavior::Expanding) {
+                        if (hsb == UIWidget::SizeBehavior::Fixed) {
                             int _w = 0, _h = 0;
                             m_widgets[i]->size(&_w, &_h);
                             m_widgets[i]->setGeometry(x, y, _w, sep_height);
                         } else
-                        if (hsb == Widget::SizeBehavior::Expanding) {
+                        if (hsb == UIWidget::SizeBehavior::Expanding) {
                             m_widgets[i]->setGeometry(x, y, sum_width, sep_height);
                         }
                     }

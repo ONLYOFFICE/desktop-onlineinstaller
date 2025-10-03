@@ -7,24 +7,24 @@
 #define RESIZE_AREA_PART 0.14
 
 
-Caption::Caption(Widget *parent) :
-    Label(parent),
+UICaption::UICaption(UIWidget *parent) :
+    UILabel(parent),
     m_isResizingAvailable(true)
 {
     m_hwndRoot = GetAncestor(m_hWnd, GA_ROOT);
 }
 
-Caption::~Caption()
+UICaption::~UICaption()
 {
 
 }
 
-void Caption::setResizingAvailable(bool isResizingAvailable)
+void UICaption::setResizingAvailable(bool isResizingAvailable)
 {
     m_isResizingAvailable = isResizingAvailable;
 }
 
-bool Caption::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
+bool UICaption::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
 {
     switch (msg) {
     case WM_PAINT: {
@@ -92,22 +92,22 @@ bool Caption::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
     default:
         break;
     }
-    return Widget::event(msg, wParam, lParam, result);
+    return UIWidget::event(msg, wParam, lParam, result);
 }
 
-bool Caption::isResizingAvailable()
+bool UICaption::isResizingAvailable()
 {
-    return m_isResizingAvailable && Utils::getWinVersion() >= Utils::WinVer::Win10 && !IsZoomed(m_hwndRoot);
+    return m_isResizingAvailable && UIUtils::getWinVersion() >= UIUtils::WinVer::Win10 && !IsZoomed(m_hwndRoot);
 }
 
-bool Caption::isPointInResizeArea(int posY)
+bool UICaption::isPointInResizeArea(int posY)
 {
     int w = 0, h = 0;
     size(&w, &h);
     return posY <= RESIZE_AREA_PART * h;
 }
 
-bool Caption::postMsg(DWORD cmd) {
+bool UICaption::postMsg(DWORD cmd) {
     POINT pt;
     ::GetCursorPos(&pt);
     ScreenToClient(m_hWnd, &pt);

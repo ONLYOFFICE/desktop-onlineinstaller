@@ -9,7 +9,7 @@
 #define NC_AREA_WIDTH 3
 #define MAIN_WINDOW_BORDER_WIDTH 1
 
-using WinVer = Utils::WinVer;
+using WinVer = UIUtils::WinVer;
 
 
 static BOOL CALLBACK EnumChildProc(_In_ HWND hwnd, _In_ LPARAM lParam)
@@ -48,7 +48,7 @@ static Rect availableGeometry(HWND hwnd)
 
 static void GetFrameMetricsForDpi(FRAME &frame, double dpi, bool maximized = false)
 {
-    WinVer ver = Utils::getWinVersion();
+    WinVer ver = UIUtils::getWinVersion();
     int row = ver == WinVer::WinXP ? 0 :
                   ver <= WinVer::Win7 ? 1 :
                   ver <= WinVer::Win8_1 ? 2 :
@@ -124,8 +124,8 @@ static bool isThemeActive()
     return IsThemeActive ? (bool)IsThemeActive() : true;
 }
 
-Window::Window(Widget *parent, const Rect &rc) :
-    Widget(parent, ObjectType::WindowType, nullptr, rc),
+UIWindow::UIWindow(UIWidget *parent, const Rect &rc) :
+    UIWidget(parent, ObjectType::WindowType, nullptr, rc),
     m_centralWidget(nullptr),
     m_contentMargins(0,0,0,0),
     m_resAreaWidth(0),
@@ -135,12 +135,12 @@ Window::Window(Widget *parent, const Rect &rc) :
     m_scaleChanged(false),
     m_init_size(rc.width, rc.height)
 {
-    //setLayout(new BoxLayout(BoxLayout::Vertical));
+    //setLayout(new UIBoxLayout(UIBoxLayout::Vertical));
     m_isThemeActive = isThemeActive();
     m_isTaskbarAutoHideOn = isTaskbarAutoHideOn();
     m_borderless = true;//isCustomWindowStyle();
 
-    if (m_borderless && Utils::getWinVersion() < WinVer::Win10) {
+    if (m_borderless && UIUtils::getWinVersion() < WinVer::Win10) {
         LONG style = ::GetWindowLong(m_hWnd, GWL_STYLE) | WS_OVERLAPPEDWINDOW;
         ::SetWindowLong(m_hWnd, GWL_STYLE, style & ~WS_CAPTION);
     }
@@ -148,34 +148,34 @@ Window::Window(Widget *parent, const Rect &rc) :
     m_dpi = GetLogicalDpi(m_hWnd);
     GetFrameMetricsForDpi(m_frame, m_dpi, m_isMaximized);
 
-    if (m_borderless && Utils::getWinVersion() == WinVer::Win10) {
+    if (m_borderless && UIUtils::getWinVersion() == WinVer::Win10) {
         HDC hdc = GetDC(NULL);
         m_brdWidth = GetSystemMetrics(SM_CXBORDER) * GetDeviceCaps(hdc, LOGPIXELSX)/96;
         ReleaseDC(NULL, hdc);
-        m_brdColor = Utils::getColorizationColor(true, palette()->color(Palette::Background));
+        m_brdColor = UIUtils::getColorizationColor(true, palette()->color(Palette::Background));
     }
     SetWindowPos(m_hWnd, NULL, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
 }
 
-Window::~Window()
+UIWindow::~UIWindow()
 {
     //if (m_layout)
     //    delete m_layout, m_layout = nullptr;
 }
 
-void Window::setCentralWidget(Widget *wgt)
+void UIWindow::setCentralWidget(UIWidget *wgt)
 {
     m_centralWidget = wgt;
 }
 
-void Window::setContentsMargins(int left, int top, int right, int bottom)
+void UIWindow::setContentsMargins(int left, int top, int right, int bottom)
 {
     m_contentMargins = Margins(left, top, right, bottom);
     if (IsWindowVisible(m_hWnd))
         SetWindowPos(m_hWnd, NULL, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
 }
 
-void Window::setResizable(bool isResizable)
+void UIWindow::setResizable(bool isResizable)
 {
     if (m_isResizable != isResizable) {
         m_isResizable = isResizable;
@@ -184,7 +184,7 @@ void Window::setResizable(bool isResizable)
     }
 }
 
-void Window::showAll()
+void UIWindow::showAll()
 {
     ShowWindow(m_hWnd, SW_SHOWNORMAL);
     UpdateWindow(m_hWnd);
@@ -192,22 +192,22 @@ void Window::showAll()
     SetForegroundWindow(m_hWnd);
 }
 
-void Window::showNormal()
+void UIWindow::showNormal()
 {
     ShowWindow(m_hWnd, SW_RESTORE);
 }
 
-void Window::showMinimized()
+void UIWindow::showMinimized()
 {
     ShowWindow(m_hWnd, SW_SHOWMINIMIZED);
 }
 
-void Window::showMaximized()
+void UIWindow::showMaximized()
 {
     ShowWindow(m_hWnd, SW_SHOWMAXIMIZED);
 }
 
-void Window::setIcon(int id)
+void UIWindow::setIcon(int id)
 {
     HMODULE hInstance = GetModuleHandle(NULL);
     HICON hIcon = (HICON)LoadImage(hInstance, MAKEINTRESOURCE(id), IMAGE_ICON, 96, 96, LR_DEFAULTCOLOR | LR_SHARED);
@@ -215,7 +215,7 @@ void Window::setIcon(int id)
     SendMessage(m_hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
 }
 
-bool Window::isMinimized()
+bool UIWindow::isMinimized()
 {
     WINDOWPLACEMENT wpl;
     wpl.length = sizeof(wpl);
@@ -224,7 +224,7 @@ bool Window::isMinimized()
     return false;
 }
 
-bool Window::isMaximized()
+bool UIWindow::isMaximized()
 {
     WINDOWPLACEMENT wpl;
     wpl.length = sizeof(wpl);
@@ -233,25 +233,25 @@ bool Window::isMaximized()
     return false;
 }
 
-Widget *Window::centralWidget()
+UIWidget *UIWindow::centralWidget()
 {
     return m_centralWidget;
 }
 
-int Window::onStateChanged(const FnVoidInt &callback)
+int UIWindow::onStateChanged(const FnVoidInt &callback)
 {
     m_state_callbacks[++m_connectionId] = callback;
     return m_connectionId;
 }
 
-void Window::disconnect(int connectionId)
+void UIWindow::disconnect(int connectionId)
 {
     auto it = m_state_callbacks.find(connectionId);
     if (it != m_state_callbacks.end())
         m_state_callbacks.erase(it);
 }
 
-bool Window::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
+bool UIWindow::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
 {
     switch (msg) {
     case WM_DPICHANGED: {
@@ -295,7 +295,7 @@ bool Window::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
     }
 
     case WM_NCPAINT: {
-        if (Utils::getWinVersion() > WinVer::Win7 || !m_borderless)
+        if (UIUtils::getWinVersion() > WinVer::Win7 || !m_borderless)
             return false;
         if (HDC hdc = ::GetDCEx(m_hWnd, 0, DCX_WINDOW | DCX_USESTYLE)) {
             RECT rcc, rcw;
@@ -351,7 +351,7 @@ bool Window::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
         params->rgrc[0].top -= m_frame.top;
         params->rgrc[0].right += m_frame.left;
         params->rgrc[0].bottom += m_frame.left;
-        if (m_isMaximized && m_isTaskbarAutoHideOn && (Utils::getWinVersion() >= WinVer::Win10))
+        if (m_isMaximized && m_isTaskbarAutoHideOn && (UIUtils::getWinVersion() >= WinVer::Win10))
             params->rgrc[0].bottom -= 2;
         *result = res;
         return true;
@@ -406,13 +406,13 @@ bool Window::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
 
     case WM_NCACTIVATE: {
         if (m_borderless) {
-            if (Utils::getWinVersion() > WinVer::WinXP && Utils::getWinVersion() < WinVer::Win10) {
+            if (UIUtils::getWinVersion() > WinVer::WinXP && UIUtils::getWinVersion() < WinVer::Win10) {
                 // Prevent drawing of inactive system frame (needs ~WS_CAPTION or temporary ~WS_VISIBLE to work)
                 *result = DefWindowProc(m_hWnd, WM_NCACTIVATE, wParam, -1);
                 return true;
             } else
-            if (Utils::getWinVersion() == WinVer::Win10) {
-                m_brdColor = Utils::getColorizationColor(LOWORD(wParam), palette()->color(Palette::Background));
+            if (UIUtils::getWinVersion() == WinVer::Win10) {
+                m_brdColor = UIUtils::getColorizationColor(LOWORD(wParam), palette()->color(Palette::Background));
                 RECT rc;
                 GetClientRect(m_hWnd, &rc);
                 rc.bottom = m_brdWidth;
@@ -427,7 +427,7 @@ bool Window::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
         if (m_isMaximized != isMaximized) {
             m_isMaximized = isMaximized;
             GetFrameMetricsForDpi(m_frame, m_dpi, isMaximized);
-            if (m_borderless && Utils::getWinVersion() == WinVer::Win10) {
+            if (m_borderless && UIUtils::getWinVersion() == WinVer::Win10) {
                 if (isMaximized) {
                     m_brdWidth = 0;
                 } else {
@@ -456,7 +456,7 @@ bool Window::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
 
     case WM_SETTINGCHANGE: {
         // if (wParam == SPI_SETWINARRANGING) {
-        //     if (Utils::getWinVersion() > Utils::WinVer::Win10)
+        //     if (UIUtils::getWinVersion() > UIUtils::WinVer::Win10)
         //         SendMessage((HWND)m_boxTitleBtns->winId(), WM_SETTINGCHANGE, 0, 0);
         // }
         //     printf(" Settings...\n");
@@ -484,11 +484,11 @@ bool Window::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
 
                 if (m_borderless) {
                     if (m_isMaximized) {
-                        if (Utils::getWinVersion() < WinVer::Win10) {
+                        if (UIUtils::getWinVersion() < WinVer::Win10) {
                             m_resAreaWidth = 0;
                             Rect rc = availableGeometry(m_hWnd);
                             int offset = 0;
-                            if (Utils::getWinVersion() == WinVer::WinXP) {
+                            if (UIUtils::getWinVersion() == WinVer::WinXP) {
                                 if (isTaskbarAutoHideOn())
                                     offset += NC_AREA_WIDTH + 1;
                                 if (m_isThemeActive) {
@@ -498,14 +498,14 @@ bool Window::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
                                     rc.height += 2*NC_AREA_WIDTH;
                                 }
                             } else
-                            if (Utils::getWinVersion() > WinVer::WinXP && isTaskbarAutoHideOn())
+                            if (UIUtils::getWinVersion() > WinVer::WinXP && isTaskbarAutoHideOn())
                                 offset += 2;
                             SetWindowPos(m_hWnd, NULL, rc.x, rc.y, rc.width, rc.height - offset, SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOSENDCHANGING);
                         }
                     } else {
-                        if (Utils::getWinVersion() < WinVer::Win10) {
+                        if (UIUtils::getWinVersion() < WinVer::Win10) {
                             m_resAreaWidth = (int)round(MAIN_WINDOW_BORDER_WIDTH * m_dpi);
-                            if (Utils::getWinVersion() == WinVer::WinXP)
+                            if (UIUtils::getWinVersion() == WinVer::WinXP)
                                 m_resAreaWidth -= NC_AREA_WIDTH;
                         }
                     }
@@ -513,7 +513,7 @@ bool Window::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
             }
             if (m_centralWidget) {
                 int top_offset = 0;
-                if (m_borderless && !m_isMaximized && Utils::getWinVersion() == Utils::WinVer::Win10)
+                if (m_borderless && !m_isMaximized && UIUtils::getWinVersion() == UIUtils::WinVer::Win10)
                     top_offset = m_brdWidth;
                 m_centralWidget->setGeometry(m_contentMargins.left + m_resAreaWidth, m_contentMargins.top + top_offset + m_resAreaWidth,
                                              LOWORD(lParam) - m_contentMargins.right - m_contentMargins.left - 2*m_resAreaWidth,
@@ -530,5 +530,5 @@ bool Window::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
     default:
         break;
     }
-    return Widget::event(msg, wParam, lParam, result);
+    return UIWidget::event(msg, wParam, lParam, result);
 }

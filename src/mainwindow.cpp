@@ -24,7 +24,7 @@
 
 
 template <class T>
-static void setSelectorStyle(T *sel) // style for CheckBox and RadioButton
+static void setSelectorStyle(T *sel) // style for UICheckBox and UIRadioButton
 {
     sel->metrics()->setMetrics(Metrics::TextMarginLeft, 6);
     sel->metrics()->setMetrics(Metrics::TextMarginRight, 6);
@@ -44,7 +44,7 @@ static void setSelectorStyle(T *sel) // style for CheckBox and RadioButton
     sel->palette()->setColor(Palette::Primitive, Palette::Pressed, 0x0055ff);
 }
 
-static void setButtonStyle(Button *btn)
+static void setButtonStyle(UIButton *btn)
 {
     btn->palette()->setColor(Palette::Text, Palette::Disabled, 0x888888);
     btn->palette()->setColor(Palette::Text, Palette::Normal, 0x333333);
@@ -61,20 +61,20 @@ static void setButtonStyle(Button *btn)
     btn->metrics()->setMetrics(Metrics::BorderWidth, 1);
 }
 
-static void setProgressStyle(ProgressBar *bar)
+static void setProgressStyle(UIProgressBar *bar)
 {
     bar->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
     bar->palette()->setColor(Palette::Base, Palette::Normal, 0xcccccc);
     bar->palette()->setColor(Palette::AlternateBase, Palette::Normal, 0x1e7aaa);
 }
 
-static void setLabelStyle(Label *lb)
+static void setLabelStyle(UILabel *lb)
 {
     lb->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
     lb->palette()->setColor(Palette::Text, Palette::Normal, 0x888888);
 }
 
-static void setControlLabelStyle(Label *lb)
+static void setControlLabelStyle(UILabel *lb)
 {
     lb->resize(50, 36);
     lb->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
@@ -96,8 +96,8 @@ static wstring displayNameAddInfo(const wstring &disp_name, const wstring &info)
     return disp_name + L" (" + info + L")";
 }
 
-MainWindow::MainWindow(Widget *parent, const Rect &rc) :
-    Window(parent, rc),
+MainWindow::MainWindow(UIWidget *parent, const Rect &rc) :
+    UIWindow(parent, rc),
     m_comntLbl(nullptr),
     m_versionLbl(nullptr),
     m_comntInfoLbl(nullptr),
@@ -118,52 +118,52 @@ MainWindow::MainWindow(Widget *parent, const Rect &rc) :
     setIcon(IDI_MAINICON);
     palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
     palette()->setColor(Palette::Border, Palette::Normal, 0x888888);
-    if (Utils::getWinVersion() > Utils::WinXP && Utils::getWinVersion() < Utils::Win10)
+    if (UIUtils::getWinVersion() > UIUtils::WinXP && UIUtils::getWinVersion() < UIUtils::Win10)
         metrics()->setMetrics(Metrics::BorderWidth, 1);
 
-    Widget *cw = new Widget(this);
+    UIWidget *cw = new UIWidget(this);
     cw->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
     setCentralWidget(cw);
     setContentsMargins(0,0,0,0);
 
-    BoxLayout *cenVlut = new BoxLayout(BoxLayout::Vertical);
+    UIBoxLayout *cenVlut = new UIBoxLayout(UIBoxLayout::Vertical);
     cenVlut->setContentMargins(0, 0, 0, 0);
     cenVlut->setSpacing(0);
     cw->setLayout(cenVlut);
 
     /* Caption section*/
-    Widget *topPanel = new Widget(cw);
+    UIWidget *topPanel = new UIWidget(cw);
     topPanel->resize(50,28);
     topPanel->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
-    topPanel->setProperty(Widget::HSizeBehavior, Widget::Expanding);
-    topPanel->setProperty(Widget::VSizeBehavior, Widget::Fixed);
+    topPanel->setProperty(UIWidget::HSizeBehavior, UIWidget::Expanding);
+    topPanel->setProperty(UIWidget::VSizeBehavior, UIWidget::Fixed);
     cenVlut->addWidget(topPanel);
 
-    BoxLayout *topHlut = new BoxLayout(BoxLayout::Horizontal);
+    UIBoxLayout *topHlut = new UIBoxLayout(UIBoxLayout::Horizontal);
     topHlut->setContentMargins(0, 0, 0, 0);
     topHlut->setSpacing(0);
     topPanel->setLayout(topHlut);
 
-    Caption *cap = new Caption(topPanel);
+    UICaption *cap = new UICaption(topPanel);
     cap->setResizingAvailable(false);
     cap->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
     cap->metrics()->setMetrics(Metrics::TextMarginLeft, 12);
     cap->metrics()->setMetrics(Metrics::TextAlignment, Metrics::AlignHLeft| Metrics::AlignVCenter);
     cap->resize(50,28);
-    cap->setProperty(Widget::HSizeBehavior, Widget::Expanding);
-    cap->setProperty(Widget::VSizeBehavior, Widget::Fixed);
+    cap->setProperty(UIWidget::HSizeBehavior, UIWidget::Expanding);
+    cap->setProperty(UIWidget::VSizeBehavior, UIWidget::Fixed);
 
-    Button *closeBtn = new Button(topPanel);
+    UIButton *closeBtn = new UIButton(topPanel);
     closeBtn->resize(40,28);
-    closeBtn->setProperty(Widget::HSizeBehavior, Widget::Fixed);
-    closeBtn->setProperty(Widget::VSizeBehavior, Widget::Fixed);
+    closeBtn->setProperty(UIWidget::HSizeBehavior, UIWidget::Fixed);
+    closeBtn->setProperty(UIWidget::VSizeBehavior, UIWidget::Fixed);
     closeBtn->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
     closeBtn->palette()->setColor(Palette::Background, Palette::Hover, 0xe81123);
     closeBtn->palette()->setColor(Palette::Background, Palette::Pressed, 0x8b0a14);
     closeBtn->palette()->setColor(Palette::Background, Palette::Disabled, 0x2b2b2b);
     closeBtn->palette()->setColor(Palette::Primitive, Palette::Normal, 0x000000);
     closeBtn->metrics()->setMetrics(Metrics::PrimitiveWidth, 1);
-    closeBtn->setStockIcon(Button::CloseIcon);
+    closeBtn->setStockIcon(UIButton::CloseIcon);
     closeBtn->setIconSize(10, 10);
     closeBtn->onClick([this]() {
         close();
@@ -172,13 +172,13 @@ MainWindow::MainWindow(Widget *parent, const Rect &rc) :
     topHlut->addWidget(closeBtn);
 
     /* Central section */
-    m_cenPanel = new Widget(cw);
+    m_cenPanel = new UIWidget(cw);
     m_cenPanel->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
-    m_cenPanel->setProperty(Widget::HSizeBehavior, Widget::Expanding);
-    m_cenPanel->setProperty(Widget::VSizeBehavior, Widget::Expanding);
+    m_cenPanel->setProperty(UIWidget::HSizeBehavior, UIWidget::Expanding);
+    m_cenPanel->setProperty(UIWidget::VSizeBehavior, UIWidget::Expanding);
     cenVlut->addWidget(m_cenPanel);
 
-    m_cenPanelVlut = new BoxLayout(BoxLayout::Vertical);
+    m_cenPanelVlut = new UIBoxLayout(UIBoxLayout::Vertical);
     m_cenPanelVlut->setContentMargins(6, 12, 6, 48);
     m_cenPanelVlut->setSpacing(6);
     m_cenPanel->setLayout(m_cenPanelVlut);
@@ -195,16 +195,16 @@ void MainWindow::initInstallationMode()
     m_is_checked = true;
     m_mode = Mode::Install;
     /* Image section*/
-    Label *wlcLbl = new Label(m_cenPanel);
+    UILabel *wlcLbl = new UILabel(m_cenPanel);
     wlcLbl->resize(282, 200);
     wlcLbl->setEMFIcon(IDI_WELCOME, 282, 200);
     wlcLbl->palette()->setColor(Palette::Background, Palette::Normal, 0xfefefe);
-    wlcLbl->setProperty(Widget::HSizeBehavior, Widget::Expanding);
-    wlcLbl->setProperty(Widget::VSizeBehavior, Widget::Fixed);
+    wlcLbl->setProperty(UIWidget::HSizeBehavior, UIWidget::Expanding);
+    wlcLbl->setProperty(UIWidget::VSizeBehavior, UIWidget::Fixed);
     m_cenPanelVlut->addWidget(wlcLbl);
 
     /* Check box section*/
-    CheckBox *chkBox = new CheckBox(m_cenPanel, _TR(CHECK_SILENT));
+    UICheckBox *chkBox = new UICheckBox(m_cenPanel, _TR(CHECK_SILENT));
     chkBox->setChecked(m_is_checked);
     setSelectorStyle(chkBox);
     chkBox->adjustSizeBasedOnContent();
@@ -217,13 +217,13 @@ void MainWindow::initInstallationMode()
     /* Comment section */
     wstring warn_text = _TR(LABEL_WARN_CLOSE);
     NS_Utils::Replace(warn_text, L"%1", _T(WINDOW_NAME));
-    Label *comntLbl = new Label(m_cenPanel);
+    UILabel *comntLbl = new UILabel(m_cenPanel);
     comntLbl->setText(warn_text, true);
     comntLbl->setGeometry(0, m_cenPanel->size().height - 130, m_cenPanel->size().width, 48);
     setLabelStyle(comntLbl);
 
     /* Install button section */
-    Button *instlBtn = new Button(m_cenPanel);
+    UIButton *instlBtn = new UIButton(m_cenPanel);
     instlBtn->setText(_TR(BUTTON_INSTALL));
     instlBtn->setGeometry(m_cenPanel->size().width/2 - 50, m_cenPanel->size().height - 76, 100, 28);
     setButtonStyle(instlBtn);
@@ -246,21 +246,21 @@ void MainWindow::initControlMode(const std::wstring &_arch)
 {
     m_mode = Mode::Control;
     /* Comment section */
-    m_versionLbl = new Label(m_cenPanel);
+    m_versionLbl = new UILabel(m_cenPanel);
     setControlLabelStyle(m_versionLbl);
     m_versionLbl->setText(fillInstalledVerInfo());
-    m_versionLbl->setProperty(Widget::HSizeBehavior, Widget::Expanding);
-    m_versionLbl->setProperty(Widget::VSizeBehavior, Widget::Fixed);
+    m_versionLbl->setProperty(UIWidget::HSizeBehavior, UIWidget::Expanding);
+    m_versionLbl->setProperty(UIWidget::VSizeBehavior, UIWidget::Fixed);
     m_versionLbl->metrics()->setMetrics(Metrics::TextMarginLeft, 12);
     m_cenPanelVlut->setContentMargins(18, 6, 6, 6);
     m_cenPanelVlut->addWidget(m_versionLbl);
 
     if (m_package == _TR(LABEL_UNKN_PACK) || m_ver == _TR(LABEL_UNKN_VER) || _arch.empty() || m_arch != _arch) {
-        Label *errLbl = new Label(m_cenPanel);
+        UILabel *errLbl = new UILabel(m_cenPanel);
         setControlLabelStyle(errLbl);
         errLbl->setText(_TR(LABEL_NO_OPTIONS));
-        errLbl->setProperty(Widget::HSizeBehavior, Widget::Expanding);
-        errLbl->setProperty(Widget::VSizeBehavior, Widget::Expanding);
+        errLbl->setProperty(UIWidget::HSizeBehavior, UIWidget::Expanding);
+        errLbl->setProperty(UIWidget::VSizeBehavior, UIWidget::Expanding);
         errLbl->metrics()->setMetrics(Metrics::TextMarginLeft, 24);
         m_cenPanelVlut->addWidget(errLbl);
         return;
@@ -280,25 +280,25 @@ bool MainWindow::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
         break;
     }
     }
-    return Window::event(msg, wParam, lParam, result);
+    return UIWindow::event(msg, wParam, lParam, result);
 }
 
 void MainWindow::startInstall()
 {
     /* Comment section */
-    m_comntLbl = new Label(m_cenPanel);
+    m_comntLbl = new UILabel(m_cenPanel);
     m_comntLbl->setText(_TR(LABEL_DOWNLOAD), true);
     m_comntLbl->setGeometry(0, m_cenPanel->size().height - 156, m_cenPanel->size().width, 24);
     m_comntLbl->metrics()->setMetrics(Metrics::FontHeight, 20);
     setLabelStyle(m_comntLbl);
 
-    m_comntInfoLbl = new Label(m_cenPanel);
+    m_comntInfoLbl = new UILabel(m_cenPanel);
     m_comntInfoLbl->setText(_TR(LABEL_ALMOST_DONE), true);
     m_comntInfoLbl->setGeometry(0, m_cenPanel->size().height - 112, m_cenPanel->size().width, 40);
     setLabelStyle(m_comntInfoLbl);
 
     /* Progress section */
-    m_bar = new ProgressBar(m_cenPanel);
+    m_bar = new UIProgressBar(m_cenPanel);
     m_bar->setGeometry(0, m_cenPanel->size().height - 126, m_cenPanel->size().width, 5);
     setProgressStyle(m_bar);
     m_bar->metrics()->setMetrics(Metrics::IconMarginLeft, 108);
@@ -356,7 +356,7 @@ void MainWindow::finishInstall(const std::wstring &app_path)
 {
     /* Check box section*/
     m_is_checked = true;
-    CheckBox *chkBox = new CheckBox(m_cenPanel, _TR(CHECK_LAUNCH));
+    UICheckBox *chkBox = new UICheckBox(m_cenPanel, _TR(CHECK_LAUNCH));
     chkBox->setChecked(m_is_checked);
     setSelectorStyle(chkBox);
     chkBox->adjustSizeBasedOnContent();
@@ -369,13 +369,13 @@ void MainWindow::finishInstall(const std::wstring &app_path)
     /* Comment section */
     wstring compl_text = _TR(LABEL_INSTALL_COMPL);
     NS_Utils::Replace(compl_text, L"%1", _T(WINDOW_NAME));
-    Label *comntLbl = new Label(m_cenPanel);
+    UILabel *comntLbl = new UILabel(m_cenPanel);
     comntLbl->setText(compl_text, true);
     comntLbl->setGeometry(0, m_cenPanel->size().height - 130, m_cenPanel->size().width, 48);
     setLabelStyle(comntLbl);
 
     /* Install button section */
-    Button *closeBtn = new Button(m_cenPanel);
+    UIButton *closeBtn = new UIButton(m_cenPanel);
     closeBtn->setText(_TR(BUTTON_CLOSE));
     closeBtn->setGeometry(m_cenPanel->size().width/2 - 50, m_cenPanel->size().height - 76, 100, 28);
     setButtonStyle(closeBtn);
@@ -579,7 +579,7 @@ void MainWindow::createSelectionPage()
 {
     m_is_completed = false;
     /* Check box section*/
-    CheckBox *clrChkBox = new CheckBox(m_cenPanel, _TR(CHECK_CLR_DATA));
+    UICheckBox *clrChkBox = new UICheckBox(m_cenPanel, _TR(CHECK_CLR_DATA));
     clrChkBox->setDisabled(!(m_checkState & UpdateRadio));
     clrChkBox->setChecked(m_checkState & ClrDataCheck);
     setSelectorStyle(clrChkBox);
@@ -589,7 +589,7 @@ void MainWindow::createSelectionPage()
         m_checkState = (m_checkState & ~ClrDataCheck) | (clrChkBox->isChecked() * ClrDataCheck);
     });
 
-    CheckBox *stnChkBox = new CheckBox(m_cenPanel, _TR(CHECK_CLR_STNGS));
+    UICheckBox *stnChkBox = new UICheckBox(m_cenPanel, _TR(CHECK_CLR_STNGS));
     stnChkBox->setDisabled(!(m_checkState & UpdateRadio));
     stnChkBox->setChecked(m_checkState & ClrStnCheck);
     setSelectorStyle(stnChkBox);
@@ -599,7 +599,7 @@ void MainWindow::createSelectionPage()
         m_checkState = (m_checkState & ~ClrStnCheck) | (stnChkBox->isChecked() * ClrStnCheck);
     });
 
-    CheckBox *clrAllChkBox = new CheckBox(m_cenPanel, _TR(CHECK_CLR_ALL));
+    UICheckBox *clrAllChkBox = new UICheckBox(m_cenPanel, _TR(CHECK_CLR_ALL));
     clrAllChkBox->setDisabled(!(m_checkState & UninstRadio));
     clrAllChkBox->setChecked(m_checkState & ClrAllCheck);
     setSelectorStyle(clrAllChkBox);
@@ -610,7 +610,7 @@ void MainWindow::createSelectionPage()
     });
 
     /* Update radio button section*/
-    m_updRadio = new RadioButton(m_cenPanel, _TR(RADIO_UPDATE));
+    m_updRadio = new UIRadioButton(m_cenPanel, _TR(RADIO_UPDATE));
     m_updRadio->setChecked(m_checkState & UpdateRadio);
     setSelectorStyle(m_updRadio);
     m_updRadio->adjustSizeBasedOnContent();
@@ -627,7 +627,7 @@ void MainWindow::createSelectionPage()
     });
 
     /* Repair radio button section*/
-    // m_repRadio = new RadioButton(m_cenPanel, _TR(RADIO_REPAIR));
+    // m_repRadio = new UIRadioButton(m_cenPanel, _TR(RADIO_REPAIR));
     // m_repRadio->setChecked(m_checkState & RepairRadio);
     // setSelectorStyle(m_repRadio);
     // m_repRadio->adjustSizeBasedOnContent();
@@ -644,7 +644,7 @@ void MainWindow::createSelectionPage()
     // });
 
     /* Uninstall radio button section*/
-    m_uninsRadio = new RadioButton(m_cenPanel, _TR(RADIO_UNINST));
+    m_uninsRadio = new UIRadioButton(m_cenPanel, _TR(RADIO_UNINST));
     m_uninsRadio->setChecked(m_checkState & UninstRadio);
     setSelectorStyle(m_uninsRadio);
     m_uninsRadio->adjustSizeBasedOnContent();
@@ -661,7 +661,7 @@ void MainWindow::createSelectionPage()
     });
 
     /* Apply button section */
-    Button *applyBtn = new Button(m_cenPanel);
+    UIButton *applyBtn = new UIButton(m_cenPanel);
     applyBtn->setText(_TR(BUTTON_APPLY));
     applyBtn->setGeometry(m_cenPanel->size().width - 100 - 12, m_cenPanel->size().height - 28 - 12, 100, 28);
     setButtonStyle(applyBtn);
@@ -683,7 +683,7 @@ void MainWindow::createSelectionPage()
             createProgressPage(msg);
             if (m_updRadio->isChecked() /*|| m_repRadio->isChecked()*/) {
                 /* Check box section*/
-                m_launchCheck = new CheckBox(m_cenPanel, _TR(CHECK_LAUNCH));
+                m_launchCheck = new UICheckBox(m_cenPanel, _TR(CHECK_LAUNCH));
                 m_launchCheck->setChecked(m_checkState & LaunchCheck);
                 setSelectorStyle(m_launchCheck);
                 m_launchCheck->adjustSizeBasedOnContent();
@@ -715,23 +715,23 @@ void MainWindow::createSelectionPage()
 
 void MainWindow::createProgressPage(const std::wstring &text)
 {
-    m_comntLbl = new Label(m_cenPanel);
+    m_comntLbl = new UILabel(m_cenPanel);
     setControlLabelStyle(m_comntLbl);
     m_comntLbl->setText(text);
     m_comntLbl->metrics()->setMetrics(Metrics::TextMarginLeft, 12);
     m_comntLbl->setGeometry(30, 50, size().width - 30, 24);
 
-    m_comntInfoLbl = new Label(m_cenPanel);
+    m_comntInfoLbl = new UILabel(m_cenPanel);
     setControlLabelStyle(m_comntInfoLbl);
     m_comntInfoLbl->metrics()->setMetrics(Metrics::TextMarginLeft, 12);
     m_comntInfoLbl->setGeometry(30, 92, m_cenPanel->size().width - 30, 40);
 
     /* Progress section */
-    m_bar = new ProgressBar(m_cenPanel);
+    m_bar = new UIProgressBar(m_cenPanel);
     m_bar->setGeometry(42, 80, 250, 5);
     setProgressStyle(m_bar);
 
-    m_cancelBtn = new Button(m_cenPanel);
+    m_cancelBtn = new UIButton(m_cenPanel);
     m_cancelBtn->setText(_TR(BUTTON_CANCEL));
     m_cancelBtn->setGeometry(m_cenPanel->size().width - 100 - 12, m_cenPanel->size().height - 28 - 12, 100, 28);
     setButtonStyle(m_cancelBtn);
@@ -750,7 +750,7 @@ void MainWindow::createCloseButton()
     invokeMethod([=]() {
         m_cenPanel->disconnect(m_resize_conn);
         m_cancelBtn->close();
-        Button *closeBtn = new Button(m_cenPanel);
+        UIButton *closeBtn = new UIButton(m_cenPanel);
         closeBtn->setText(_TR(BUTTON_CLOSE));
         closeBtn->setGeometry(m_cenPanel->size().width - 100 - 12, m_cenPanel->size().height - 28 - 12, 100, 28);
         setButtonStyle(closeBtn);
@@ -781,7 +781,7 @@ void MainWindow::createCloseAndBackButtons()
             }
         }
 
-        Button *closeBtn = new Button(m_cenPanel);
+        UIButton *closeBtn = new UIButton(m_cenPanel);
         closeBtn->setText(_TR(BUTTON_CLOSE));
         closeBtn->setGeometry(m_cenPanel->size().width - 100 - 12, m_cenPanel->size().height - 28 - 12, 100, 28);
         setButtonStyle(closeBtn);
@@ -795,7 +795,7 @@ void MainWindow::createCloseAndBackButtons()
             close();
         });
 
-        Button *backBtn = new Button(m_cenPanel);
+        UIButton *backBtn = new UIButton(m_cenPanel);
         backBtn->setText(_TR(BUTTON_BACK));
         backBtn->setGeometry(m_cenPanel->size().width - 100 - 12 - 106, m_cenPanel->size().height - 28 - 12, 100, 28);
         setButtonStyle(backBtn);

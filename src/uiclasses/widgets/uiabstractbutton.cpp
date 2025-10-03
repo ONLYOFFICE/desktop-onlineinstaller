@@ -4,25 +4,25 @@
 #include <gdiplus.h>
 
 
-AbstractButton::AbstractButton(Widget *parent, const std::wstring &text) :
-    Widget(parent, ObjectType::WidgetType),
+UIAbstractButton::UIAbstractButton(UIWidget *parent, const std::wstring &text) :
+    UIWidget(parent, ObjectType::WidgetType),
     m_text(text)
 {
 
 }
 
-AbstractButton::~AbstractButton()
+UIAbstractButton::~UIAbstractButton()
 {
 
 }
 
-void AbstractButton::setText(const std::wstring &text)
+void UIAbstractButton::setText(const std::wstring &text)
 {
     m_text = text;
     update();
 }
 
-void AbstractButton::adjustSizeBasedOnContent()
+void UIAbstractButton::adjustSizeBasedOnContent()
 {
     HDC hdc = GetDC(nativeWindowHandle());
     Gdiplus::Graphics gr(hdc);
@@ -37,20 +37,20 @@ void AbstractButton::adjustSizeBasedOnContent()
     resize(w, h);
 }
 
-int AbstractButton::onClick(const FnVoidVoid &callback)
+int UIAbstractButton::onClick(const FnVoidVoid &callback)
 {
     m_click_callbacks[++m_connectionId] = callback;
     return m_connectionId;
 }
 
-void AbstractButton::disconnect(int connectionId)
+void UIAbstractButton::disconnect(int connectionId)
 {
     auto it = m_click_callbacks.find(connectionId);
     if (it != m_click_callbacks.end())
         m_click_callbacks.erase(it);
 }
 
-bool AbstractButton::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
+bool UIAbstractButton::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
 {
     switch (msg) {
     case WM_LBUTTONDOWN: {
@@ -89,10 +89,10 @@ bool AbstractButton::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *resu
     default:
         break;
     }
-    return Widget::event(msg, wParam, lParam, result);
+    return UIWidget::event(msg, wParam, lParam, result);
 }
 
-void AbstractButton::click()
+void UIAbstractButton::click()
 {
     if (underMouse()) {
         for (auto it = m_click_callbacks.begin(); it != m_click_callbacks.end(); it++) {

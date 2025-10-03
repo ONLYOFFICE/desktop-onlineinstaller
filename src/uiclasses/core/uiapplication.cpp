@@ -4,7 +4,7 @@
 #include <gdiplus.h>
 
 
-class Application::ApplicationPrivate
+class UIApplication::ApplicationPrivate
 {
 public:
     ApplicationPrivate();
@@ -19,7 +19,7 @@ public:
     static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 };
 
-Application::ApplicationPrivate::ApplicationPrivate() :
+UIApplication::ApplicationPrivate::ApplicationPrivate() :
     gdi_token(0),
     hInstance(nullptr),
     layoutDirection(LayoutDirection::LeftToRight),
@@ -29,12 +29,12 @@ Application::ApplicationPrivate::ApplicationPrivate() :
     Gdiplus::GdiplusStartup(&gdi_token, &gdiplusStartupInput, nullptr);
 }
 
-Application::ApplicationPrivate::~ApplicationPrivate()
+UIApplication::ApplicationPrivate::~ApplicationPrivate()
 {
     Gdiplus::GdiplusShutdown(gdi_token);
 }
 
-ATOM Application::ApplicationPrivate::registerClass(LPCWSTR className, HINSTANCE hInstance)
+ATOM UIApplication::ApplicationPrivate::registerClass(LPCWSTR className, HINSTANCE hInstance)
 {
     WNDCLASSEX wcx;
     memset(&wcx, 0, sizeof(wcx));
@@ -52,11 +52,11 @@ ATOM Application::ApplicationPrivate::registerClass(LPCWSTR className, HINSTANCE
     return RegisterClassEx(&wcx);
 }
 
-LRESULT CALLBACK Application::ApplicationPrivate::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK UIApplication::ApplicationPrivate::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     if (msg == WM_CREATE) {
         if (CREATESTRUCT *cs = (CREATESTRUCT*)lParam) {
-            if (Widget *wgt = (Widget*)cs->lpCreateParams) {
+            if (UIWidget *wgt = (UIWidget*)cs->lpCreateParams) {
                 wgt->setNativeWindowHandle(hWnd);
                 SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)wgt);
                 LRESULT result = 0;
@@ -65,7 +65,7 @@ LRESULT CALLBACK Application::ApplicationPrivate::WndProc(HWND hWnd, UINT msg, W
             }
         }
     } else
-    if (Widget *wgt = (Widget*)GetWindowLongPtr(hWnd, GWLP_USERDATA)) {
+    if (UIWidget *wgt = (UIWidget*)GetWindowLongPtr(hWnd, GWLP_USERDATA)) {
          LRESULT result = 0;
          if (wgt->event(msg, wParam, lParam, &result))
              return result;
@@ -73,10 +73,10 @@ LRESULT CALLBACK Application::ApplicationPrivate::WndProc(HWND hWnd, UINT msg, W
     return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
-Application *Application::inst = nullptr;
+UIApplication *UIApplication::inst = nullptr;
 
-Application::Application(HINSTANCE hInstance, PWSTR cmdline, int cmdshow) :
-    Application()
+UIApplication::UIApplication(HINSTANCE hInstance, PWSTR cmdline, int cmdshow) :
+    UIApplication()
 {
     d_ptr->hInstance = hInstance;
     if (!d_ptr->hInstance)
@@ -84,44 +84,44 @@ Application::Application(HINSTANCE hInstance, PWSTR cmdline, int cmdshow) :
     inst = this;
 }
 
-Application::Application() :
-    Object(nullptr),
+UIApplication::UIApplication() :
+    UIObject(nullptr),
     d_ptr(new ApplicationPrivate)
 {
 
 }
 
-Application *Application::instance()
+UIApplication *UIApplication::instance()
 {
     return inst;
 }
 
-HINSTANCE Application::moduleHandle()
+HINSTANCE UIApplication::moduleHandle()
 {
     return d_ptr->hInstance;
 }
 
-void Application::setLayoutDirection(LayoutDirection layoutDirection)
+void UIApplication::setLayoutDirection(LayoutDirection layoutDirection)
 {
     d_ptr->layoutDirection = layoutDirection;
 }
 
-void Application::setFont(const std::wstring &font) const
+void UIApplication::setFont(const std::wstring &font) const
 {
     d_ptr->font = font;
 }
 
-std::wstring Application::font() const
+std::wstring UIApplication::font() const
 {
     return d_ptr->font;
 }
 
-Application::~Application()
+UIApplication::~UIApplication()
 {
     delete d_ptr, d_ptr = nullptr;
 }
 
-int Application::exec()
+int UIApplication::exec()
 {
     MSG msg;
     BOOL res;
@@ -132,12 +132,12 @@ int Application::exec()
     return (int)msg.wParam;
 }
 
-void Application::exit(int code)
+void UIApplication::exit(int code)
 {
     PostQuitMessage(code);
 }
 
-void Application::registerWidget(Widget *wgt, ObjectType objType, const Rect &rc)
+void UIApplication::registerWidget(UIWidget *wgt, ObjectType objType, const Rect &rc)
 {
     std::wstring className;
     DWORD style = WS_CLIPCHILDREN;
@@ -165,7 +165,7 @@ void Application::registerWidget(Widget *wgt, ObjectType objType, const Rect &rc
 
     case ObjectType::WidgetType:
     default:
-        className = L"Widget " + std::to_wstring(++d_ptr->windowId);
+        className = L"UIWidget " + std::to_wstring(++d_ptr->windowId);
         style |= WS_CHILD;
         break;
     }

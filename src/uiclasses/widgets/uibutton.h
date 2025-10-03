@@ -5,11 +5,11 @@
 #include "uiconhandler.h"
 
 
-class Button : public AbstractButton, public IconHandler
+class UIButton : public UIAbstractButton, public UIconHandler
 {
 public:
-    Button(Widget *parent = nullptr, const std::wstring &text = L"");
-    virtual ~Button();
+    UIButton(UIWidget *parent = nullptr, const std::wstring &text = L"");
+    virtual ~UIButton();
 
     enum StockIcon : BYTE {
         None,

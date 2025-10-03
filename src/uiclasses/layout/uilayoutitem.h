@@ -2,17 +2,17 @@
 #define LAYOUTITEM_H
 
 
-class Widget;
-class Layout;
+class UIWidget;
+class UILayout;
 
-class LayoutItem
+class UILayoutItem
 {
 public:
-    LayoutItem();
-    ~LayoutItem();
+    UILayoutItem();
+    ~UILayoutItem();
 
-    virtual Widget *widget();
-    virtual Layout *layout();
+    virtual UIWidget *widget();
+    virtual UILayout *layout();
 
 protected:
 };

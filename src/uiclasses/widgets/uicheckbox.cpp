@@ -4,30 +4,30 @@
 #include <windowsx.h>
 
 
-CheckBox::CheckBox(Widget *parent, const std::wstring &text) :
-    AbstractButton(parent, text),
+UICheckBox::UICheckBox(UIWidget *parent, const std::wstring &text) :
+    UIAbstractButton(parent, text),
     m_checked(false)
 {
     metrics()->setMetrics(Metrics::TextAlignment, Metrics::AlignHLeft | Metrics::AlignVCenter);
 }
 
-CheckBox::~CheckBox()
+UICheckBox::~UICheckBox()
 {
 
 }
 
-void CheckBox::setChecked(bool checked)
+void UICheckBox::setChecked(bool checked)
 {
     m_checked = checked;
     update();
 }
 
-bool CheckBox::isChecked()
+bool UICheckBox::isChecked()
 {
     return m_checked;
 }
 
-bool CheckBox::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
+bool UICheckBox::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
 {
     switch (msg) {
     case WM_PAINT: {
@@ -48,12 +48,12 @@ bool CheckBox::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
     default:
         break;
     }
-    return AbstractButton::event(msg, wParam, lParam, result);
+    return UIAbstractButton::event(msg, wParam, lParam, result);
 }
 
-void CheckBox::click()
+void UICheckBox::click()
 {
     m_checked = !m_checked;
     update();
-    AbstractButton::click();
+    UIAbstractButton::click();
 }

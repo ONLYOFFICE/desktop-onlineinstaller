@@ -4,8 +4,8 @@
 #define DEFAULT_PULSE_STEP 1
 
 
-ProgressBar::ProgressBar(Widget *parent) :
-    Widget(parent, ObjectType::WidgetType),
+UIProgressBar::UIProgressBar(UIWidget *parent) :
+    UIWidget(parent, ObjectType::WidgetType),
     m_progress(0),
     m_pulse_pos(-1),
     m_pulse_direction(1),
@@ -14,18 +14,18 @@ ProgressBar::ProgressBar(Widget *parent) :
 
 }
 
-ProgressBar::~ProgressBar()
+UIProgressBar::~UIProgressBar()
 {
 
 }
 
-void ProgressBar::setProgress(int progress)
+void UIProgressBar::setProgress(int progress)
 {
     m_progress = progress;
     update();
 }
 
-void ProgressBar::pulse(bool enable)
+void UIProgressBar::pulse(bool enable)
 {
     m_pulse_pos = enable ? 0 : -1;
     m_pulse_direction = 1;
@@ -38,7 +38,7 @@ void ProgressBar::pulse(bool enable)
     }
 }
 
-void ProgressBar::setPulseStep(int step)
+void UIProgressBar::setPulseStep(int step)
 {
     if (step < 1)
         step = 1;
@@ -48,7 +48,7 @@ void ProgressBar::setPulseStep(int step)
     m_pulse_step = step;
 }
 
-bool ProgressBar::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
+bool UIProgressBar::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
 {
     switch (msg) {
     // case WM_LBUTTONDOWN: {
@@ -106,5 +106,5 @@ bool ProgressBar::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
     default:
         break;
     }
-    return Widget::event(msg, wParam, lParam, result);
+    return UIWidget::event(msg, wParam, lParam, result);
 }

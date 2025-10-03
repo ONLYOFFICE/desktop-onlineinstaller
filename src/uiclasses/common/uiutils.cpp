@@ -86,7 +86,7 @@ static DWORD RegQueryDwordValue(HKEY rootKey, LPCWSTR subkey, LPCWSTR value)
     return dwValue;
 }
 
-Utils::WinVer Utils::getWinVersion()
+UIUtils::WinVer UIUtils::getWinVersion()
 {
     static WinVer winVer = WinVer::Undef;
     if (winVer == WinVer::Undef) {
@@ -115,7 +115,7 @@ Utils::WinVer Utils::getWinVersion()
     return winVer;
 }
 
-COLORREF Utils::getColorizationColor(bool isActive, COLORREF topColor)
+COLORREF UIUtils::getColorizationColor(bool isActive, COLORREF topColor)
 {
     int luma = getLuma(topColor);
     if (isActive) {
@@ -149,7 +149,7 @@ COLORREF Utils::getColorizationColor(bool isActive, COLORREF topColor)
     return RGB(res, res, res);
 }
 
-void Utils::loadImageResource(Gdiplus::Bitmap *&hBmp, int id, LPCWSTR type)
+void UIUtils::loadImageResource(Gdiplus::Bitmap *&hBmp, int id, LPCWSTR type)
 {
     if (IStream *pStream = LoadResourceToStream(id, type)) {
         hBmp = new Gdiplus::Bitmap(pStream);
@@ -157,7 +157,7 @@ void Utils::loadImageResource(Gdiplus::Bitmap *&hBmp, int id, LPCWSTR type)
     }
 }
 
-void Utils::loadEmfResource(Gdiplus::Metafile* &hBmp, int id, LPCWSTR type)
+void UIUtils::loadEmfResource(Gdiplus::Metafile* &hBmp, int id, LPCWSTR type)
 {
     if (IStream *pStream = LoadResourceToStream(id, type)) {
         hBmp = new Gdiplus::Metafile(pStream);
@@ -165,7 +165,7 @@ void Utils::loadEmfResource(Gdiplus::Metafile* &hBmp, int id, LPCWSTR type)
     }
 }
 
-// bool Utils::isColorDark(COLORREF color)
+// bool UIUtils::isColorDark(COLORREF color)
 // {
 //     return int(0.299 * GetRValue(color) + 0.587 * GetGValue(color) + 0.114 * GetBValue(color)) < 128;
 // }

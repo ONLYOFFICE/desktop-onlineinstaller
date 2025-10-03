@@ -3,27 +3,27 @@
 #include "uidrawningengine.h"
 
 
-Label::Label(Widget *parent) :
-    Widget(parent, ObjectType::WidgetType),
-    IconHandler(this),
+UILabel::UILabel(UIWidget *parent) :
+    UIWidget(parent, ObjectType::WidgetType),
+    UIconHandler(this),
     m_multiline(false)
 {
 
 }
 
-Label::~Label()
+UILabel::~UILabel()
 {
 
 }
 
-void Label::setText(const std::wstring &text, bool multiline)
+void UILabel::setText(const std::wstring &text, bool multiline)
 {
     m_text = text;
     m_multiline = multiline;
     update();
 }
 
-bool Label::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
+bool UILabel::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
 {
     switch (msg) {
     case WM_PAINT: {
@@ -65,5 +65,5 @@ bool Label::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
     default:
         break;
     }
-    return Widget::event(msg, wParam, lParam, result);
+    return UIWidget::event(msg, wParam, lParam, result);
 }

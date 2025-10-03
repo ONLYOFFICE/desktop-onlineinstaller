@@ -4,11 +4,11 @@
 #include <string>
 
 
-class Object
+class UIObject
 {
 public:
-    Object(Object *parent = nullptr);
-    virtual ~Object();
+    UIObject(UIObject *parent = nullptr);
+    virtual ~UIObject();
 
     enum ObjectType : unsigned char {
         ApplicationType,
@@ -18,8 +18,8 @@ public:
         PopupType
     };
 
-    Object *parent();
-    void setParent(Object*);
+    UIObject *parent();
+    void setParent(UIObject*);
     void setObjectName(const std::wstring&);
     std::wstring objectName();
     virtual void disconnect(int);
@@ -28,7 +28,7 @@ protected:
     static int m_connectionId;
 
 private:
-    Object      *m_parent;
+    UIObject      *m_parent;
     std::wstring m_object_name;
 };
 

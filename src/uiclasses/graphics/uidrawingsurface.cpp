@@ -4,30 +4,30 @@
 #include "uipalette.h"
 
 
-DrawningSurface::DrawningSurface() :
+UIDrawningSurface::UIDrawningSurface() :
     m_metrics(new Metrics),
     m_palette(new Palette)
 {
-    m_engine = DrawingEngine::instance();
+    m_engine = UIDrawingEngine::instance();
 }
 
-DrawningSurface::~DrawningSurface()
+UIDrawningSurface::~UIDrawningSurface()
 {
     delete m_palette, m_palette = nullptr;
     delete m_metrics, m_metrics = nullptr;
 }
 
-Metrics *DrawningSurface::metrics()
+Metrics *UIDrawningSurface::metrics()
 {
     return m_metrics;
 }
 
-Palette *DrawningSurface::palette()
+Palette *UIDrawningSurface::palette()
 {
     return m_palette;
 }
 
-DrawingEngine *DrawningSurface::engine()
+UIDrawingEngine *UIDrawningSurface::engine()
 {
     return m_engine;
 }

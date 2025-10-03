@@ -5,11 +5,11 @@
 //#include <gdiplus.h>
 
 
-class ProgressBar : public Widget
+class UIProgressBar : public UIWidget
 {
 public:
-    ProgressBar(Widget *parent = nullptr);
-    virtual ~ProgressBar();
+    UIProgressBar(UIWidget *parent = nullptr);
+    virtual ~UIProgressBar();
 
     void setProgress(int progress);
     void pulse(bool);

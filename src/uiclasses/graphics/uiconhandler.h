@@ -6,12 +6,12 @@
 #include <string>
 
 
-class Widget;
-class IconHandler
+class UIWidget;
+class UIconHandler
 {
 public:
-    IconHandler(Widget *owner);
-    virtual ~IconHandler();
+    UIconHandler(UIWidget *owner);
+    virtual ~UIconHandler();
 
     void setIcon(const std::wstring &path, int w, int h);
     void setIcon(int id, int w, int h);
@@ -27,7 +27,7 @@ protected:
     Gdiplus::Bitmap *m_hBmp;
 
 private:
-    Widget *m_owner;
+    UIWidget *m_owner;
 };
 
 #endif // ICONHANDLER_H

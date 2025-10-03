@@ -5,18 +5,18 @@
 #include <future>
 
 
-class Label;
-class ProgressBar;
-class Widget;
-class BoxLayout;
-class CheckBox;
-class RadioButton;
-class Button;
+class UILabel;
+class UIProgressBar;
+class UIWidget;
+class UIBoxLayout;
+class UICheckBox;
+class UIRadioButton;
+class UIButton;
 class CDownloader;
-class MainWindow : public Window
+class MainWindow : public UIWindow
 {
 public:
-    MainWindow(Widget *parent, const Rect &rc);
+    MainWindow(UIWidget *parent, const Rect &rc);
     ~MainWindow();
 
     void initInstallationMode();
@@ -47,17 +47,17 @@ private:
                  m_ver,
                  m_arch,
                  m_package;
-    Label       *m_comntLbl,
+    UILabel     *m_comntLbl,
                 *m_versionLbl,
                 *m_comntInfoLbl;
-    ProgressBar *m_bar;
-    Widget      *m_cenPanel;
-    BoxLayout   *m_cenPanelVlut;
-    CheckBox    *m_launchCheck;
-    RadioButton *m_updRadio,
-                // *m_repRadio,
-                *m_uninsRadio;
-    Button      *m_cancelBtn;
+    UIProgressBar *m_bar;
+    UIWidget      *m_cenPanel;
+    UIBoxLayout   *m_cenPanelVlut;
+    UICheckBox    *m_launchCheck;
+    UIRadioButton *m_updRadio,
+                  // *m_repRadio,
+                  *m_uninsRadio;
+    UIButton      *m_cancelBtn;
     Mode m_mode;
     int  m_resize_conn;
     BYTE m_checkState;
