@@ -10,6 +10,7 @@ CORE_ROOT_DIR = $$PWD/../core
 UICLASSES = $$PWD/src/uiclasses
 
 DEFINES += VISUALUI_STATIC
+DEFINES += VISUALUI_SIMPLIFIED
 CONFIG += core_no_dst
 include($$CORE_ROOT_DIR/Common/base.pri)
 
@@ -41,27 +42,27 @@ HEADERS += $$PWD/src/version.h \
            $$UICLASSES/graphics/uidrawningengine.h \
            $$UICLASSES/graphics/uidrawingsurface.h \
            $$UICLASSES/graphics/uistyle.h \
-           $$UICLASSES/graphics/uigeometryanimation.h \
-           $$UICLASSES/graphics/uiopacityanimation.h \
+           # $$UICLASSES/graphics/uigeometryanimation.h \
+           # $$UICLASSES/graphics/uiopacityanimation.h \
            $$UICLASSES/graphics/uiconhandler.h \
-           $$UICLASSES/graphics/uidraghandler.h \
-           $$UICLASSES/graphics/uitooltiphandler.h \
+           # $$UICLASSES/graphics/uidraghandler.h \
+           # $$UICLASSES/graphics/uitooltiphandler.h \
            $$UICLASSES/graphics/uipixmap.h \
            $$UICLASSES/core/uiobject.h \
-           $$UICLASSES/core/uicursor.h \
+           # $$UICLASSES/core/uicursor.h \
            $$UICLASSES/core/uiapplication.h \
            $$UICLASSES/core/uithread.h \
            $$UICLASSES/core/uifontmetrics.h \
            $$UICLASSES/core/uitimer.h \
-           $$UICLASSES/core/uieventloop.h \
+           # $$UICLASSES/core/uieventloop.h \
            $$UICLASSES/core/uixmldocument.h \
            # $$UICLASSES/dialogs/uipopupmessage.h \
            # $$UICLASSES/dialogs/uidialog.h \
            # $$UICLASSES/dialogs/uifiledialog.h \
            $$UICLASSES/widgets/uiwindow.h \
            $$UICLASSES/widgets/uiabstractwindow.h \
-           $$UICLASSES/widgets/uiabstractpopup.h \
-           $$UICLASSES/widgets/uitooltip.h \
+           # $$UICLASSES/widgets/uiabstractpopup.h \
+           # $$UICLASSES/widgets/uitooltip.h \
            # $$UICLASSES/widgets/uimenu.h \
            $$UICLASSES/widgets/uiwidget.h \
            $$UICLASSES/widgets/uilabel.h \
@@ -91,26 +92,26 @@ SOURCES += $$PWD/src/main.cpp \
            $$UICLASSES/graphics/uidrawningengine.cpp \
            $$UICLASSES/graphics/uidrawingsurface.cpp \
            $$UICLASSES/graphics/uistyle.cpp \
-           $$UICLASSES/graphics/uigeometryanimation.cpp \
-           $$UICLASSES/graphics/uiopacityanimation.cpp \
+           # $$UICLASSES/graphics/uigeometryanimation.cpp \
+           # $$UICLASSES/graphics/uiopacityanimation.cpp \
            $$UICLASSES/graphics/uiconhandler.cpp \
-           $$UICLASSES/graphics/uidraghandler.cpp \
-           $$UICLASSES/graphics/uitooltiphandler.cpp \
+           # $$UICLASSES/graphics/uidraghandler.cpp \
+           # $$UICLASSES/graphics/uitooltiphandler.cpp \
            $$UICLASSES/graphics/uipixmap.cpp \
            $$UICLASSES/core/uiobject.cpp \
-           $$UICLASSES/core/uicursor.cpp \
+           # $$UICLASSES/core/uicursor.cpp \
            $$UICLASSES/core/uiapplication.cpp \
            $$UICLASSES/core/uifontmetrics.cpp \
            $$UICLASSES/core/uitimer.cpp \
-           $$UICLASSES/core/uieventloop.cpp \
+           # $$UICLASSES/core/uieventloop.cpp \
            $$UICLASSES/core/uixmldocument.cpp \
            # $$UICLASSES/dialogs/uipopupmessage.cpp \
            # $$UICLASSES/dialogs/uidialog.cpp \
            # $$UICLASSES/dialogs/uifiledialog.cpp \
            $$UICLASSES/widgets/uiwindow.cpp \
            $$UICLASSES/widgets/uiabstractwindow.cpp \
-           $$UICLASSES/widgets/uiabstractpopup.cpp \
-           $$UICLASSES/widgets/uitooltip.cpp \
+           # $$UICLASSES/widgets/uiabstractpopup.cpp \
+           # $$UICLASSES/widgets/uitooltip.cpp \
            # $$UICLASSES/widgets/uimenu.cpp \
            $$UICLASSES/widgets/uiwidget.cpp \
            $$UICLASSES/widgets/uilabel.cpp \

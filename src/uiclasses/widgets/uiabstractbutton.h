@@ -13,7 +13,9 @@ public:
     virtual ~UIAbstractButton();
 
     virtual void setText(const tstring &text) noexcept;
+#ifndef VISUALUI_SIMPLIFIED
     void setToolTip(const tstring &text) noexcept;
+#endif
     tstring text() noexcept;
     void restrictClickArea(bool restrict) noexcept;
     void adjustSizeBasedOnContent();
@@ -32,7 +34,9 @@ protected:
 
     tstring  m_text;
     RECT m_check_rc;
+#ifndef VISUALUI_SIMPLIFIED
     UIToolTipHandler *m_tooltipHandler;
+#endif
     bool m_checked,
          m_restrictedClickArea;
 

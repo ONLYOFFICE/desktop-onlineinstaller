@@ -14,7 +14,9 @@
 UIAbstractButton::UIAbstractButton(UIWidget *parent, const tstring &text) :
     UIWidget(parent, ObjectType::WidgetType),
     m_text(text),
+#ifndef VISUALUI_SIMPLIFIED
     m_tooltipHandler(nullptr),
+#endif
     m_checked(false),
     m_restrictedClickArea(false)
 {
@@ -27,9 +29,11 @@ UIAbstractButton::UIAbstractButton(UIWidget *parent, const tstring &text) :
 
 UIAbstractButton::~UIAbstractButton()
 {
+#ifndef VISUALUI_SIMPLIFIED
     if (m_tooltipHandler) {
         delete m_tooltipHandler; m_tooltipHandler = nullptr;
     }
+#endif
 }
 
 void UIAbstractButton::setText(const tstring &text) noexcept
@@ -38,12 +42,14 @@ void UIAbstractButton::setText(const tstring &text) noexcept
     update();
 }
 
+#ifndef VISUALUI_SIMPLIFIED
 void UIAbstractButton::setToolTip(const tstring &text) noexcept
 {
     if (!m_tooltipHandler)
         m_tooltipHandler = new UIToolTipHandler(this);
     m_tooltipHandler->setToolTipText(text);
 }
+#endif
 
 tstring UIAbstractButton::text() noexcept
 {
@@ -124,8 +130,10 @@ bool UIAbstractButton::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *re
 
     case WM_MOUSELEAVE: {
         if (!m_disabled) {
+#ifndef VISUALUI_SIMPLIFIED
             if (m_tooltipHandler)
                 m_tooltipHandler->skipToolTip();
+#endif
             palette()->setCurrentState(Palette::Normal);
             repaint();
         }
@@ -134,8 +142,10 @@ bool UIAbstractButton::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *re
 
     case WM_MOUSEMOVE: {
         if (!m_disabled) {
+#ifndef VISUALUI_SIMPLIFIED
             if (m_tooltipHandler)
                 m_tooltipHandler->handleMouseMove();
+#endif
         }
         break;
     }
@@ -178,8 +188,10 @@ bool UIAbstractButton::event(uint ev_type, void *param)
 
     case GDK_LEAVE_NOTIFY: {
         if (!m_disabled) {
+#ifndef VISUALUI_SIMPLIFIED
             if (m_tooltipHandler)
                 m_tooltipHandler->skipToolTip();
+#endif
             palette()->setCurrentState(Palette::Normal);
             repaint();
         }
@@ -188,8 +200,10 @@ bool UIAbstractButton::event(uint ev_type, void *param)
 
     case GDK_MOTION_NOTIFY: {
         if (!m_disabled) {
+#ifndef VISUALUI_SIMPLIFIED
             if (m_tooltipHandler)
                 m_tooltipHandler->handleMouseMove();
+#endif
         }
         break;
     }
@@ -204,8 +218,10 @@ bool UIAbstractButton::event(uint ev_type, void *param)
 void UIAbstractButton::click()
 {
     if (underMouse()) {
+#ifndef VISUALUI_SIMPLIFIED
         if (m_tooltipHandler)
             m_tooltipHandler->skipToolTip();
+#endif
         for (auto it = m_click_callbacks.begin(); it != m_click_callbacks.end(); it++) {
             if (it->second)
                 (it->second)();

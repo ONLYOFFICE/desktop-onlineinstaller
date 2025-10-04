@@ -31,10 +31,12 @@ public:
     virtual void size(int*, int*) const;
     virtual Point pos() const;
     void updateGeometry();
+#ifndef VISUALUI_SIMPLIFIED
     UIGeometryAnimation* geometryAnimation();
     void setGeometryAnimation(UIGeometryAnimation*);
     UIDragHandler* dragHandler();
     void setDragHandler(UIDragHandler*);
+#endif
     void applyStyle();
     void setSizePolicy(SizePolicy::Properties, int);
     void setFont(const tstring &font, double fontPointSize = 10);
@@ -122,8 +124,10 @@ private:
 
     Size    m_base_size;
     tstring m_font;
+#ifndef VISUALUI_SIMPLIFIED
     UIDragHandler *m_drag_handler;
     UIGeometryAnimation *m_geometry_animation;
+#endif
     double m_font_size;
     bool   m_is_created,
            m_is_active,

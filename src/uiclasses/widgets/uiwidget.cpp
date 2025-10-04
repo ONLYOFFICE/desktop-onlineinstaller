@@ -4,8 +4,10 @@
 #include "uimetrics.h"
 #include "uipalette.h"
 #include "uidrawningengine.h"
+#ifndef VISUALUI_SIMPLIFIED
 #include "uidraghandler.h"
 #include "uigeometryanimation.h"
+#endif
 #include "uiutils.h"
 #include "uistyle.h"
 #ifdef _WIN32
@@ -51,8 +53,10 @@ UIWidget::UIWidget(UIWidget *parent, ObjectType type, PlatformWindow hWindow, co
     m_corners(UIDrawingEngine::CornerAll),
     m_disabled(false),
     m_rtl(UIApplication::instance()->layoutDirection() == UIApplication::RightToLeft),
+#ifndef VISUALUI_SIMPLIFIED
     m_drag_handler(nullptr),
     m_geometry_animation(nullptr),
+#endif
     m_font_size(10.0),
     m_is_created(false),
     m_is_active(false),
@@ -89,12 +93,14 @@ UIWidget::UIWidget(UIWidget *parent, ObjectType type, PlatformWindow hWindow, co
 
 UIWidget::~UIWidget()
 {
+#ifndef VISUALUI_SIMPLIFIED
     if (m_drag_handler) {
         delete m_drag_handler; m_drag_handler = nullptr;
     }
     if (m_geometry_animation) {
         delete m_geometry_animation; m_geometry_animation = nullptr;
     }
+#endif
     UIApplication::instance()->style()->unregisterWidget(this);
     m_is_class_destroyed = true;
     if (m_layout) {
@@ -256,6 +262,7 @@ void UIWidget::updateGeometry()
 #endif
 }
 
+#ifndef VISUALUI_SIMPLIFIED
 UIGeometryAnimation *UIWidget::geometryAnimation()
 {
     return m_geometry_animation;
@@ -275,6 +282,7 @@ void UIWidget::setDragHandler(UIDragHandler *drag_handler)
 {
     m_drag_handler = drag_handler;
 }
+#endif
 
 void UIWidget::applyStyle()
 {
@@ -691,9 +699,11 @@ bool UIWidget::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
 
     case WM_LBUTTONUP: {
         SetFocus(m_hWindow);
+#ifndef VISUALUI_SIMPLIFIED
         if (m_drag_handler) {
             m_drag_handler->handleButtonUpEvent();
         }
+#endif
         break;
     }
 
@@ -708,11 +718,13 @@ bool UIWidget::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
     }
 
     case WM_LBUTTONDOWN:
+#ifndef VISUALUI_SIMPLIFIED
         if (m_drag_handler) {
             int x = GET_X_LPARAM(lParam);
             int y = GET_Y_LPARAM(lParam);
             m_drag_handler->handleButtonDownEvent(x, y);
         }
+#endif
     case WM_RBUTTONDOWN:
     case WM_MBUTTONDOWN: {
         if (m_root_hWnd && m_root_hWnd != m_hWindow)
@@ -732,11 +744,13 @@ bool UIWidget::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
             PostMessage(m_hWindow, WM_MOUSEENTER, 0, 0);
         }
         // add here impl onMouseMove
+#ifndef VISUALUI_SIMPLIFIED
         if (m_drag_handler && wParam & MK_LBUTTON) {
             int x = GET_X_LPARAM(lParam);
             int y = GET_Y_LPARAM(lParam);
             m_drag_handler->handleMouseMoveEvent(x, y);
         }
+#endif
 
         TRACKMOUSEEVENT tme;
         tme.cbSize = sizeof(tme);
@@ -875,9 +889,11 @@ bool UIWidget::event(uint ev_type, void *param)
         if (!m_disabled) {
             GdkEventButton *bev = (GdkEventButton*)param;
             GtkWidget *root = gtk_widget_get_toplevel(m_hWindow);
+#ifndef VISUALUI_SIMPLIFIED
             if (m_drag_handler && bev->button == GDK_BUTTON_PRIMARY) {
                 m_drag_handler->handleButtonDownEvent(bev->x_root, bev->y_root);
             }
+#endif
             if (root && root != m_hWindow)
                 UIApplication::sendEvent(root, GDK_CHILD_BUTTONDOWN_NOTIFY, &bev->button);
             gtk_widget_grab_focus(m_hWindow);
@@ -888,9 +904,11 @@ bool UIWidget::event(uint ev_type, void *param)
     case GDK_BUTTON_RELEASE: {
         GdkEventButton *bev = (GdkEventButton*)param;
         if (bev->button == GDK_BUTTON_PRIMARY) {
+#ifndef VISUALUI_SIMPLIFIED
             if (m_drag_handler) {
                 m_drag_handler->handleButtonUpEvent();
             }
+#endif
         } else
         if (bev->button == GDK_BUTTON_SECONDARY) {
             for (auto it = m_context_callbacks.begin(); it != m_context_callbacks.end(); it++) {
@@ -902,11 +920,13 @@ bool UIWidget::event(uint ev_type, void *param)
     }
 
     case GDK_MOTION_NOTIFY: {
+#ifndef VISUALUI_SIMPLIFIED
         GdkEventMotion *mev = (GdkEventMotion*)param;
         GdkModifierType state = (GdkModifierType)mev->state;
         if (m_drag_handler && state & GDK_BUTTON1_MASK) {
             m_drag_handler->handleMouseMoveEvent(mev->x_root, mev->y_root);
         }
+#endif
         return true;
     }
 
