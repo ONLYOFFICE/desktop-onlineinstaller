@@ -36,6 +36,7 @@ private:
     void createProgressPage(const std::wstring &text);
     void createCloseButton();
     void createCloseAndBackButtons();
+    void runProcessAsync(const std::wstring &cmd, const std::wstring &args, const std::function<void(int)> &onComplete);
     std::wstring fillInstalledVerInfo();
     CDownloader* startDownload(const std::wstring &install_type, const std::wstring &arch, const std::wstring &path, const std::function<void()> &onComplete);
 

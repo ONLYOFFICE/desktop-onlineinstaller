@@ -244,9 +244,7 @@ void MainWindow::startInstall()
             } else {
                 hide();
             }
-            m_future = std::async(std::launch::async, [=]() {
-            DWORD status = NS_File::runProcess(path, args);
-            UIThread::invoke(this, [=]() {
+            runProcessAsync(path, args, [=](DWORD status) {
             if (status != 0) {
                 DWORD err = GetLastError();
                 if (!m_is_checked)
@@ -276,7 +274,6 @@ void MainWindow::startInstall()
                 NS_File::removeFile(path);
             if (m_mode == Mode::Control)
                 createCloseAndBackButtons();
-            });
             });
         });
 }
@@ -357,9 +354,8 @@ void MainWindow::startUpdate()
             m_comntLbl->setText(_TR(LABEL_UPDATING));
             wstring args = L"/c call \"" + tmp_path;
             args += (m_package == L"msi") ? L"\" /qn /norestart" : L"\" /UPDATE /VERYSILENT /NOLAUNCH";
-            m_future = std::async(std::launch::async, [=]() {
-            DWORD status = NS_File::runProcess(L"cmd", args, true);
-            UIThread::invoke(this, [=]() {
+
+            runProcessAsync(L"cmd", args, [=](DWORD status) {
             if (status != 0) {
                 DWORD err = GetLastError();
                 m_bar->pulse(false);
@@ -386,7 +382,6 @@ void MainWindow::startUpdate()
                 NS_File::removeFile(tmp_path);
             if (m_mode == Mode::Control)
                 createCloseAndBackButtons();
-            });
             });
         });
 
@@ -445,9 +440,8 @@ void MainWindow::startUpdate()
 //                 args = (m_package == L"msi") ? L"/fvamus \"" : L"/c \"";
 //                 args += tmp_path;
 //                 args += (m_package == L"msi") ? L"\" /qn" : L" /VERYSILENT\"";
-//             m_future = std::async(std::launch::async, [=]() {
-//             DWORD status = NS_File::runProcess(cmd, args, true);
-//             UIThread::invoke(this, [=]() {
+
+//             runProcessAsync(cmd, args, [=](DWORD status) {
 //             if (status != 0) {
 //                 DWORD err = GetLastError();
 //                 m_bar->pulse(false);
@@ -474,7 +468,6 @@ void MainWindow::startUpdate()
 //             if (m_mode == Mode::Control)
 //                 createCloseAndBackButtons();
 //             });
-//             });
 //         });
 
 //     m_cancelBtn->onClick([=]() {
@@ -494,9 +487,8 @@ void MainWindow::startUninstall()
     m_bar->pulse(true);
     wstring args = L"/c \"" + m_uninst_cmd;
     args += (m_package == L"msi") ? L" /qn\"" : L" /VERYSILENT\"";
-    m_future = std::async(std::launch::async, [=]() {
-        DWORD status = NS_File::runProcess(L"cmd", args, true);
-        UIThread::invoke(this, [=]() {
+
+    runProcessAsync(L"cmd", args, [=](DWORD status) {
         if (status != 0) {
             m_bar->pulse(false);
             m_bar->setProgress(0);
@@ -518,7 +510,6 @@ void MainWindow::startUninstall()
             // m_is_completed = true;
             createCloseButton();
         }
-        });
     });
 }
 
@@ -791,6 +782,16 @@ void MainWindow::createCloseAndBackButtons()
 
         closeBtn->show();
         backBtn->show();
+    });
+}
+
+void MainWindow::runProcessAsync(const std::wstring &cmd, const std::wstring &args, const std::function<void(int)> &onComplete)
+{
+    m_future = std::async(std::launch::async, [=]() {
+        DWORD status = NS_File::runProcess(cmd, args);
+        UIThread::invoke(this, [=]() {
+            onComplete(status);
+        });
     });
 }
 
