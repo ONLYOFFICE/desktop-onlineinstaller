@@ -2,7 +2,10 @@
 
 #define IDI_MAINICON          101
 #define IDI_WELCOME           102
+#define IDI_WELCOME_DARK      103
 
+#define IDT_THEMES            1001
+#define IDT_STYLES            1002
 #define IDT_TRANSLATIONS      10001
 
 #define APP_LAUNCH_NAME           "\\DesktopEditors.exe"
