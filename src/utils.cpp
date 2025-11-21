@@ -539,7 +539,6 @@ namespace NS_File
         wfi.hFile = NULL;
         wfi.pgKnownSubject = NULL;
 
-        GUID guidAction = WINTRUST_ACTION_GENERIC_VERIFY_V2;
         WINTRUST_DATA wtd;
         ZeroMemory(&wtd, sizeof(wtd));
         wtd.cbStruct = sizeof(WINTRUST_DATA);
@@ -553,7 +552,16 @@ namespace NS_File
         wtd.pwszURLReference = NULL;
         wtd.dwUIContext = 0;
         wtd.pFile = &wfi;
-        return WinVerifyTrust(NULL, &guidAction, &wtd) == ERROR_SUCCESS;
+
+        GUID action = WINTRUST_ACTION_GENERIC_VERIFY_V2;
+        LONG res = WinVerifyTrust(NULL, &action, &wtd);
+
+        if (wtd.hWVTStateData) {
+            wtd.dwStateAction = WTD_STATEACTION_CLOSE;
+            WinVerifyTrust(NULL, &action, &wtd);
+        }
+
+        return (res == ERROR_SUCCESS);
     }
 
     wstring appDataPath()
