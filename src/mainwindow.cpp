@@ -853,6 +853,15 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
 
                 UIThread::invoke(this, [=]() {
                     dnl->stop();
+                    if (url.empty()) {
+                        m_comntInfoLbl->setText(_TR(LABEL_NO_VER_AVAIL), true);
+                        if (m_mode == Mode::Control)
+                            createCloseAndBackButtons();
+                        else {
+                            // ShellExecuteW(nullptr, L"open", _T(DOWNLOAD_PAGE), nullptr, nullptr, SW_SHOWNORMAL);
+                        }
+                        return;
+                    }
                     dnl->onProgress([=](int percent) {
                         m_bar->setProgress(percent);
                     });
