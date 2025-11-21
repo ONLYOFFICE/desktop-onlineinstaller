@@ -164,6 +164,7 @@ void MainWindow::initInstallationMode()
 void MainWindow::initControlMode(const std::wstring &_arch)
 {
     m_mode = Mode::Control;
+    m_arch = _arch;
     /* Comment section */
     m_versionLbl = new UILabel(m_cenPanel);
     m_versionLbl->setObjectGroupId(_T("ControlLabel"));
@@ -174,7 +175,7 @@ void MainWindow::initControlMode(const std::wstring &_arch)
     m_cenPanelVlut->setContentMargins(18, 6, 6, 6);
     m_cenPanelVlut->addWidget(m_versionLbl);
 
-    if (m_package == _TR(LABEL_UNKN_PACK) || m_ver == _TR(LABEL_UNKN_VER) || _arch.empty() || m_arch != _arch) {
+    if (m_arch.empty() || m_package == _TR(LABEL_UNKN_PACK) || m_ver == _TR(LABEL_UNKN_VER)) {
         UILabel *errLbl = new UILabel(m_cenPanel);
         errLbl->setObjectGroupId(_T("ControlLabel"));
         errLbl->setText(_TR(LABEL_NO_OPTIONS));
@@ -235,7 +236,7 @@ void MainWindow::startInstall()
     m_bar->show();
 
     wstring path = NS_File::generateTmpFileName(L".exe");
-    startDownload(L"iss", NS_Utils::IsWin64() ? _T("x64") : _T("x86"), path, [=]() {
+    startDownload(L"iss", NS_Utils::IsWinArm64() ? _T("arm64") : NS_Utils::IsWin64() ? _T("x64") : _T("x86"), path, [=]() {
             wstring args;
             if (m_is_checked) {
                 args = _T("/VERYSILENT");
@@ -798,12 +799,12 @@ void MainWindow::runProcessAsync(const std::wstring &cmd, const std::wstring &ar
 wstring MainWindow::fillInstalledVerInfo()
 {
     wstring text = _TR(LABEL_VERSION), dispName;
-    NS_Utils::InstalledVerInfo(L"DisplayName", dispName, m_arch);
-    NS_Utils::InstalledVerInfo(L"DisplayVersion", m_ver, m_arch);
+    NS_Utils::InstalledVerInfo(L"DisplayName", dispName);
+    NS_Utils::InstalledVerInfo(L"DisplayVersion", m_ver);
     if (m_ver.empty())
         m_ver = _TR(LABEL_UNKN_VER);
 
-    NS_Utils::InstalledVerInfo(L"UninstallString", m_uninst_cmd, m_arch);
+    NS_Utils::InstalledVerInfo(L"UninstallString", m_uninst_cmd);
     m_package = (m_uninst_cmd.find(L"msiexec") != std::wstring::npos) ? L"msi" : (m_uninst_cmd.find(L".exe") != std::wstring::npos) ? L"exe" : _TR(LABEL_UNKN_PACK);
 
     if (!dispName.empty()) {
@@ -834,7 +835,8 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
                 // tstring version = root.value(_T("version")).toTString();
                 JsonObject package = root.value(_T("package")).toObject();
 #ifdef _WIN32
-                JsonObject win = package.value(arch == _T("x64") ? _T("win_64") : _T("win_32")).toObject();
+                JsonObject win = package.value(arch == _T("arm64") ? _T("win_arm64") :
+                                               arch == _T("x64") ? _T("win_64") : _T("win_32")).toObject();
 #else
                 JsonObject win = package.value(_T("linux_64")).toObject();
 #endif
@@ -851,6 +853,15 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
 
                 UIThread::invoke(this, [=]() {
                     dnl->stop();
+                    if (url.empty()) {
+                        m_comntInfoLbl->setText(_TR(LABEL_NO_VER_AVAIL), true);
+                        if (m_mode == Mode::Control)
+                            createCloseAndBackButtons();
+                        else {
+                            // ShellExecuteW(nullptr, L"open", _T(DOWNLOAD_PAGE), nullptr, nullptr, SW_SHOWNORMAL);
+                        }
+                        return;
+                    }
                     dnl->onProgress([=](int percent) {
                         m_bar->setProgress(percent);
                     });

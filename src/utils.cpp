@@ -69,6 +69,53 @@ static void RegQueryStringValue(HKEY rootKey, LPCWSTR subkey, REGSAM advFlags, L
     }
 }
 
+static bool GetImageArchitecture(const wstring &path, USHORT &machine)
+{
+    std::ifstream file(path, std::ios::binary);
+    if (!file) return false;
+
+    IMAGE_DOS_HEADER dosHeader;
+    file.read(reinterpret_cast<char*>(&dosHeader), sizeof(dosHeader));
+    if (dosHeader.e_magic != IMAGE_DOS_SIGNATURE)
+        return false;
+
+    file.seekg(dosHeader.e_lfanew);
+    DWORD ntSignature;
+    file.read(reinterpret_cast<char*>(&ntSignature), sizeof(ntSignature));
+    if (ntSignature != IMAGE_NT_SIGNATURE)
+        return false;
+
+    IMAGE_FILE_HEADER fileHeader;
+    file.read(reinterpret_cast<char*>(&fileHeader), sizeof(fileHeader));
+    machine = fileHeader.Machine;
+    return true;
+}
+
+static wstring GetImageArchitectureFallback()
+{
+    wstring dispName;
+    NS_Utils::InstalledVerInfo(L"DisplayName", dispName);
+    if (!dispName.empty()) {
+        size_t lbr = dispName.find_last_of(L'(');
+        size_t rbr = dispName.find_last_of(L')');
+        if (lbr != wstring::npos && rbr != wstring::npos && lbr < rbr) {
+            wstring inside_brackets = dispName.substr(lbr + 1, rbr - lbr - 1);
+            if (inside_brackets.find(L"x64") != wstring::npos
+                || inside_brackets.find(L"x86_64") != wstring::npos
+                || inside_brackets.find(L"amd64") != wstring::npos) {
+                return L"x64";
+            } else
+            if (inside_brackets.find(L"x86") != wstring::npos) {
+                return L"x86";
+            } else
+            if (inside_brackets.find(L"arm64") != wstring::npos) {
+                return L"arm64";
+            }
+        }
+    }
+    return {};
+}
+
 namespace NS_Utils
 {
     std::vector<wstring> cmd_args;
@@ -183,8 +230,27 @@ namespace NS_Utils
 #ifdef _WIN64
         return true;
 #else
+        if (IsWinArm64()) return true;
         BOOL wow64 = FALSE;
         return IsWow64Process(GetCurrentProcess(), &wow64) && wow64;
+#endif
+    }
+
+    bool IsWinArm64()
+    {
+#if defined(_M_ARM64)
+        return true;
+#elif defined(_M_X64) || defined(_M_IX86)
+        HMODULE hKernel32 = GetModuleHandle(L"kernel32");
+        if (!hKernel32) return false;
+
+        BOOL(WINAPI *IsWow64Process2_t)(HANDLE, USHORT*, USHORT*) = nullptr;
+        *(FARPROC*)&IsWow64Process2_t = GetProcAddress(hKernel32, "IsWow64Process2");
+        USHORT machine, native_machine;
+        if (IsWow64Process2_t && IsWow64Process2_t(GetCurrentProcess(), &machine, &native_machine)) {
+            return (native_machine == IMAGE_FILE_MACHINE_ARM64);
+        }
+        return false;
 #endif
     }
 
@@ -204,13 +270,19 @@ namespace NS_Utils
             RegQueryStringValue(HKEY_LOCAL_MACHINE, subkey.c_str(), flag, L"AppPath", path);
             if (!path.empty() && (path.back() == L'\\' || path.back() == L'/'))
                 path.pop_back();
-            if (!path.empty() /*&& NS_File::fileExists(path + _T(APP_LAUNCH_NAME))*/) {                    
+            if (!path.empty()) {
+                wstring execPath = path + _T(APP_LAUNCH_NAME);
                 if (arch) {
-#ifdef _WIN64
-                    *arch = (flag == 0) ? L"x64" : L"x86";
-#else
-                    *arch = (flag == 0) ? L"x86" : L"x64";
-#endif
+                    USHORT machine;
+                    if (NS_File::fileExists(execPath) && GetImageArchitecture(execPath, machine)) {
+                        switch (machine) {
+                        case IMAGE_FILE_MACHINE_I386:  *arch = L"x86"; break;
+                        case IMAGE_FILE_MACHINE_AMD64: *arch = L"x64"; break;
+                        case IMAGE_FILE_MACHINE_ARM64: *arch = L"arm64"; break;
+                        default: break;}
+                    } else {
+                        *arch = GetImageArchitectureFallback();
+                    }
                 }
                 return true;
             }
@@ -246,7 +318,7 @@ namespace NS_Utils
         return accept;
     }
 
-    void InstalledVerInfo(LPCWSTR value, wstring &name, wstring &arch)
+    void InstalledVerInfo(LPCWSTR value, wstring &name)
     {
         if (!name.empty())
             name.clear();
@@ -264,13 +336,6 @@ namespace NS_Utils
             for (int i = 0; i < 2; i++) {
                 RegQueryStringValue(HKEY_LOCAL_MACHINE, subkey.c_str(), flag, value, name);
                 if (!name.empty()) {
-                    if (arch.empty()) {
-#ifdef _WIN64
-                        arch = (flag == 0) ? L"x64" : L"x86";
-#else
-                        arch = (flag == 0) ? L"x86" : L"x64";
-#endif
-                    }
                     return;
                 }
                 subkey += L"_is1";
@@ -539,7 +604,6 @@ namespace NS_File
         wfi.hFile = NULL;
         wfi.pgKnownSubject = NULL;
 
-        GUID guidAction = WINTRUST_ACTION_GENERIC_VERIFY_V2;
         WINTRUST_DATA wtd;
         ZeroMemory(&wtd, sizeof(wtd));
         wtd.cbStruct = sizeof(WINTRUST_DATA);
@@ -553,7 +617,16 @@ namespace NS_File
         wtd.pwszURLReference = NULL;
         wtd.dwUIContext = 0;
         wtd.pFile = &wfi;
-        return WinVerifyTrust(NULL, &guidAction, &wtd) == ERROR_SUCCESS;
+
+        GUID action = WINTRUST_ACTION_GENERIC_VERIFY_V2;
+        LONG res = WinVerifyTrust(NULL, &action, &wtd);
+
+        if (wtd.hWVTStateData) {
+            wtd.dwStateAction = WTD_STATEACTION_CLOSE;
+            WinVerifyTrust(NULL, &action, &wtd);
+        }
+
+        return (res == ERROR_SUCCESS);
     }
 
     wstring appDataPath()
