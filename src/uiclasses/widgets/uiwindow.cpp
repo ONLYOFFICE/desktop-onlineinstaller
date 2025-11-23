@@ -907,6 +907,10 @@ bool UIWindow::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
     }
 
     case WM_SETTINGCHANGE: {
+        if (wParam == SPI_SETNONCLIENTMETRICS) {
+            GetFrameMetricsForDpi(m_frame, m_dpi, m_isMaximized);
+            SetWindowPos(m_hWindow, 0, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+        } else
         if (wParam == SPI_SETWINARRANGING) {
             if (ver > UIUtils::WinVer::Win10) {
                 NotifyParams params;
