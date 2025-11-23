@@ -24,6 +24,7 @@
 # endif
 
 using WinVer = UIUtils::WinVer;
+using GetSystemMetricsForDpi_t = int (WINAPI*)(int nIndex, UINT dpi);
 
 static const WinVer ver = UIUtils::winVersion();
 
@@ -32,6 +33,13 @@ struct NotifyParams {
     WPARAM wParam = 0;
     LPARAM lParam = 0;
 };
+
+static auto pGetSystemMetricsForDpi = []() -> GetSystemMetricsForDpi_t
+{
+    if (HMODULE hUser32 = GetModuleHandle(L"user32"))
+        return (GetSystemMetricsForDpi_t)GetProcAddress(hUser32, "GetSystemMetricsForDpi");
+    return nullptr;
+}();
 
 static BOOL CALLBACK NcActivationNotifyProc(_In_ HWND hwnd, _In_ LPARAM lParam)
 {
@@ -110,6 +118,17 @@ static Rect availableGeometry(HWND hwnd)
 
 static void GetFrameMetricsForDpi(Margins &frame, double dpi, bool maximized = false)
 {
+    if (pGetSystemMetricsForDpi) {
+        frame.left = 0;
+        frame.top = pGetSystemMetricsForDpi(SM_CYCAPTION, dpi * 96);
+        if (!maximized) {
+            int cyFrame = pGetSystemMetricsForDpi(SM_CYSIZEFRAME, dpi * 96);
+            int cyBorder = pGetSystemMetricsForDpi(SM_CXPADDEDBORDER, dpi * 96);
+            frame.top += (cyFrame + cyBorder);
+        }
+        return;
+    }
+
     int row = ver == WinVer::WinXP ? 0 :
                   ver <= WinVer::Win7 ? 1 :
                   ver <= WinVer::Win8_1 ? 2 :
