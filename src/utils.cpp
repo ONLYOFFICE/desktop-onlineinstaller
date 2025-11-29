@@ -53,6 +53,12 @@
 # define LOCALE_IREADINGLAYOUT 0x70
 #endif
 
+static LRESULT CALLBACK FakeWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    if (uMsg == WM_QUERYOPEN)
+        return FALSE;
+    return DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
 
 static void RegQueryStringValue(HKEY rootKey, LPCWSTR subkey, REGSAM advFlags, LPCWSTR value, wstring &result)
 {
@@ -182,7 +188,7 @@ namespace NS_Utils
         HMODULE hInst = GetModuleHandle(NULL);
         if (!parent) {
             WNDCLASS wc = {0};
-            wc.lpfnWndProc   = DefWindowProc;
+            wc.lpfnWndProc   = FakeWindowProc;
             wc.hInstance     = hInst;
             wc.lpszClassName = L"FakeWindowClass";
             RegisterClass(&wc);
