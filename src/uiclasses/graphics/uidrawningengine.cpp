@@ -14,6 +14,14 @@
 # define GetBValue(rgb) ((double)((BYTE)((rgb) >> 16))/255)
 #endif
 
+namespace Ui {
+enum Style { Outline, Filled };
+#ifdef UI_STYLE_OUTLINE
+constexpr Style style = Style::Outline;
+#else
+constexpr Style style = Style::Filled;
+#endif
+}
 
 #ifdef _WIN32
 static Gdiplus::Color ColorFromColorRef(COLORREF rgb)
@@ -448,14 +456,23 @@ void UIDrawingEngine::DrawCheckBox(const tstring &text, PlatformFont hFont, RECT
 
     Gdiplus::GraphicsPath ph;
     RoundedPath(ph, CornerAll, rc.X, rc.Y, rc.Width, rc.Height, metrics->value(Metrics::PrimitiveRadius) * m_dpi);
-    m_graphics->DrawPath(&pen, &ph);
+
+    if (Ui::style == Ui::Style::Outline || !checked) {
+        m_graphics->DrawPath(&pen, &ph);
+    } else {
+        Gdiplus::SolidBrush chunkBrush(ColorFromColorRef(palette->color(Palette::AlternateBase)));
+        m_graphics->FillPath(&chunkBrush, &ph);
+    }
+
     if (checked) {
-        pen.SetWidth(metrics->value(Metrics::AlternatePrimitiveWidth) * m_dpi);
+        pen.SetWidth((Ui::style == Ui::Style::Outline ? metrics->value(Metrics::AlternatePrimitiveWidth) : 1.55) * m_dpi);
         pen.SetColor(ColorFromColorRef(palette->color(Palette::AlternatePrimitive)));
+        float offset = (Ui::style == Ui::Style::Outline ? 0.0 : 1.0);
+        float rtl_offset = (Ui::style == Ui::Style::Outline ? 0.0 : 0.5);
         Gdiplus::PointF pts[3] = {
-            Gdiplus::PointF(float(x + (m_rtl ? icon_width - 3 * m_dpi : 2 * m_dpi)), float(y + icon_height/2 - 1 * m_dpi)),
-            Gdiplus::PointF(float(x + icon_width/2 + (m_rtl ? 1 * m_dpi : - 2 * m_dpi)), float(y + icon_height - 5 * m_dpi)),
-            Gdiplus::PointF(float(x + (m_rtl ? 2 * m_dpi : icon_width - 3 * m_dpi)), float(y + 4 * m_dpi))
+            Gdiplus::PointF(float(x + (m_rtl ? icon_width - (3.0 + rtl_offset) * m_dpi : (2.0 + offset) * m_dpi)), float(y + icon_height/2 - 1 * m_dpi)),
+            Gdiplus::PointF(float(x + icon_width/2 + (m_rtl ? (1.0 - rtl_offset) * m_dpi : - (2.0 - offset) * m_dpi)), float(y + icon_height - 5 * m_dpi)),
+            Gdiplus::PointF(float(x + (m_rtl ? (2.0 + rtl_offset) * m_dpi : icon_width - 3 * m_dpi)), float(y + 4 * m_dpi))
         };
         m_graphics->DrawLines(&pen, pts, 3);
     }
@@ -471,21 +488,29 @@ void UIDrawingEngine::DrawCheckBox(const tstring &text, PlatformFont hFont, RECT
     double x = m_rtl ? m_rc->width - icon_height - 1.5 : m_rc->x + 1.5;
     double y = m_rc->y + (m_rc->height - icon_height) / 2 + 0.5;
 
-    COLORREF rgb = palette->color(Palette::Primitive);
-    cairo_set_line_width(m_cr, metrics->value(Metrics::PrimitiveWidth));
-    cairo_set_source_rgb(m_cr, GetRValue(rgb), GetGValue(rgb), GetBValue(rgb));
-
     check_rc = Rect(x, y, icon_width - 1, icon_height - 1);
     RoundedPath(m_cr, CornerAll, x, y, check_rc.width, check_rc.height, metrics->value(Metrics::PrimitiveRadius));
-    cairo_stroke(m_cr);
+
+    if (Ui::style == Ui::Style::Outline || !checked) {
+        COLORREF rgb = palette->color(Palette::Primitive);
+        cairo_set_line_width(m_cr, metrics->value(Metrics::PrimitiveWidth));
+        cairo_set_source_rgb(m_cr, GetRValue(rgb), GetGValue(rgb), GetBValue(rgb));
+        cairo_stroke(m_cr);
+    } else {
+        COLORREF rgb = palette->color(Palette::AlternateBase);
+        cairo_set_source_rgb(m_cr, GetRValue(rgb), GetGValue(rgb), GetBValue(rgb));
+        cairo_fill(m_cr);
+    }
+
     if (checked) {
-        rgb = palette->color(Palette::AlternatePrimitive);
-        cairo_set_line_width(m_cr, metrics->value(Metrics::AlternatePrimitiveWidth));
+        COLORREF rgb = palette->color(Palette::AlternatePrimitive);
+        cairo_set_line_width(m_cr, (Ui::style == Ui::Style::Outline ? metrics->value(Metrics::AlternatePrimitiveWidth) : 1.55) * m_dpi);
         cairo_set_source_rgb(m_cr, GetRValue(rgb), GetGValue(rgb), GetBValue(rgb));
 
-        cairo_move_to(m_cr, x + 2, y + icon_height/2 - 1);
-        cairo_line_to(m_cr, x + icon_width/2 - 2, y + icon_height - 5);
-        cairo_line_to(m_cr, x + icon_width - 3, y + 4);
+        float offset = (Ui::style == Ui::Style::Outline ? 0.0 : 0.5);
+        cairo_move_to(m_cr, x + (2 + offset), y + icon_height/2 - 1);
+        cairo_line_to(m_cr, x + icon_width/2 - (2 - offset), y + icon_height - 5);
+        cairo_line_to(m_cr, x + icon_width - (3 + offset), y + 4);
         cairo_stroke(m_cr);
     }
     if (!text.empty()) {
@@ -515,11 +540,18 @@ void UIDrawingEngine::DrawRadioButton(const tstring &text, PlatformFont hFont, R
     check_rc.right = x + icon_width - 1;
     check_rc.bottom = y + icon_height - 1;
 
-    Gdiplus::Pen pen(ColorFromColorRef(palette->color(Palette::Primitive)), metrics->value(Metrics::PrimitiveWidth) * m_dpi);
-    m_graphics->DrawEllipse(&pen, x, y, icon_height - 1, icon_height - 1);
+    if (Ui::style == Ui::Style::Outline || !checked) {
+        Gdiplus::Pen pen(ColorFromColorRef(palette->color(Palette::Primitive)), metrics->value(Metrics::PrimitiveWidth) * m_dpi);
+        m_graphics->DrawEllipse(&pen, x, y, icon_height - 1, icon_height - 1);
+    } else {
+        Gdiplus::SolidBrush chunkBrush(ColorFromColorRef(palette->color(Palette::AlternateBase)));
+        m_graphics->FillEllipse(&chunkBrush, x, y, icon_height - 1, icon_height - 1);
+    }
+
     if (checked) {
+        float offset = (Ui::style == Ui::Style::Outline ? 2.7f : 3.5f) * m_dpi;
         Gdiplus::SolidBrush chunkBrush(ColorFromColorRef(palette->color(Palette::AlternatePrimitive)));
-        m_graphics->FillEllipse(&chunkBrush, float(x) + float(2.7f * m_dpi), float(y) + float(2.7f * m_dpi), float(icon_height) - 5.4f * m_dpi - 1.0f, float(icon_height) - 5.4f * m_dpi - 1.0f);
+        m_graphics->FillEllipse(&chunkBrush, float(x) + offset, float(y) + offset, float(icon_height) - 2*offset - 1.0f, float(icon_height) - 2*offset - 1.0f);
     }
 
     if (!text.empty()) {
@@ -533,17 +565,27 @@ void UIDrawingEngine::DrawRadioButton(const tstring &text, PlatformFont hFont, R
     double x = m_rtl ? m_rc->width - icon_height - 1.5 : m_rc->x + 1.5;
     double y = m_rc->y + (m_rc->height - icon_height) / 2 + 0.5;
 
-    COLORREF rgb = palette->color(Palette::Primitive);
-    cairo_set_line_width(m_cr, metrics->value(Metrics::PrimitiveWidth));
-    cairo_set_source_rgb(m_cr, GetRValue(rgb), GetGValue(rgb), GetBValue(rgb));
-
     check_rc = Rect(x, y, icon_width, icon_height);
-    cairo_arc(m_cr, double(x) + double(icon_height)/2, double(y) + double(icon_height)/2, double(icon_height)/2, 0, 2 * G_PI);
-    cairo_stroke(m_cr);
-    if (checked) {
-        rgb = palette->color(Palette::AlternatePrimitive);
+
+    if (Ui::style == Ui::Style::Outline || !checked) {
+        COLORREF rgb = palette->color(Palette::Primitive);
+        cairo_set_line_width(m_cr, metrics->value(Metrics::PrimitiveWidth));
         cairo_set_source_rgb(m_cr, GetRValue(rgb), GetGValue(rgb), GetBValue(rgb));
-        cairo_arc(m_cr, double(x) + double(icon_height)/2, double(y) + double(icon_height)/2, double(icon_height)/2 - 2.7, 0, 2 * G_PI);
+        cairo_arc(m_cr, double(x) + double(icon_height)/2, double(y) + double(icon_height)/2, double(icon_height)/2, 0, 2 * G_PI);
+        cairo_stroke(m_cr);
+
+    } else {
+        COLORREF rgb = palette->color(Palette::AlternateBase);
+        cairo_set_source_rgb(m_cr, GetRValue(rgb), GetGValue(rgb), GetBValue(rgb));
+        cairo_arc(m_cr, double(x) + double(icon_height)/2, double(y) + double(icon_height)/2, double(icon_height)/2, 0, 2 * G_PI);
+        cairo_fill(m_cr);
+    }
+
+    if (checked) {
+        float rad = (Ui::style == Ui::Style::Outline ? 2.7f : 3.5f) * m_dpi;
+        COLORREF rgb = palette->color(Palette::AlternatePrimitive);
+        cairo_set_source_rgb(m_cr, GetRValue(rgb), GetGValue(rgb), GetBValue(rgb));
+        cairo_arc(m_cr, double(x) + double(icon_height)/2, double(y) + double(icon_height)/2, double(icon_height)/2 - rad, 0, 2 * G_PI);
         cairo_fill(m_cr);
     }
     if (!text.empty()) {

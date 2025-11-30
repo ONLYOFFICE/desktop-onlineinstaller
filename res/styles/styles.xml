@@ -20,20 +20,21 @@
   </Widget>
   <Widget id="PushButton">
     <SizePolicy HSizeBehavior="Fixed" VSizeBehavior="Fixed"/>
-    <Metrics BorderWidth="1"/>
+    <Metrics BorderWidth="1" BorderRadius="4"/>
     <BaseSize width="100" height="28"/>
     <Color background="PUSHBTN_BKG" hover="PUSHBTN_HOVER_BKG" pressed="PUSHBTN_PRESSED_BKG" disabled="PUSHBTN_DISABLED_BKG"/>
-    <Color border="PUSHBTN_BRD" hover="PUSHBTN_BRD" pressed="PUSHBTN_BRD" disabled="PUSHBTN_BRD"/>
+    <Color border="PUSHBTN_BRD" hover="PUSHBTN_HOVER_BKG" pressed="PUSHBTN_PRESSED_BKG" disabled="PUSHBTN_DISABLED_BKG"/>
     <Color text="PUSHBTN_TEXT" hover="PUSHBTN_TEXT" pressed="PUSHBTN_TEXT" disabled="PUSHBTN_TEXT_DISABLED"/>
     <Color base="WINDOW_BKG" hover="WINDOW_BKG" pressed="WINDOW_BKG" disabled="WINDOW_BKG"/>
   </Widget>
   <Widget id="Selector">
-    <Metrics TextMarginLeft="6" TextMarginRight="6" PrimitiveRadius="1" AlternatePrimitiveWidth="2"/>
+    <Metrics IconWidth="14" IconHeight="14" TextMarginLeft="6" TextMarginRight="6" PrimitiveRadius="3" AlternatePrimitiveWidth="2"/>
     <Color background="WINDOW_BKG" hover="WINDOW_BKG" pressed="WINDOW_BKG" disabled="WINDOW_BKG"/>
     <Color base="WINDOW_BKG" hover="WINDOW_BKG" pressed="WINDOW_BKG" disabled="WINDOW_BKG"/>
+    <Color alternateBase="SELECTOR_SELECTED_FILL" hover="SELECTOR_SELECTED_FILL" pressed="SELECTOR_SELECTED_FILL" disabled="SELECTOR_SELECTED_FILL_DISABLED"/>
     <Color text="TEXT_NORMAL" hover="TEXT_NORMAL" pressed="TEXT_NORMAL" disabled="TEXT_DISABLED"/>
     <Color primitive="SELECTOR_NORMAL" hover="SELECTOR_HOVER" pressed="SELECTOR_PRESSED" disabled="SELECTOR_DISABLED"/>
-    <Color alternatePrimitive="SELECTOR_CHECK" hover="SELECTOR_CHECK" pressed="SELECTOR_CHECK" disabled="SELECTOR_DISABLED"/>
+    <Color alternatePrimitive="SELECTOR_CHECK" hover="SELECTOR_CHECK" pressed="SELECTOR_CHECK" disabled="SELECTOR_CHECK_DISABLED"/>
   </Widget>
   <Widget id="ProgressBar">
     <Color background="WINDOW_BKG"/>
