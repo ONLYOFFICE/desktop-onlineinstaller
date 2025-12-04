@@ -834,6 +834,21 @@ void UIDrawingEngine::DrawString(const RECT &rc, const tstring &text, PlatformFo
     pango_layout_set_width(lut, multiline ? _rc.width * PANGO_SCALE : -1);
     pango_layout_set_height(lut, _rc.height * PANGO_SCALE);
 
+    const char *vrt = pango_font_description_get_variations(hFont);
+    if (vrt) {
+        PangoAttrList* attrs = pango_attr_list_new();
+        if (strchr(vrt, 'u')) {
+            PangoAttribute* underline = pango_attr_underline_new(PANGO_UNDERLINE_SINGLE);
+            pango_attr_list_insert(attrs, underline);
+        }
+        if (strchr(vrt, 's')) {
+            PangoAttribute* strike = pango_attr_strikethrough_new(TRUE);
+            pango_attr_list_insert(attrs, strike);
+        }
+        pango_layout_set_attributes(lut, attrs);
+        pango_attr_list_unref(attrs);
+    }
+
     int txt_w, txt_h;
     pango_layout_get_size(lut, &txt_w, &txt_h);
     txt_w /= PANGO_SCALE;
