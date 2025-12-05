@@ -102,6 +102,7 @@ void UIAbstractWindow::showAll()
     ShowWindow(m_hWindow, SW_SHOWNORMAL);
     UpdateWindow(m_hWindow);
     EnumChildWindows(m_hWindow, ShowChildrenProc, 0);
+    SetForegroundWindow(m_hWindow);
     SetFocus(m_hWindow);
 #else
     gtk_widget_show_all(m_hWindow);

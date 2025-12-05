@@ -144,6 +144,7 @@ void MainWindow::initInstallationMode()
     /* Install button section */
     UIButton *instlBtn = new UIButton(m_cenPanel);
     instlBtn->setObjectGroupId(_T("PushButton"));
+    instlBtn->setFont({DEFAULT_FONT_NAME, 9.5, 600});
     instlBtn->setText(_TR(BUTTON_INSTALL));
     instlBtn->move(m_cenPanel->size().width/2 - 50 * m_dpi_ratio, m_cenPanel->size().height - 76 * m_dpi_ratio);
     instlBtn->onClick([=]() {
@@ -212,7 +213,7 @@ void MainWindow::startInstall()
     m_comntLbl->setObjectGroupId(_T("Label"));
     m_comntLbl->setText(_TR(LABEL_DOWNLOAD), true);
     m_comntLbl->setGeometry(0, m_cenPanel->size().height - 161 * m_dpi_ratio, m_cenPanel->size().width, 28 * m_dpi_ratio);
-    m_comntLbl->setFont(L"Segoe UI", 12);
+    m_comntLbl->setFont({DEFAULT_FONT_NAME, 12});
 
     m_comntInfoLbl = new UILabel(m_cenPanel);
     m_comntInfoLbl->setObjectGroupId(_T("Label"));
@@ -304,6 +305,7 @@ void MainWindow::finishInstall(const std::wstring &app_path)
     /* Install button section */
     UIButton *closeBtn = new UIButton(m_cenPanel);
     closeBtn->setObjectGroupId(_T("PushButton"));
+    closeBtn->setFont({DEFAULT_FONT_NAME, 9.5, 600});
     closeBtn->setText(_TR(BUTTON_CLOSE));
     closeBtn->move(m_cenPanel->size().width/2 - 50 * m_dpi_ratio, m_cenPanel->size().height - 76 * m_dpi_ratio);
     closeBtn->onClick([=]() {
@@ -602,6 +604,7 @@ void MainWindow::createSelectionPage()
     /* Apply button section */
     UIButton *applyBtn = new UIButton(m_cenPanel);
     applyBtn->setObjectGroupId(_T("PushButton"));
+    applyBtn->setFont({DEFAULT_FONT_NAME, 9.5, 600});
     applyBtn->setText(_TR(BUTTON_APPLY));
     applyBtn->move(m_cenPanel->size().width - 112 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
     applyBtn->onClick([=]() {
@@ -678,6 +681,7 @@ void MainWindow::createProgressPage(const std::wstring &text)
 
     m_cancelBtn = new UIButton(m_cenPanel);
     m_cancelBtn->setObjectGroupId(_T("PushButton"));
+    m_cancelBtn->setFont({DEFAULT_FONT_NAME, 9.5, 600});
     m_cancelBtn->setText(_TR(BUTTON_CANCEL));
     m_cancelBtn->move(m_cenPanel->size().width - 112 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
     m_resize_conn = m_cenPanel->onResize([this](int w, int h) {
@@ -700,6 +704,7 @@ void MainWindow::createCloseButton()
         m_cancelBtn->close();
         UIButton *closeBtn = new UIButton(m_cenPanel);
         closeBtn->setObjectGroupId(_T("PushButton"));
+        closeBtn->setFont({DEFAULT_FONT_NAME, 9.5, 600});
         closeBtn->setText(_TR(BUTTON_CLOSE));
         closeBtn->move(m_cenPanel->size().width - 112 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
         closeBtn->onClick([=]() {
@@ -738,6 +743,7 @@ void MainWindow::createCloseAndBackButtons()
 
         UIButton *closeBtn = new UIButton(m_cenPanel);
         closeBtn->setObjectGroupId(_T("PushButton"));
+        closeBtn->setFont({DEFAULT_FONT_NAME, 9.5, 600});
         closeBtn->setText(_TR(BUTTON_CLOSE));
         closeBtn->move(m_cenPanel->size().width - 112 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
         closeBtn->onClick([=]() {
@@ -752,6 +758,7 @@ void MainWindow::createCloseAndBackButtons()
 
         UIButton *backBtn = new UIButton(m_cenPanel);
         backBtn->setObjectGroupId(_T("PushButton"));
+        backBtn->setFont({DEFAULT_FONT_NAME, 9.5, 600});
         backBtn->setText(_TR(BUTTON_BACK));
         backBtn->move(m_cenPanel->size().width - 218 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
         backBtn->onClick([=]() {

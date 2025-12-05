@@ -57,7 +57,6 @@ UIWidget::UIWidget(UIWidget *parent, ObjectType type, PlatformWindow hWindow, co
     m_drag_handler(nullptr),
     m_geometry_animation(nullptr),
 #endif
-    m_font_size(10.0),
     m_is_created(false),
     m_is_active(false),
     m_is_destroyed(false),
@@ -86,7 +85,7 @@ UIWidget::UIWidget(UIWidget *parent, ObjectType type, PlatformWindow hWindow, co
     m_root_is_layered = (m_root_hWnd && (GetWindowLong(m_root_hWnd, GWL_EXSTYLE) & WS_EX_LAYERED));
 #endif
     if (!hWindow) {
-        setFont(UIApplication::instance()->font(), UIApplication::instance()->fontPointSize());
+        setFont(UIApplication::instance()->font());
         UIApplication::instance()->style()->registerWidget(this);
     }
 }
@@ -294,26 +293,62 @@ void UIWidget::setSizePolicy(SizePolicy::Properties property, int val)
     m_size_behaviors[property] = val;
 }
 
-void UIWidget::setFont(const tstring &font, double fontPointSize)
+void UIWidget::setFont(const FontInfo &fontInfo)
 {
-    m_font_size = fontPointSize > 0 ? fontPointSize : 10.0;
+    m_fontInfo = fontInfo;
+    if (m_fontInfo.name.empty())
+        m_fontInfo.name = DEFAULT_FONT_NAME;
 #ifdef _WIN32
-    m_font = font.empty() ? L"Arial" : font;
     if (m_hFont) {
         DeleteObject(m_hFont);
         m_hFont = nullptr;
     }
-    int h = -round((double)MulDiv(m_font_size * 10, m_dpi_ratio * 96, 72)/10);
-    m_hFont = CreateFont(h, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, m_font.c_str());
+
+    int wt = m_fontInfo.weight;
+    int weight =
+        (wt <= 100) ? FW_THIN :
+        (wt <= 200) ? FW_ULTRALIGHT :
+        (wt <= 300) ? FW_LIGHT :
+        (wt <= 400) ? FW_NORMAL :
+        (wt <= 500) ? FW_MEDIUM :
+        (wt <= 600) ? FW_SEMIBOLD :
+        (wt <= 700) ? FW_BOLD :
+        (wt <= 800) ? FW_ULTRABOLD :
+        (wt <= 900) ? FW_HEAVY : 1000;
+
+    int h = -round((double)MulDiv(m_fontInfo.pointSize * 10, m_dpi_ratio * 96, 72)/10);
+    m_hFont = CreateFontA(h, 0, 0, 0, weight, m_fontInfo.italic, m_fontInfo.underline, m_fontInfo.strikeOut,
+                          DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, m_fontInfo.name.c_str());
 #else
-    m_font = font.empty() ? "Helvetica" : font;
     if (m_hFont) {
         pango_font_description_free(m_hFont);
         m_hFont = nullptr;
     }
     m_hFont = pango_font_description_new();
-    pango_font_description_set_family(m_hFont, m_font.c_str());
-    pango_font_description_set_size(m_hFont, m_font_size * PANGO_SCALE);
+
+    int wt = m_fontInfo.weight;
+    PangoWeight weight =
+        (wt <= 100) ? PANGO_WEIGHT_THIN :
+        (wt <= 200) ? PANGO_WEIGHT_ULTRALIGHT :
+        (wt <= 300) ? PANGO_WEIGHT_LIGHT :
+        (wt <= 350) ? PANGO_WEIGHT_SEMILIGHT :
+        (wt <= 380) ? PANGO_WEIGHT_BOOK :
+        (wt <= 400) ? PANGO_WEIGHT_NORMAL :
+        (wt <= 500) ? PANGO_WEIGHT_MEDIUM :
+        (wt <= 600) ? PANGO_WEIGHT_SEMIBOLD :
+        (wt <= 700) ? PANGO_WEIGHT_BOLD :
+        (wt <= 800) ? PANGO_WEIGHT_ULTRABOLD :
+        (wt <= 900) ? PANGO_WEIGHT_HEAVY : PANGO_WEIGHT_ULTRAHEAVY;
+
+    pango_font_description_set_family(m_hFont, m_fontInfo.name.c_str());
+    pango_font_description_set_size(m_hFont, m_fontInfo.pointSize * PANGO_SCALE);
+    pango_font_description_set_weight(m_hFont, weight);
+    if (m_fontInfo.italic)
+        pango_font_description_set_style(m_hFont, PANGO_STYLE_ITALIC);
+    std::string vrt;
+    if (m_fontInfo.underline) vrt += "u";
+    if (m_fontInfo.strikeOut) vrt += "s";
+    pango_font_description_set_variations(m_hFont, !vrt.empty() ? vrt.c_str() : nullptr);
 #endif
 }
 
@@ -472,6 +507,11 @@ int UIWidget::sizePolicy(SizePolicy::Properties property)
 double UIWidget::dpiRatio()
 {
     return m_dpi_ratio;
+}
+
+FontInfo UIWidget::font() const
+{
+    return m_fontInfo;
 }
 
 UILayout *UIWidget::layout() const noexcept
@@ -678,8 +718,9 @@ bool UIWidget::event(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
             DeleteObject(m_hFont);
             m_hFont = nullptr;
         }
-        int h = -round((double)MulDiv(m_font_size * 10, m_dpi_ratio * 96, 72)/10);
-        m_hFont = CreateFont(h, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, m_font.c_str());
+        int h = -round((double)MulDiv(m_fontInfo.pointSize * 10, m_dpi_ratio * 96, 72)/10);
+        m_hFont = CreateFontA(h, 0, 0, 0, m_fontInfo.weight, m_fontInfo.italic, m_fontInfo.underline, m_fontInfo.strikeOut,
+                              DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, m_fontInfo.name.c_str());
         resize(round(m_base_size.width * m_dpi_ratio), round(m_base_size.height * m_dpi_ratio));
         break;
     }

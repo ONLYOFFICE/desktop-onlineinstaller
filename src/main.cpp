@@ -54,7 +54,7 @@ int WINAPI _tWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInstance, _In
     app.style()->loadThemesFromResource(IDT_THEMES);
     app.style()->loadStylesFromResource(IDT_STYLES);
     app.style()->setDefaultTheme(UIUtils::shouldAppsUseDarkMode() ? _T("Dark") : _T("Light"));
-    app.setFont(L"Segoe UI", 9.5);
+    app.setFont({DEFAULT_FONT_NAME, 9.5});
     if (NS_Utils::IsRtlLanguage(lcid))
         app.setLayoutDirection(UIApplication::RightToLeft);
 

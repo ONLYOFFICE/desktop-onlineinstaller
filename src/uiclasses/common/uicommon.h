@@ -46,6 +46,25 @@ struct DECL_VISUALUI DropFilesInfo {
 };
 #endif
 
+struct DECL_VISUALUI FontInfo {
+    FontInfo(std::string _name = DEFAULT_FONT_NAME, float _pointSize = 10.0f, int _weight = 400,
+             bool _italic = false, bool _underline = false, bool _strikeOut = false) :
+        name(_name),
+        pointSize(_pointSize),
+        weight(_weight),
+        italic(_italic),
+        underline(_underline),
+        strikeOut(_strikeOut)
+    {}
+
+    std::string name;
+    float pointSize;
+    int weight;
+    bool italic;
+    bool underline;
+    bool strikeOut;
+};
+
 namespace SizePolicy
 {
     enum Properties : unsigned char {
