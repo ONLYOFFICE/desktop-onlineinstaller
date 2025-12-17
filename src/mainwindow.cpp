@@ -135,7 +135,7 @@ void MainWindow::initInstallationMode()
 
     /* Comment section */
     wstring warn_text = _TR(LABEL_WARN_CLOSE);
-    NS_Utils::Replace(warn_text, L"%1", _T(WINDOW_NAME));
+    NS_Utils::Replace(warn_text, L"%1", _T(REG_UNINST_KEY));
     UILabel *comntLbl = new UILabel(m_cenPanel);
     comntLbl->setObjectGroupId(_T("Label"));
     comntLbl->setText(warn_text, true);
@@ -296,7 +296,7 @@ void MainWindow::finishInstall(const std::wstring &app_path)
 
     /* Comment section */
     wstring compl_text = _TR(LABEL_INSTALL_COMPL);
-    NS_Utils::Replace(compl_text, L"%1", _T(WINDOW_NAME));
+    NS_Utils::Replace(compl_text, L"%1", _T(REG_UNINST_KEY));
     UILabel *comntLbl = new UILabel(m_cenPanel);
     comntLbl->setObjectGroupId(_T("Label"));
     comntLbl->setText(compl_text, true);
@@ -609,7 +609,7 @@ void MainWindow::createSelectionPage()
     applyBtn->move(m_cenPanel->size().width - 112 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
     applyBtn->onClick([=]() {
         wstring msg = m_uninsRadio->isChecked() ? _TR(MSG_REMOVE) : /*m_repRadio->isChecked() ? _TR(MSG_REPAIR) :*/ _TR(MSG_UPDATE);
-        NS_Utils::Replace(msg, L"%1", _T(WINDOW_NAME));
+        NS_Utils::Replace(msg, L"%1", _T(REG_UNINST_KEY));
         if (IDOK == NS_Utils::ShowTaskDialog(platformWindow(), msg.c_str(), TD_WARNING_ICON)) {
             if (!NS_Utils::checkAndWaitForAppClosure(platformWindow()))
                 return;
@@ -817,7 +817,7 @@ wstring MainWindow::fillInstalledVerInfo()
     if (!dispName.empty()) {
         NS_Utils::Replace(text, L"%1 %2 (%3 %4)", displayNameAddInfo(dispName, m_package));
     } else {
-        NS_Utils::Replace(text, L"%1", _T(WINDOW_NAME));
+        NS_Utils::Replace(text, L"%1", _T(REG_UNINST_KEY));
         NS_Utils::Replace(text, L"%2", m_ver);
         NS_Utils::Replace(text, L"%3", m_arch);
         NS_Utils::Replace(text, L"%4", m_package);
