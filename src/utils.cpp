@@ -46,8 +46,7 @@
 #include "../desktop-apps/win-linux/src/prop/defines_p.h"
 
 #define BUFSIZE 1024
-#define DEFAULT_LICENSE_NAME L"GNU AFFERO GENERAL PUBLIC LICENSE"
-#define DEFAULT_LICENSE_NAME_SHORT L"GNU AGPL"
+#define DEFAULT_LICENSE_NAME_SHORT L"GNU AGPL V3"
 #define APP_REG_PATH "\\" REG_GROUP_KEY "\\" REG_APP_NAME
 #define BIT123_LAYOUTRTL 0x08000000
 #ifndef LOCALE_IREADINGLAYOUT
@@ -299,27 +298,23 @@ namespace NS_Utils
 
     bool IsCommunityEdition(const wstring &basePath)
     {
-        const std::vector<wstring> patterns = { L"LICENSE", L"EULA" };
-        for (const auto& pattern : patterns) {
-            auto matches = NS_File::findFilesByPattern(basePath, pattern + L".*");
-            if (matches.empty()) continue;
+        auto matches = NS_File::findFilesByPattern(basePath, L"EULA.*");
+        if (matches.empty()) return true;
 
-            wstring licPath = NS_File::fromNativeSeparators(basePath) + matches.at(0);
-            std::wifstream file(licPath.c_str(), std::ios::in);
-            if (!file.is_open()) return false;
+        wstring licPath = NS_File::fromNativeSeparators(basePath) + matches.at(0);
+        std::wifstream file(licPath.c_str(), std::ios::in);
+        if (!file.is_open()) return false;
 
-            wstring line;
-            while (std::getline(file, line)) {
-                size_t start = line.find_first_not_of(L" \t\r\n");
-                if (start == std::wstring::npos) continue;
+        wstring line;
+        while (std::getline(file, line)) {
+            size_t start = line.find_first_not_of(L" \t\r\n");
+            if (start == std::wstring::npos) continue;
 
-                size_t end = line.find_last_not_of(L" \t\r\n");
-                wstring trimmed = line.substr(start, end - start + 1);
+            size_t end = line.find_last_not_of(L" \t\r\n");
+            wstring trimmed = line.substr(start, end - start + 1);
 
-                std::transform(trimmed.begin(), trimmed.end(), trimmed.begin(), towupper);
-                return (trimmed.find(DEFAULT_LICENSE_NAME) != std::wstring::npos ||
-                        trimmed.find(DEFAULT_LICENSE_NAME_SHORT) != std::wstring::npos);
-            }
+            std::transform(trimmed.begin(), trimmed.end(), trimmed.begin(), towupper);
+            return (trimmed.find(DEFAULT_LICENSE_NAME_SHORT) != std::wstring::npos);
         }
         return true;
     }
