@@ -46,7 +46,7 @@
 #include "../desktop-apps/win-linux/src/prop/defines_p.h"
 
 #define BUFSIZE 1024
-
+#define DEFAULT_LICENSE_NAME_SHORT L"GNU AGPL V3"
 #define APP_REG_PATH "\\" REG_GROUP_KEY "\\" REG_APP_NAME
 #define BIT123_LAYOUTRTL 0x08000000
 #ifndef LOCALE_IREADINGLAYOUT
@@ -296,6 +296,29 @@ namespace NS_Utils
         return false;
     }
 
+    bool IsCommunityEdition(const wstring &basePath)
+    {
+        auto matches = NS_File::findFilesByPattern(basePath, L"EULA.*");
+        if (matches.empty()) return true;
+
+        wstring licPath = NS_File::fromNativeSeparators(basePath) + matches.at(0);
+        std::wifstream file(licPath.c_str(), std::ios::in);
+        if (!file.is_open()) return true;
+
+        wstring line;
+        while (std::getline(file, line)) {
+            size_t start = line.find_first_not_of(L" \t\r\n");
+            if (start == std::wstring::npos) continue;
+
+            size_t end = line.find_last_not_of(L" \t\r\n");
+            wstring trimmed = line.substr(start, end - start + 1);
+
+            std::transform(trimmed.begin(), trimmed.end(), trimmed.begin(), towupper);
+            return (trimmed.find(DEFAULT_LICENSE_NAME_SHORT) != std::wstring::npos);
+        }
+        return true;
+    }
+
     bool checkAndWaitForAppClosure(HWND parent)
     {
         bool accept = true;
@@ -435,6 +458,30 @@ namespace NS_File
 //        CloseHandle(snapShot);
 //        return false;
 //    }
+
+    std::vector<wstring> findFilesByPattern(const wstring &path, const wstring &pattern)
+    {
+        std::vector<wstring> result;
+        wstring searchPath = toNativeSeparators(path) + L"\\" + pattern;
+        if (searchPath.size() > MAX_PATH - 1) {
+            return result;
+        }
+
+        WIN32_FIND_DATAW ffd;
+        HANDLE hFind = FindFirstFile(searchPath.c_str(), &ffd);
+        if (hFind == INVALID_HANDLE_VALUE)
+            return result;
+
+        do {
+            if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+                result.push_back(L"/" + wstring(ffd.cFileName));
+            }
+
+        } while (FindNextFile(hFind, &ffd) != 0);
+
+        FindClose(hFind);
+        return result;
+    }
 
     bool readFile(const wstring &filePath, list<wstring> &linesList)
     {

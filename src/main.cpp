@@ -73,7 +73,7 @@ int WINAPI _tWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInstance, _In
     if (!app_installed)
         w.initInstallationMode();
     else
-        w.initControlMode(arch);
+        w.initControlMode(path, arch);
     w.showAll();
     int exit_code = app.exec();
     CloseHandle(hMutex);

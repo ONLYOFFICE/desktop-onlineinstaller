@@ -162,7 +162,7 @@ void MainWindow::initInstallationMode()
     });
 }
 
-void MainWindow::initControlMode(const std::wstring &_arch)
+void MainWindow::initControlMode(const std::wstring &path, const std::wstring &_arch)
 {
     m_mode = Mode::Control;
     m_arch = _arch;
@@ -176,7 +176,9 @@ void MainWindow::initControlMode(const std::wstring &_arch)
     m_cenPanelVlut->setContentMargins(18, 6, 6, 6);
     m_cenPanelVlut->addWidget(m_versionLbl);
 
-    if (m_arch.empty() || m_package == _TR(LABEL_UNKN_PACK) || m_ver == _TR(LABEL_UNKN_VER)) {
+    bool isCommunityEdition = NS_Utils::IsCommunityEdition(path);
+
+    if (!isCommunityEdition || m_arch.empty() || m_package == _TR(LABEL_UNKN_PACK) || m_ver == _TR(LABEL_UNKN_VER)) {
         UILabel *errLbl = new UILabel(m_cenPanel);
         errLbl->setObjectGroupId(_T("ControlLabel"));
         errLbl->setText(_TR(LABEL_NO_OPTIONS));
