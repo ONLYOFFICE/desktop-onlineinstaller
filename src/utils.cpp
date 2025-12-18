@@ -301,7 +301,7 @@ namespace NS_Utils
         bool accept = true;
         if (HWND app_hwnd = FindWindow(WINDOW_CLASS_NAME, NULL)) {
             wstring msg(_TR(MSG_ERR_TRY_CLOSE_APP));
-            NS_Utils::Replace(msg, L"%1", _T(WINDOW_NAME));
+            NS_Utils::Replace(msg, L"%1", _T(REG_UNINST_KEY));
             accept = (IDOK == NS_Utils::ShowTaskDialog(parent, msg.c_str(), TD_INFORMATION_ICON));
             if (accept) {
                 PostMessage(app_hwnd, UM_INSTALL_UPDATE, 0, 0);
@@ -309,7 +309,7 @@ namespace NS_Utils
                 while(true) {
                     if ((app_hwnd = FindWindow(WINDOW_CLASS_NAME, NULL)) != nullptr) {
                         wstring msg(_TR(MSG_ERR_CLOSE_APP));
-                        NS_Utils::Replace(msg, L"%1", _T(WINDOW_NAME));
+                        NS_Utils::Replace(msg, L"%1", _T(REG_UNINST_KEY));
                         int result = NS_Utils::ShowTaskDialog(parent, msg.c_str(), TD_WARNING_ICON);
                         if (result != IDOK) {
                             accept = false;
