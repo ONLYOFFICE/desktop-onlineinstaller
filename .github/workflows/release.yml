@@ -75,14 +75,11 @@ jobs:
           $JSON.bak \
           s3://$RELEASE_BUCKET/$JSON_PATH.bak
 
-        aws cloudfront create-invalidation \
-          --distribution-id ${{ secrets.DISTRIBUTION_ID }} \
-          --paths "/$RELEASE_PATH/$PACKAGE.exe" "/$JSON_PATH"
         aws apigateway test-invoke-method \
           --rest-api-id ${{ secrets.CDN_REST_API_ID }} \
           --resource-id ${{ secrets.CDN_RESOURCE_ID }} \
           --http-method PUT \
-          --path-with-query-string /prod/selectel \
+          --path-with-query-string /prod/download-oo-com \
           --body "{\"paths\":[\"/$RELEASE_PATH/$PACKAGE.exe\",\"/$JSON_PATH\"]}" \
           --region us-east-1 \
           --no-paginate
