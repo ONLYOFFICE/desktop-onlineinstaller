@@ -303,7 +303,7 @@ namespace NS_Utils
 
         wstring licPath = NS_File::fromNativeSeparators(basePath) + matches.at(0);
         std::wifstream file(licPath.c_str(), std::ios::in);
-        if (!file.is_open()) return false;
+        if (!file.is_open()) return true;
 
         wstring line;
         while (std::getline(file, line)) {
