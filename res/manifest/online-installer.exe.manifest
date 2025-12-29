@@ -41,8 +41,14 @@
       <asmv3:windowsSettings xmlns="http://schemas.microsoft.com/SMI/2020/WindowsSettings">
          <heapType>SegmentHeap</heapType>
       </asmv3:windowsSettings>
-      <asmv3:windowsSettings xmlns="http://schemas.microsoft.com/SMI/2017/WindowsSettings">
+      <!-- asmv3:windowsSettings xmlns="http://schemas.microsoft.com/SMI/2017/WindowsSettings">
          <gdiScaling>true</gdiScaling>
+      </asmv3:windowsSettings -->
+      <asmv3:windowsSettings xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">
+         <dpiAwareness>permonitorv2</dpiAwareness>
+      </asmv3:windowsSettings>
+      <asmv3:windowsSettings xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">
+         <dpiAware>true/pm</dpiAware>
       </asmv3:windowsSettings>
    </asmv3:application>
 

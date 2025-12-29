@@ -1,14 +1,14 @@
-#include "application.h"
+#include "uiapplication.h"
 #include "mainwindow.h"
+#include "uistyle.h"
 #include <locale>
 #include "resource.h"
 #include "utils.h"
-#include "baseutils.h"
+#include "uiutils.h"
 #include "translator.h"
 #include "../desktop-apps/win-linux/src/defines.h"
 #include "../desktop-apps/win-linux/src/prop/defines_p.h"
 
-#define WINDOW_SIZE Size(768, 480)
 
 static const WCHAR pVersion[] = _T("Application version:\n" VER_FILEVERSION_STR);
 
@@ -34,7 +34,7 @@ int WINAPI _tWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInstance, _In
         return 0;
     }
 
-    if (Utils::getWinVersion() < Utils::Win7) {
+    if (UIUtils::winVersion() < UIUtils::Win7) {
         wstring msg(_TR(MSG_ERR_SYSTEM));
         NS_Utils::Replace(msg, L"%1", _TR(CAPTION));
         NS_Utils::ShowMessage(msg);
@@ -50,22 +50,30 @@ int WINAPI _tWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInstance, _In
     wstring path, arch;
     bool app_installed = NS_Utils::IsAppInstalled(path, &arch);
 
-    Application app(hInst, lpCmdLine, nCmdShow);
-    app.setFont(L"Segoe UI");
+    UIApplication app(hInst, lpCmdLine, nCmdShow);
+    app.style()->loadThemesFromResource(IDT_THEMES);
+    app.style()->loadStylesFromResource(IDT_STYLES);
+    app.style()->setDefaultTheme(UIUtils::shouldAppsUseDarkMode() ? _T("Dark") : _T("Light"));
+    app.setFont({DEFAULT_FONT_NAME, 9.5});
     if (NS_Utils::IsRtlLanguage(lcid))
-        app.setLayoutDirection(Application::RightToLeft);
+        app.setLayoutDirection(UIApplication::RightToLeft);
+
+    RECT rc{0, 0, WINDOW_SIZE.width, WINDOW_SIZE.height};
+    double screenDpi = UIUtils::screenDpiAtRect(rc);
     int scrWidth = GetSystemMetrics(SM_CXSCREEN);
     int scrHeight = GetSystemMetrics(SM_CYSCREEN);
-    int x = (scrWidth - WINDOW_SIZE.width) / 2;
-    int y = (scrHeight - WINDOW_SIZE.height) / 2;
-    MainWindow w(nullptr, Rect(x, y, WINDOW_SIZE.width, WINDOW_SIZE.height));
+    int x = (scrWidth - WINDOW_SIZE.width * screenDpi) / 2;
+    int y = (scrHeight - WINDOW_SIZE.height * screenDpi) / 2;
+    MainWindow w(nullptr, Rect(x, y, WINDOW_SIZE.width * screenDpi, WINDOW_SIZE.height * screenDpi));
+    w.setMinimumSize(WINDOW_SIZE.width * screenDpi, WINDOW_SIZE.height * screenDpi);
+    w.setResizable(false);
     w.onAboutToDestroy([&app]() {
         app.exit(0);
     });
     if (!app_installed)
         w.initInstallationMode();
     else
-        w.initControlMode(arch);
+        w.initControlMode(path, arch);
     w.showAll();
     int exit_code = app.exec();
     CloseHandle(hMutex);

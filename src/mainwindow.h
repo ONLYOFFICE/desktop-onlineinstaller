@@ -1,26 +1,27 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "window.h"
+#include "uiwindow.h"
 #include <future>
 
+#define WINDOW_SIZE Size(768, 480)
 
-class Label;
-class ProgressBar;
-class Widget;
-class BoxLayout;
-class CheckBox;
-class RadioButton;
-class Button;
+class UILabel;
+class UIProgressBar;
+class UIWidget;
+class UIBoxLayout;
+class UICheckBox;
+class UIRadioButton;
+class UIButton;
 class CDownloader;
-class MainWindow : public Window
+class MainWindow : public UIWindow
 {
 public:
-    MainWindow(Widget *parent, const Rect &rc);
+    MainWindow(UIWidget *parent, const Rect &rc);
     ~MainWindow();
 
     void initInstallationMode();
-    void initControlMode(const std::wstring &arch);
+    void initControlMode(const std::wstring &path, const std::wstring &arch);
 
 protected:
     virtual bool event(UINT, WPARAM, LPARAM, LRESULT*) override;
@@ -35,10 +36,9 @@ private:
     void createProgressPage(const std::wstring &text);
     void createCloseButton();
     void createCloseAndBackButtons();
+    void runProcessAsync(const std::wstring &cmd, const std::wstring &args, const std::function<void(int)> &onComplete);
     std::wstring fillInstalledVerInfo();
     CDownloader* startDownload(const std::wstring &install_type, const std::wstring &arch, const std::wstring &path, const std::function<void()> &onComplete);
-    template<typename Fn, typename... Args>
-    void invokeMethod(Fn&& fn, Args&&... args);
 
     enum class Mode : BYTE {Install, Control};
     enum Selectors : BYTE {UpdateRadio = 1, RepairRadio = 2, UninstRadio = 4, ClrDataCheck = 8, ClrStnCheck = 16, ClrAllCheck = 32, LaunchCheck = 64};
@@ -47,17 +47,17 @@ private:
                  m_ver,
                  m_arch,
                  m_package;
-    Label       *m_comntLbl,
+    UILabel     *m_comntLbl,
                 *m_versionLbl,
                 *m_comntInfoLbl;
-    ProgressBar *m_bar;
-    Widget      *m_cenPanel;
-    BoxLayout   *m_cenPanelVlut;
-    CheckBox    *m_launchCheck;
-    RadioButton *m_updRadio,
-                // *m_repRadio,
-                *m_uninsRadio;
-    Button      *m_cancelBtn;
+    UIProgressBar *m_bar;
+    UIWidget      *m_cenPanel;
+    UIBoxLayout   *m_cenPanelVlut;
+    UICheckBox    *m_launchCheck;
+    UIRadioButton *m_updRadio,
+                  // *m_repRadio,
+                  *m_uninsRadio;
+    UIButton      *m_cancelBtn;
     Mode m_mode;
     int  m_resize_conn;
     BYTE m_checkState;
