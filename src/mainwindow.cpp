@@ -135,7 +135,7 @@ void MainWindow::initInstallationMode()
 
     /* Comment section */
     wstring warn_text = _TR(LABEL_WARN_CLOSE);
-    NS_Utils::Replace(warn_text, L"%1", _T(WINDOW_NAME));
+    NS_Utils::Replace(warn_text, L"%1", _T(REG_UNINST_KEY));
     UILabel *comntLbl = new UILabel(m_cenPanel);
     comntLbl->setObjectGroupId(_T("Label"));
     comntLbl->setText(warn_text, true);
@@ -144,6 +144,7 @@ void MainWindow::initInstallationMode()
     /* Install button section */
     UIButton *instlBtn = new UIButton(m_cenPanel);
     instlBtn->setObjectGroupId(_T("PushButton"));
+    instlBtn->setFont({DEFAULT_FONT_NAME, 9.5, 600});
     instlBtn->setText(_TR(BUTTON_INSTALL));
     instlBtn->move(m_cenPanel->size().width/2 - 50 * m_dpi_ratio, m_cenPanel->size().height - 76 * m_dpi_ratio);
     instlBtn->onClick([=]() {
@@ -161,9 +162,10 @@ void MainWindow::initInstallationMode()
     });
 }
 
-void MainWindow::initControlMode(const std::wstring &_arch)
+void MainWindow::initControlMode(const std::wstring &path, const std::wstring &_arch)
 {
     m_mode = Mode::Control;
+    m_arch = _arch;
     /* Comment section */
     m_versionLbl = new UILabel(m_cenPanel);
     m_versionLbl->setObjectGroupId(_T("ControlLabel"));
@@ -174,7 +176,9 @@ void MainWindow::initControlMode(const std::wstring &_arch)
     m_cenPanelVlut->setContentMargins(18, 6, 6, 6);
     m_cenPanelVlut->addWidget(m_versionLbl);
 
-    if (m_package == _TR(LABEL_UNKN_PACK) || m_ver == _TR(LABEL_UNKN_VER) || _arch.empty() || m_arch != _arch) {
+    bool isCommunityEdition = NS_Utils::IsCommunityEdition(path);
+
+    if (!isCommunityEdition || m_arch.empty() || m_package == _TR(LABEL_UNKN_PACK) || m_ver == _TR(LABEL_UNKN_VER)) {
         UILabel *errLbl = new UILabel(m_cenPanel);
         errLbl->setObjectGroupId(_T("ControlLabel"));
         errLbl->setText(_TR(LABEL_NO_OPTIONS));
@@ -211,7 +215,7 @@ void MainWindow::startInstall()
     m_comntLbl->setObjectGroupId(_T("Label"));
     m_comntLbl->setText(_TR(LABEL_DOWNLOAD), true);
     m_comntLbl->setGeometry(0, m_cenPanel->size().height - 161 * m_dpi_ratio, m_cenPanel->size().width, 28 * m_dpi_ratio);
-    m_comntLbl->setFont(L"Segoe UI", 12);
+    m_comntLbl->setFont({DEFAULT_FONT_NAME, 12});
 
     m_comntInfoLbl = new UILabel(m_cenPanel);
     m_comntInfoLbl->setObjectGroupId(_T("Label"));
@@ -235,7 +239,7 @@ void MainWindow::startInstall()
     m_bar->show();
 
     wstring path = NS_File::generateTmpFileName(L".exe");
-    startDownload(L"iss", NS_Utils::IsWin64() ? _T("x64") : _T("x86"), path, [=]() {
+    startDownload(L"iss", NS_Utils::IsWinArm64() ? _T("arm64") : NS_Utils::IsWin64() ? _T("x64") : _T("x86"), path, [=]() {
             wstring args;
             if (m_is_checked) {
                 args = _T("/VERYSILENT");
@@ -294,7 +298,7 @@ void MainWindow::finishInstall(const std::wstring &app_path)
 
     /* Comment section */
     wstring compl_text = _TR(LABEL_INSTALL_COMPL);
-    NS_Utils::Replace(compl_text, L"%1", _T(WINDOW_NAME));
+    NS_Utils::Replace(compl_text, L"%1", _T(REG_UNINST_KEY));
     UILabel *comntLbl = new UILabel(m_cenPanel);
     comntLbl->setObjectGroupId(_T("Label"));
     comntLbl->setText(compl_text, true);
@@ -303,6 +307,7 @@ void MainWindow::finishInstall(const std::wstring &app_path)
     /* Install button section */
     UIButton *closeBtn = new UIButton(m_cenPanel);
     closeBtn->setObjectGroupId(_T("PushButton"));
+    closeBtn->setFont({DEFAULT_FONT_NAME, 9.5, 600});
     closeBtn->setText(_TR(BUTTON_CLOSE));
     closeBtn->move(m_cenPanel->size().width/2 - 50 * m_dpi_ratio, m_cenPanel->size().height - 76 * m_dpi_ratio);
     closeBtn->onClick([=]() {
@@ -601,11 +606,12 @@ void MainWindow::createSelectionPage()
     /* Apply button section */
     UIButton *applyBtn = new UIButton(m_cenPanel);
     applyBtn->setObjectGroupId(_T("PushButton"));
+    applyBtn->setFont({DEFAULT_FONT_NAME, 9.5, 600});
     applyBtn->setText(_TR(BUTTON_APPLY));
     applyBtn->move(m_cenPanel->size().width - 112 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
     applyBtn->onClick([=]() {
         wstring msg = m_uninsRadio->isChecked() ? _TR(MSG_REMOVE) : /*m_repRadio->isChecked() ? _TR(MSG_REPAIR) :*/ _TR(MSG_UPDATE);
-        NS_Utils::Replace(msg, L"%1", _T(WINDOW_NAME));
+        NS_Utils::Replace(msg, L"%1", _T(REG_UNINST_KEY));
         if (IDOK == NS_Utils::ShowTaskDialog(platformWindow(), msg.c_str(), TD_WARNING_ICON)) {
             if (!NS_Utils::checkAndWaitForAppClosure(platformWindow()))
                 return;
@@ -677,6 +683,7 @@ void MainWindow::createProgressPage(const std::wstring &text)
 
     m_cancelBtn = new UIButton(m_cenPanel);
     m_cancelBtn->setObjectGroupId(_T("PushButton"));
+    m_cancelBtn->setFont({DEFAULT_FONT_NAME, 9.5, 600});
     m_cancelBtn->setText(_TR(BUTTON_CANCEL));
     m_cancelBtn->move(m_cenPanel->size().width - 112 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
     m_resize_conn = m_cenPanel->onResize([this](int w, int h) {
@@ -699,6 +706,7 @@ void MainWindow::createCloseButton()
         m_cancelBtn->close();
         UIButton *closeBtn = new UIButton(m_cenPanel);
         closeBtn->setObjectGroupId(_T("PushButton"));
+        closeBtn->setFont({DEFAULT_FONT_NAME, 9.5, 600});
         closeBtn->setText(_TR(BUTTON_CLOSE));
         closeBtn->move(m_cenPanel->size().width - 112 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
         closeBtn->onClick([=]() {
@@ -737,6 +745,7 @@ void MainWindow::createCloseAndBackButtons()
 
         UIButton *closeBtn = new UIButton(m_cenPanel);
         closeBtn->setObjectGroupId(_T("PushButton"));
+        closeBtn->setFont({DEFAULT_FONT_NAME, 9.5, 600});
         closeBtn->setText(_TR(BUTTON_CLOSE));
         closeBtn->move(m_cenPanel->size().width - 112 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
         closeBtn->onClick([=]() {
@@ -751,6 +760,7 @@ void MainWindow::createCloseAndBackButtons()
 
         UIButton *backBtn = new UIButton(m_cenPanel);
         backBtn->setObjectGroupId(_T("PushButton"));
+        backBtn->setFont({DEFAULT_FONT_NAME, 9.5, 600});
         backBtn->setText(_TR(BUTTON_BACK));
         backBtn->move(m_cenPanel->size().width - 218 * m_dpi_ratio, m_cenPanel->size().height - 40 * m_dpi_ratio);
         backBtn->onClick([=]() {
@@ -798,18 +808,18 @@ void MainWindow::runProcessAsync(const std::wstring &cmd, const std::wstring &ar
 wstring MainWindow::fillInstalledVerInfo()
 {
     wstring text = _TR(LABEL_VERSION), dispName;
-    NS_Utils::InstalledVerInfo(L"DisplayName", dispName, m_arch);
-    NS_Utils::InstalledVerInfo(L"DisplayVersion", m_ver, m_arch);
+    NS_Utils::InstalledVerInfo(L"DisplayName", dispName);
+    NS_Utils::InstalledVerInfo(L"DisplayVersion", m_ver);
     if (m_ver.empty())
         m_ver = _TR(LABEL_UNKN_VER);
 
-    NS_Utils::InstalledVerInfo(L"UninstallString", m_uninst_cmd, m_arch);
+    NS_Utils::InstalledVerInfo(L"UninstallString", m_uninst_cmd);
     m_package = (m_uninst_cmd.find(L"msiexec") != std::wstring::npos) ? L"msi" : (m_uninst_cmd.find(L".exe") != std::wstring::npos) ? L"exe" : _TR(LABEL_UNKN_PACK);
 
     if (!dispName.empty()) {
         NS_Utils::Replace(text, L"%1 %2 (%3 %4)", displayNameAddInfo(dispName, m_package));
     } else {
-        NS_Utils::Replace(text, L"%1", _T(WINDOW_NAME));
+        NS_Utils::Replace(text, L"%1", _T(REG_UNINST_KEY));
         NS_Utils::Replace(text, L"%2", m_ver);
         NS_Utils::Replace(text, L"%3", m_arch);
         NS_Utils::Replace(text, L"%4", m_package);
@@ -834,7 +844,8 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
                 // tstring version = root.value(_T("version")).toTString();
                 JsonObject package = root.value(_T("package")).toObject();
 #ifdef _WIN32
-                JsonObject win = package.value(arch == _T("x64") ? _T("win_64") : _T("win_32")).toObject();
+                JsonObject win = package.value(arch == _T("arm64") ? _T("win_arm64") :
+                                               arch == _T("x64") ? _T("win_64") : _T("win_32")).toObject();
 #else
                 JsonObject win = package.value(_T("linux_64")).toObject();
 #endif
@@ -851,6 +862,15 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
 
                 UIThread::invoke(this, [=]() {
                     dnl->stop();
+                    if (url.empty()) {
+                        m_comntInfoLbl->setText(_TR(LABEL_NO_VER_AVAIL), true);
+                        if (m_mode == Mode::Control)
+                            createCloseAndBackButtons();
+                        else {
+                            // ShellExecuteW(nullptr, L"open", _T(DOWNLOAD_PAGE), nullptr, nullptr, SW_SHOWNORMAL);
+                        }
+                        return;
+                    }
                     dnl->onProgress([=](int percent) {
                         m_bar->setProgress(percent);
                     });

@@ -38,11 +38,10 @@ public:
     static bool sendEvent(GtkWidget*, uint event_type, void *param);
 #endif
     void setLayoutDirection(LayoutDirection);
-    void setFont(const tstring &font, double pointSize = 10) const;
+    void setFont(const FontInfo &fontInfo);
+    FontInfo font() const;
     LayoutDirection layoutDirection() const;
-    tstring font() const;
     UIStyle* style();
-    double fontPointSize();
 
     int exec();
     void exit(int);

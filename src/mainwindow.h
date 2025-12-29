@@ -21,7 +21,7 @@ public:
     ~MainWindow();
 
     void initInstallationMode();
-    void initControlMode(const std::wstring &arch);
+    void initControlMode(const std::wstring &path, const std::wstring &arch);
 
 protected:
     virtual bool event(UINT, WPARAM, LPARAM, LRESULT*) override;

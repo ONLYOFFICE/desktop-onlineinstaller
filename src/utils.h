@@ -35,6 +35,7 @@
 
 #include <Windows.h>
 #include <string>
+#include <vector>
 #include <list>
 
 using std::string;
@@ -58,9 +59,11 @@ void ShowMessage(wstring str, bool showError = false);
 int  ShowTaskDialog(HWND parent, const wstring &msg, PCWSTR icon);
 bool IsRtlLanguage(unsigned long lcid);
 bool IsWin64();
+bool IsWinArm64();
 bool IsAppInstalled(wstring &path, wstring *arch = nullptr);
+bool IsCommunityEdition(const wstring &basePath);
 bool checkAndWaitForAppClosure(HWND parent = nullptr);
-void InstalledVerInfo(LPCWSTR value, wstring &name, wstring &arch);
+void InstalledVerInfo(LPCWSTR value, wstring &name);
 void Replace(wstring &str, const wstring &from, const wstring &to);
 wstring MsiGetProperty(LPCWSTR prodCode, LPCWSTR propName);
 wstring MsiProductCode(const wstring &prodName);
@@ -70,6 +73,7 @@ namespace NS_File
 {
 DWORD runProcess(const wstring &fileName, const wstring &args, bool runAsAdmin = false, bool wait = true);
 // bool isProcessRunning(const wstring &fileName);
+std::vector<wstring> findFilesByPattern(const wstring &path, const wstring &pattern);
 bool readFile(const wstring &filePath, list<wstring> &linesList);
 bool fileExists(const wstring &filePath);
 bool removeFile(const wstring &filePath);

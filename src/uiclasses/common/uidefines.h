@@ -23,9 +23,11 @@
 
 #ifdef _WIN32
 # include <tchar.h>
+# define DEFAULT_FONT_NAME "Segoe UI"
   typedef std::wstring tstring;
 #else
 # define _T(x) x
+# define DEFAULT_FONT_NAME "Noto Sans"
   typedef std::string tstring;
 #endif
 
