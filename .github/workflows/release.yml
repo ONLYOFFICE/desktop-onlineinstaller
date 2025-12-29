@@ -67,7 +67,11 @@ jobs:
             | .size = $size
           ) // .)' \
           $JSON.bak > $JSON
-        diff --suppress-common-lines --color=always $JSON.bak $JSON
+
+        if diff --suppress-common-lines --color=always "$JSON.bak" "$JSON"; then
+          echo "::warning:: files $JSON and $JSON.bak are identical, no changes detected"
+        fi
+
         aws s3 cp --no-progress \
           $JSON \
           s3://$RELEASE_BUCKET/$JSON_PATH
