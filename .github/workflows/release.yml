@@ -72,7 +72,7 @@ jobs:
           echo "::warning:: files $JSON and $JSON.bak are identical, no changes detected"
         fi
 
-        aws s3 cp --no-progress \
+        aws s3 cp --no-progress --acl public-read \
           $JSON \
           s3://$RELEASE_BUCKET/$JSON_PATH
         aws s3 cp --no-progress \
