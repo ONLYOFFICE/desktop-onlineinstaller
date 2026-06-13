@@ -61,6 +61,7 @@ INCLUDEPATH += $$PWD/../desktop-apps/win-linux/src/prop
 HEADERS += $$PWD/src/version.h \
            $$PWD/src/resource.h \
            $$PWD/src/mainwindow.h \
+           $$PWD/src/httptransaction_p.h \
            $$PWD/src/cdownloader.h \
            $$PWD/src/translator.h \
            $$PWD/src/cjson_p.h \
