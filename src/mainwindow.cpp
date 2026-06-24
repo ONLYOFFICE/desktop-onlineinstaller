@@ -868,7 +868,7 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
     wstring tmp_path = NS_File::toNativeSeparators(NS_File::generateTmpFileName(L".json"));
     NS_Logger::WriteLog(_T("Appcast URL:\n") + appcast_url);
     CDownloader *dnl = new CDownloader();
-    dnl->onComplete([=](ulong error) {
+    dnl->onComplete([=](ulong error, const std::wstring&) {
         if (error == ERROR_SUCCESS) {
             list<tstring> lst;
             if (NS_File::readFile(tmp_path, lst)) {
@@ -909,7 +909,7 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
                     dnl->onProgress([=](int percent) {
                         m_bar->setProgress(percent);
                     });
-                    dnl->onComplete([=](ulong error) {
+                    dnl->onComplete([=](ulong error, const std::wstring&) {
                         UIThread::invoke(this, [=]() {
                         if (m_mode == Mode::Control)
                             m_cancelBtn->setDisabled(true);
