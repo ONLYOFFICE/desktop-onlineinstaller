@@ -889,7 +889,7 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
                 tstring url2 = package_type.value(_T("url2")).toTString();
                 NS_Logger::WriteLog(_T("Primary package URL:\n") + url + _T("\n\nSecondary package URL:\n") + url2);
                 bool primary_bad = (url.empty() || !dnl->isUrlAccessible(url));
-                bool prefer_secondary = NS_Utils::cmdArgContains(_T("--prefer-secondary-url"));
+                bool prefer_secondary = NS_Utils::cmdArgContains(_T("--prefer-alternate-url"));
                 if (!url2.empty() && (primary_bad || prefer_secondary))
                     url = url2;
                 NS_Logger::WriteLog(_T("Download from URL:\n") + url);
