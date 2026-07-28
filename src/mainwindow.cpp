@@ -88,6 +88,7 @@ MainWindow::MainWindow(UIWidget *parent, const Rect &rc) :
     m_resize_conn(0),
     m_checkState(UpdateRadio | LaunchCheck),
     m_is_checked(false),
+    m_is_community(true),
     m_is_completed(false)
 {
     setObjectGroupId(_T("MainWindow"));
@@ -211,9 +212,9 @@ void MainWindow::initControlMode(const std::wstring &path, const std::wstring &_
     m_cenPanelVlut->setContentMargins(18, 6, 6, 6);
     m_cenPanelVlut->addWidget(m_versionLbl);
 
-    bool isCommunityEdition = NS_Utils::IsCommunityEdition(path);
+    m_is_community = NS_Utils::IsCommunityEdition(path);
 
-    if (!isCommunityEdition || m_arch.empty() || m_package == _TR(LABEL_UNKN_PACK) || m_ver == _TR(LABEL_UNKN_VER)) {
+    if (/*!m_is_community ||*/ m_arch.empty() || m_package == _TR(LABEL_UNKN_PACK) || m_ver == _TR(LABEL_UNKN_VER)) {
         UILabel *errLbl = new UILabel(m_cenPanel);
         errLbl->setObjectGroupId(_T("ControlLabel"));
         errLbl->setText(_TR(LABEL_NO_OPTIONS));
@@ -544,6 +545,7 @@ void MainWindow::startUninstall()
                 key.append(_T(REG_GROUP_KEY));
                 SHDeleteKey(HKEY_CURRENT_USER, key.c_str());
             }
+            m_is_community = true;
             m_bar->pulse(false);
             m_bar->setProgress(100);
             m_comntLbl->setText(_TR(LABEL_UNINST_COMPL));
@@ -877,7 +879,9 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
                 JsonObject root = doc.object();
 
                 // tstring version = root.value(_T("version")).toTString();
-                JsonObject package = root.value(_T("package")).toObject();
+                JsonObject package = root.value(m_is_community
+                                                    ? _T("package")
+                                                    : _T("package_enterprise")).toObject();
 #ifdef _WIN32
                 JsonObject platform = package.value(arch == _T("arm64") ? _T("win_arm64") :
                                                arch == _T("x64") ? _T("win_64") : _T("win_32")).toObject();
