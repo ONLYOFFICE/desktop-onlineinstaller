@@ -879,12 +879,12 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
                 // tstring version = root.value(_T("version")).toTString();
                 JsonObject package = root.value(_T("package")).toObject();
 #ifdef _WIN32
-                JsonObject win = package.value(arch == _T("arm64") ? _T("win_arm64") :
+                JsonObject platform = package.value(arch == _T("arm64") ? _T("win_arm64") :
                                                arch == _T("x64") ? _T("win_64") : _T("win_32")).toObject();
 #else
-                JsonObject win = package.value(_T("linux_64")).toObject();
+                JsonObject platform = package.value(_T("linux_64")).toObject();
 #endif
-                JsonObject package_type = win.value(install_type).toObject();
+                JsonObject package_type = platform.value(install_type).toObject();
                 tstring url = package_type.value(_T("url")).toTString();
                 tstring url2 = package_type.value(_T("url2")).toTString();
                 NS_Logger::WriteLog(_T("Primary package URL:\n") + url + _T("\n\nSecondary package URL:\n") + url2);
