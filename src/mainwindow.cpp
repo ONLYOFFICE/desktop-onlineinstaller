@@ -881,7 +881,7 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
                 // tstring version = root.value(_T("version")).toTString();
                 JsonObject package = root.value(m_is_community
                                                     ? _T("package")
-                                                    : _T("package_enterprise")).toObject();
+                                                    : _T("packageEnterprise")).toObject();
 #ifdef _WIN32
                 JsonObject platform = package.value(arch == _T("arm64") ? _T("win_arm64") :
                                                arch == _T("x64") ? _T("win_64") : _T("win_32")).toObject();
