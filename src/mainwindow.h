@@ -97,6 +97,7 @@ private:
     int  m_resize_conn;
     BYTE m_checkState;
     bool m_is_checked,
+         m_is_community,
          m_is_completed;
 };
 
