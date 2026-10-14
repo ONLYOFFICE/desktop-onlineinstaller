@@ -41,6 +41,7 @@
 
 #define WINDOW_SIZE Size(768, 480)
 
+struct ITaskbarList3;
 class UILabel;
 class UIProgressBar;
 class UIWidget;
@@ -74,6 +75,10 @@ private:
     void runProcessAsync(const std::wstring &cmd, const std::wstring &args, const std::function<void(int)> &onComplete);
     std::wstring fillInstalledVerInfo();
     CDownloader* startDownload(const std::wstring &install_type, const std::wstring &arch, const std::wstring &path, const std::function<void()> &onComplete);
+    void setTaskbarProgress(int percent);
+    void setTaskbarPulse(bool enable);
+    void clearTaskbarProgress();
+    ITaskbarList3* taskbarList();
 
     enum class Mode : BYTE {Install, Control};
     enum Selectors : BYTE {UpdateRadio = 1, RepairRadio = 2, UninstRadio = 4, ClrDataCheck = 8, ClrStnCheck = 16, ClrAllCheck = 32, LaunchCheck = 64};
@@ -93,6 +98,8 @@ private:
                   // *m_repRadio,
                   *m_uninsRadio;
     UIButton      *m_cancelBtn;
+    ITaskbarList3 *m_taskbarList;
+    bool m_com_initialized;
     Mode m_mode;
     int  m_resize_conn;
     BYTE m_checkState;

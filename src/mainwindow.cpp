@@ -53,6 +53,7 @@
 #include "cjson.h"
 #include <Msi.h>
 #include <ShlObj.h>
+#include <ShObjIdl.h>
 #include <Shlwapi.h>
 #include <numeric>
 #include "../desktop-apps/win-linux/src/defines.h"
@@ -84,6 +85,8 @@ MainWindow::MainWindow(UIWidget *parent, const Rect &rc) :
     // m_repRadio(nullptr),
     m_uninsRadio(nullptr),
     m_cancelBtn(nullptr),
+    m_taskbarList(nullptr),
+    m_com_initialized(false),
     m_mode(Mode::Install),
     m_resize_conn(0),
     m_checkState(UpdateRadio | LaunchCheck),
@@ -142,6 +145,70 @@ MainWindow::~MainWindow()
 {
     if (m_future.valid())
         m_future.wait();
+    if (m_taskbarList)
+    {
+        m_taskbarList->Release();
+        m_taskbarList = nullptr;
+    }
+    if (m_com_initialized)
+    {
+        CoUninitialize();
+        m_com_initialized = false;
+    }
+}
+
+void MainWindow::setTaskbarProgress(int percent)
+{
+    if (ITaskbarList3 *tbl = taskbarList())
+    {
+        HWND hwnd = platformWindow();
+        tbl->SetProgressState(hwnd, TBPF_NORMAL);
+        tbl->SetProgressValue(hwnd, (ULONGLONG)percent, 100ULL);
+    }
+}
+
+void MainWindow::setTaskbarPulse(bool enable)
+{
+    if (ITaskbarList3 *tbl = taskbarList())
+        tbl->SetProgressState(platformWindow(), enable ? TBPF_INDETERMINATE : TBPF_NOPROGRESS);
+}
+
+void MainWindow::clearTaskbarProgress()
+{
+    if (ITaskbarList3 *tbl = taskbarList())
+        tbl->SetProgressState(platformWindow(), TBPF_NOPROGRESS);
+}
+
+ITaskbarList3* MainWindow::taskbarList()
+{
+    if (!m_taskbarList)
+    {
+        if (!m_com_initialized)
+        {
+            HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+            if (FAILED(hr))
+            {
+                if (hr != RPC_E_CHANGED_MODE)
+                    return nullptr;
+            }
+            else
+            {
+                m_com_initialized = true;
+            }
+        }
+        if (FAILED(CoCreateInstance(__uuidof(TaskbarList), nullptr, CLSCTX_INPROC_SERVER,
+                                    __uuidof(ITaskbarList3), (void**)&m_taskbarList)))
+        {
+            m_taskbarList = nullptr;
+            return nullptr;
+        }
+        if (FAILED(m_taskbarList->HrInit()))
+        {
+            m_taskbarList->Release();
+            m_taskbarList = nullptr;
+        }
+    }
+    return m_taskbarList;
 }
 
 void MainWindow::initInstallationMode()
@@ -281,7 +348,9 @@ void MainWindow::startInstall()
                 args = _T("/VERYSILENT");
                 m_comntLbl->setText(_TR(LABEL_INSTALL), true);
                 m_bar->pulse(true);
+                setTaskbarPulse(true);
             } else {
+                clearTaskbarProgress();
                 hide();
             }
             runProcessAsync(path, args, [=](DWORD status) {
@@ -291,6 +360,7 @@ void MainWindow::startInstall()
                     show();
                 m_bar->pulse(false);
                 m_bar->setProgress(0);
+                clearTaskbarProgress();
                 m_comntInfoLbl->setText(err == 0 ? _TR(LABEL_ERR_RUNNING) + wstring(L" Exit code: ") + to_wstring(status) : NS_Utils::GetLastErrorAsString(err), true);
             } else {
                 if (m_is_checked) {
@@ -300,10 +370,12 @@ void MainWindow::startInstall()
                         m_comntLbl->close();
                         m_comntInfoLbl->close();
                         m_bar->close();
+                        clearTaskbarProgress();
                         UIThread::invoke(this, &MainWindow::finishInstall, app_path);
                     } else {
                         m_bar->pulse(false);
                         m_bar->setProgress(0);
+                        clearTaskbarProgress();
                         m_comntLbl->setText(_TR(LABEL_ERR_INSTALL), true);
                     }
                 } else {
@@ -388,10 +460,12 @@ void MainWindow::startUpdate()
     CDownloader *dnl = startDownload(m_package == L"msi" ? L"msi" : L"iss", m_arch, tmp_path, [=]() {
             if (!NS_Utils::checkAndWaitForAppClosure(platformWindow())) {
                 m_bar->setProgress(0);
+                clearTaskbarProgress();
                 m_comntInfoLbl->setText(_TR(LABEL_ERR_CANCELLED), true);
                 return;
             }
             m_bar->pulse(true);
+            setTaskbarPulse(true);
             m_comntLbl->setText(_TR(LABEL_UPDATING));
             wstring args = L"/c call \"" + tmp_path;
             args += (m_package == L"msi") ? L"\" /qn /norestart" : L"\" /UPDATE /VERYSILENT /NOLAUNCH";
@@ -401,6 +475,7 @@ void MainWindow::startUpdate()
                 DWORD err = GetLastError();
                 m_bar->pulse(false);
                 m_bar->setProgress(0);
+                clearTaskbarProgress();
                 m_comntInfoLbl->setText(err == 0 ? _TR(LABEL_ERR_RUNNING) + wstring(L" Exit code: ") + to_wstring(status) : NS_Utils::GetLastErrorAsString(err), true);
             } else {
                 if (m_checkState & ClrDataCheck) {
@@ -415,6 +490,7 @@ void MainWindow::startUpdate()
                 }
                 m_bar->pulse(false);
                 m_bar->setProgress(100);
+                clearTaskbarProgress();
                 m_comntLbl->setText(_TR(LABEL_UPDATE_COMPL));
                 m_versionLbl->setText(fillInstalledVerInfo());
                 m_is_completed = true;
@@ -521,11 +597,13 @@ void MainWindow::startUninstall()
     m_cancelBtn->setDisabled(true);
     if (!NS_Utils::checkAndWaitForAppClosure(platformWindow())) {
         m_bar->setProgress(0);
+        clearTaskbarProgress();
         m_comntInfoLbl->setText(_TR(LABEL_ERR_CANCELLED), true);
         createCloseAndBackButtons();
         return;
     }
     m_bar->pulse(true);
+    setTaskbarPulse(true);
     wstring args = L"/c \"" + m_uninst_cmd;
     args += (m_package == L"msi") ? L" /qn\"" : L" /VERYSILENT\"";
 
@@ -533,6 +611,7 @@ void MainWindow::startUninstall()
         if (status != 0) {
             m_bar->pulse(false);
             m_bar->setProgress(0);
+            clearTaskbarProgress();
             m_comntInfoLbl->setText(_TR(LABEL_ERR_UNINST));
             createCloseAndBackButtons();
         } else {
@@ -548,6 +627,7 @@ void MainWindow::startUninstall()
             m_is_community = true;
             m_bar->pulse(false);
             m_bar->setProgress(100);
+            clearTaskbarProgress();
             m_comntLbl->setText(_TR(LABEL_UNINST_COMPL));
             // m_is_completed = true;
             createCloseButton();
@@ -914,6 +994,9 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
                     }
                     dnl->onProgress([=](int percent) {
                         m_bar->setProgress(percent);
+                        UIThread::invoke(this, [=]() {
+                            setTaskbarProgress(percent);
+                        });
                     });
                     dnl->onComplete([=](ulong error, const std::wstring&) {
                         UIThread::invoke(this, [=]() {
@@ -925,16 +1008,19 @@ CDownloader* MainWindow::startDownload(const std::wstring &install_type, const s
                                 onComplete();
                             } else {
                                 m_bar->setProgress(0);
+                                clearTaskbarProgress();
                                 m_comntInfoLbl->setText(_TR(LABEL_NO_VER_AVAIL), true);
                                 if (m_mode == Mode::Control)
                                     createCloseAndBackButtons();
                             }
                         } else
                         if (error == ERROR_CANCELLED) {
+                            clearTaskbarProgress();
                             m_comntInfoLbl->setText(_TR(LABEL_ERR_CANCELLED), true);
                             if (m_mode == Mode::Control)
                                 createCloseAndBackButtons();
                         } else {
+                            clearTaskbarProgress();
                             m_comntInfoLbl->setText(NS_Utils::GetLastErrorAsString(error), true);
                             if (m_mode == Mode::Control)
                                 createCloseAndBackButtons();
